@@ -33,6 +33,7 @@ import os.path
 import re
 import stat
 import time
+import traceback
 
 # app imports
 from hcron.constants import *
@@ -809,8 +810,6 @@ def hcron_variable_substitution2(value, varInfo, depth=1):
             #open("/tmp/hc", "a").write("*** name (%s) nameValue (%s) sep (%s) value (%s) count (%s)\n" % (substName, nameValue, substSplitSep, value, value.count(substSplitSep)+1))
             value = str(value.count(substSplitSep)+1)
     except:
-        import traceback
-        #open("/tmp/hc", "a").write("tackback ++++++++ (%s)\n" % traceback.format_exc())
         #print traceback.print_exc()
         pass
 
