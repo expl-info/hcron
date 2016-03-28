@@ -370,6 +370,7 @@ class Event:
         self.reason = None
         self.assignments = None
         self.when = None
+        self.masks = None
 
         self.load()
 
