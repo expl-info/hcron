@@ -93,7 +93,7 @@ class HcronTreeCache:
                     cache[name] = cache[linkname]
                     break
                 elif linkname in link_cache:
-                    linkname = resolve_symlink(linkname, link_cache[linkname])
+                    linkname = self.resolve_symlink(linkname, link_cache[linkname])
                 else:
                     # not found; drop
                     break
