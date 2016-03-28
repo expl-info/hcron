@@ -5,9 +5,9 @@
 # system imports
 import datetime
 #
-from hcron.library import dateToBitmasks, listStToBitmask, WHEN_BITMASKS, WHEN_MIN_MAX, WHEN_NAMES
+from hcron.library import date_to_bitmasks, list_st_to_bitmask, WHEN_BITMASKS, WHEN_MIN_MAX, WHEN_NAMES
 
-listStToBitmaskTests = [
+list_st_to_bitmaskTests = [
     # dow
     (("0", "when_dow"), "0b1"),
     (("1", "when_dow"), "0b10"),
@@ -55,7 +55,7 @@ listStToBitmaskTests = [
     (("00,10,20,30,40,50", "when_minute"),  "0b100000000010000000001000000000100000000010000000001"),
 ]
 
-dateToBitmasksTests = [
+date_to_bitmasksTests = [
     ((2009, 11, 6, 0, 0, 5),
         ("0b1000000000",
             "0b10000000000",
@@ -70,13 +70,6 @@ dateToBitmasksTests = [
             "0b1",
             "0b1",
             "0b1000000")),
-    ((2009, 11, 7, 0, 0, 6),
-        (bin(listStToBitmask("*", WHEN_MIN_MAX["when_year"], WHEN_BITMASKS["when_year"])),
-            bin(listStToBitmask("*", WHEN_MIN_MAX["when_month"], WHEN_BITMASKS["when_month"])),
-            bin(listStToBitmask("*", WHEN_MIN_MAX["when_day"], WHEN_BITMASKS["when_day"])),
-            bin(listStToBitmask("*", WHEN_MIN_MAX["when_hour"], WHEN_BITMASKS["when_hour"])),
-            bin(listStToBitmask("00,10,20,30,40,50", WHEN_MIN_MAX["when_minute"], WHEN_BITMASKS["when_minute"])),
-            bin(listStToBitmask("*", WHEN_MIN_MAX["when_dow"], WHEN_BITMASKS["when_dow"])))),
     ((2009, 11, 8, 0, 0, 0),
         ("0b1000000000",
             "0b10000000000",
@@ -96,36 +89,30 @@ if 0:
     print "WHEN_MIN_MAX:"
     for when_name in WHEN_NAMES:
         mn, mx = WHEN_MIN_MAX[when_name]
-        bmMn = listStToBitmask(str(mn), WHEN_MIN_MAX[when_name], WHEN_BITMASKS[when_name])
-        bmMx = listStToBitmask(str(mx), WHEN_MIN_MAX[when_name], WHEN_BITMASKS[when_name])
+        bmMn = list_st_to_bitmask(str(mn), WHEN_MIN_MAX[when_name], WHEN_BITMASKS[when_name])
+        bmMx = list_st_to_bitmask(str(mx), WHEN_MIN_MAX[when_name], WHEN_BITMASKS[when_name])
         print "WHEN_MIN_MAX['%s'] = (%s, %s) bin:(%s, %s)" % (when_name, mn, mx, bin(bmMn), bin(bmMx))
     print
 
 if 0:
-    print "listStToBitmaskTests:"
-    for args, expected in listStToBitmaskTests:
+    print "list_st_to_bitmaskTests:"
+    for args, expected in list_st_to_bitmaskTests:
         when_value, when_name = args
-        value = bin(listStToBitmask(when_value, WHEN_MIN_MAX[when_name], WHEN_BITMASKS[when_name]))
+        value = bin(list_st_to_bitmask(when_value, WHEN_MIN_MAX[when_name], WHEN_BITMASKS[when_name]))
         print "when_value (%s) when_name (%s)" % (when_value, when_name)
         print "%4s: value    (%s)\n" \
             "%4s  expected (%s)" % (value == expected and "GOOD" or "FAIL", value, "", expected)
         print
 
 if 0:
-    print "dateToBitmasksTests:"
-    for args, expected in dateToBitmasksTests:
-        value = tuple([ bin(x) for x in dateToBitmasks(*args) ])
+    print "date_to_bitmasksTests:"
+    for args, expected in date_to_bitmasksTests:
+        value = tuple([ bin(x) for x in date_to_bitmasks(*args) ])
         print "value: %s" % str(args)
         for v, e in zip(value, expected):
             print "%4s: value    (%s)\n" \
                 "%4s  expected (%s)" % (v == e and "GOOD" or "FAIL", v, "", e)
         print "----"
-
-if 1:
-    from hcron.event import Event
-
-    e = Event("/home/ib/sss/jdm/git-repo/hcron/tests/events/mail_on_the_minute", "mail_on_the_minute", "aspgjdm")
-    print "event (%s) d (%s) masks (%s) (%s)" % (str(e), str(e.d), str(e.masks), str([(k, bin(v)) for k, v in e.masks.items()]))
 
 if 1:
     print "date match tests:"
@@ -135,7 +122,7 @@ if 1:
 
     #y_m_d_h_m_dow_st = ("*", "*", "*", "*", "00,10,20,30,40,50", "*")
     y_m_d_h_m_dow_st = ("*", "*", "*", "*", "*", "*")
-    y_m_d_h_m_dow = tuple([ listStToBitmask(x, WHEN_MIN_MAX[when_name], WHEN_BITMASKS[when_name]) \
+    y_m_d_h_m_dow = tuple([ list_st_to_bitmask(x, WHEN_MIN_MAX[when_name], WHEN_BITMASKS[when_name]) \
         for x, when_name in zip(y_m_d_h_m_dow_st, WHEN_NAMES) ])
     
     print "mask mask st (%s)" % str(y_m_d_h_m_dow_st)
@@ -143,7 +130,7 @@ if 1:
     while start < end:
         # hcron: 0=sun, 6=sat; isoweekday: 1=mon, 7=sun
         dow = start.isoweekday() % 7
-        value = dateToBitmasks(start.year, start.month, start.day, start.hour, start.minute, dow)
+        value = date_to_bitmasks(start.year, start.month, start.day, start.hour, start.minute, dow)
 
         for v, e in zip(value, y_m_d_h_m_dow):
             #print "testing date (%s)" % str(start)
