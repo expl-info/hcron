@@ -70,9 +70,50 @@ def signal_reload():
     except:
         raise Exception("Error: Could not signal for reload.")
 
+def handle_event(event, sched_datetime):
+    """Handle a single event and related/followon chain events
+    according to the event(s) defined.
+    """
+    max_chain_events = max(globls.config.get().get("max_chain_events", CONFIG_MAX_CHAIN_EVENTS), 1)
+
+    eventChainNames = []
+    while event:
+        eventChainNames.append(event.get_name())
+
+        #log_message("info", "Processing event (%s)." % event.get_name())
+        try:
+            # None, next_event, or failover_event is returned
+            nextEventName = event.activate(eventChainNames, sched_datetime=sched_datetime)
+        except Exception, detail:
+            log_message("error", "handle_events (%s)" % detail, user_name=event.userName)
+            nextEventName = None
+
+        if nextEventName == None:
+            break
+
+        log_chain_events(event.userName, event.get_name(), nextEventName, cycleDetected=(nextEventName in eventChainNames))
+
+        # allow cycles up to a limit
+        #if nextEventName in eventChainNames:
+        if len(eventChainNames) >= max_chain_events:
+            log_message("error", "Event chain limit (%s) reached at (%s)." % (max_chain_events, nextEventName), user_name=event.userName)
+            break
+        else:
+            eventList = globls.eventListList.get(event.userName)
+            nextEvent = eventList and eventList.get(nextEventName)
+
+            # problem cases for nextEvent
+            if nextEvent == None:
+                log_message("error", "Chained event (%s) does not exist." % nextEventName, user_name=event.userName)
+            elif nextEvent.assignments == None and nextEvent.reason not in [ None, "template" ]:
+                log_message("error", "Chained event (%s) was rejected (%s)." % (nextEventName, nextEvent.reason), user_name=event.userName)
+                nextEvent = None
+
+            event = nextEvent
+
 def handle_events(events, sched_datetime):
-    """Handle all events given and chain events as specified in the
-    events being handled.
+    """Coordinate handling of all events by calling handle_event()
+    for each event in an independent forked process.
 
     The main/parent process spawns a process for each event. Each
     event (with its chained events) runs in its own process. This
@@ -86,9 +127,7 @@ def handle_events(events, sched_datetime):
     from here based on the return values of the event.activate.
     """
     childPids = {}
-
     max_activated_events = max(globls.config.get().get("max_activated_events", CONFIG_MAX_ACTIVATED_EVENTS), 1)
-    max_chain_events = max(globls.config.get().get("max_chain_events", CONFIG_MAX_CHAIN_EVENTS), 1)
 
     for event in events:
         while len(childPids) >= max_activated_events:
@@ -113,44 +152,8 @@ def handle_events(events, sched_datetime):
 
         if pid == 0:
             # child
-            eventChainNames = []
-
-            while event:
-                eventChainNames.append(event.get_name())
-
-                #log_message("info", "Processing event (%s)." % event.get_name())
-                try:
-                    # None, next_event, or failover_event is returned
-                    nextEventName = event.activate(eventChainNames, sched_datetime=sched_datetime)
-                except Exception, detail:
-                    log_message("error", "handle_events (%s)" % detail, user_name=event.userName)
-                    nextEventName = None
-    
-                if nextEventName == None:
-                    break
-
-                log_chain_events(event.userName, event.get_name(), nextEventName, cycleDetected=(nextEventName in eventChainNames))
-
-                # allow cycles up to a limit
-                #if nextEventName in eventChainNames:
-                if len(eventChainNames) >= max_chain_events:
-                    log_message("error", "Event chain limit (%s) reached at (%s)." % (max_chain_events, nextEventName), user_name=event.userName)
-                    break
-                else:
-                    eventList = globls.eventListList.get(event.userName)
-                    nextEvent = eventList and eventList.get(nextEventName)
-
-                    # problem cases for nextEvent
-                    if nextEvent == None:
-                        log_message("error", "Chained event (%s) does not exist." % nextEventName, user_name=event.userName)
-                    elif nextEvent.assignments == None and nextEvent.reason not in [ None, "template" ]:
-                        log_message("error", "Chained event (%s) was rejected (%s)." % (nextEventName, nextEvent.reason), user_name=event.userName)
-                        nextEvent = None
-
-                    event = nextEvent
-
+            handle_event(event, sched_datetime)
             os._exit(0)
-
         else:
             # parent
             pass
