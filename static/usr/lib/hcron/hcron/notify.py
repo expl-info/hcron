@@ -40,9 +40,12 @@ def send_email_notification(eventName, fromUserName, toAddr, subject, content):
     message = """From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\n%s""" % \
         (fromAddr, toAddr, subject, content)
     try:
-        m = smtplib.SMTP(smtp_server)
-        m.sendmail(fromAddr, toAddr, message)
-        m.quit()
+        if globls.simulate:
+            pass
+        else:
+            m = smtplib.SMTP(smtp_server)
+            m.sendmail(fromAddr, toAddr, message)
+            m.quit()
         log_notify_email(fromUserName, toAddr, eventName)
     except Exception, detail:
         log_message("error", "Failed to send email (%s) for event (%s)." % (detail, eventName))
