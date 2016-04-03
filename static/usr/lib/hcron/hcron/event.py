@@ -409,10 +409,10 @@ class Event:
             varInfo["HCRON_EVENT_CHAIN"] = ":".join(eventChainNames)
             varInfo["HCRON_SELF_CHAIN"] = ":".join(selfEventChainNames)
 
-            dt_utc = datetime.utcnow()
-            dt_local = datetime.now()
-            varInfo["HCRON_ACTIVATE_DATETIME"] = datetime.strftime(dt_local, "%Y:%m:%d:%H:%M:%S:%W:%w")
-            varInfo["HCRON_ACTIVATE_DATETIME_UTC"] = datetime.strftime(dt_utc, "%Y:%m:%d:%H:%M:%S:%W:%w")
+            activate_datetime = globls.clock.now()
+            activate_datetime_utc = globls.clock.utcnow()
+            varInfo["HCRON_ACTIVATE_DATETIME"] = datetime.strftime(activate_datetime, "%Y:%m:%d:%H:%M:%S:%W:%w")
+            varInfo["HCRON_ACTIVATE_DATETIME_UTC"] = datetime.strftime(activate_datetime_utc, "%Y:%m:%d:%H:%M:%S:%W:%w")
 
             if sched_datetime:
                 varInfo["HCRON_SCHEDULE_DATETIME"] = sched_datetime.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")

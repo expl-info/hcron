@@ -58,7 +58,7 @@ class Server:
     def run(self, immediate=False):
         """Run scheduling loop.
         """
-        now = datetime.now()
+        now = globls.clock.now()
         next = now # special case
 
         if immediate:
@@ -72,8 +72,8 @@ class Server:
             # to previous minute (not now() which may have passed 1
             # minute to get work done!)
             #
-            now = datetime.now()
             next = (next+MINUTE_DELTA).replace(second=0, microsecond=0)
+            now = globls.clock.now()
             if next > now:
                 # we need to wait
                 delta = (next-now).seconds+1
@@ -84,7 +84,7 @@ class Server:
     
             log_sleep(delta)
             sleep(delta)
-            now = datetime.now()
+            now = globls.clock.now()
             log_message("info", "scheduling for next interval (%s)" % next)
 
             #

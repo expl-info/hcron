@@ -24,6 +24,8 @@
 """Globals. Should be imported as "from hcron import globls".
 """
 
+from clock import Clock
+
 config = None
 allowedUsers = None
 signalHome = None
@@ -32,3 +34,6 @@ server = None
 pidFile = None
 eventListList = None
 hcron_tree_cache = None
+clock = Clock()
+
+del Clock

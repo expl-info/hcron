@@ -25,7 +25,6 @@
 # GPL--end
 
 # system imports
-from datetime import datetime
 import logging
 
 # app imports
@@ -51,9 +50,6 @@ def setup_logger():
     logger.setLevel(logging.INFO)
     logger.info("Starting hcron logging...")
 
-def get_datestamp():
-    return datetime.today().isoformat()
-
 def log_any(*args):
     """Get around chicken and egg problem with logger.
     """
@@ -69,7 +65,7 @@ def log_any2(op, userName="", *args):
         extra = ":".join([ str(el) for el in args ])
     else:
         extra = ""
-    logger.info("%s:%s:%s:%s" % (get_datestamp(), op, userName, extra))
+    logger.info("%s:%s:%s:%s" % (globls.clock.now().isoformat(), op, userName, extra))
 
 def log_message(typ, msg, user_name=""):
     log_any("message", user_name, typ, msg)
