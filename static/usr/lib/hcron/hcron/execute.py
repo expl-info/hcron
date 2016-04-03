@@ -88,77 +88,80 @@ def remote_execute(eventName, localUserName, remoteUserName, remoteHostName, com
     timeout = timeout or globls.config.get().get("command_spawn_timeout", CONFIG_COMMAND_SPAWN_TIMEOUT)
     command = command.strip()
 
-    # validate
-    if remoteHostName in LOCAL_HOST_NAMES and not allow_localhost:
-        raise RemoteExecuteException("Execution on local host is not allowed.")
+    if globls.simulate:
+        retVal = 0
+    else:
+        # validate
+        if remoteHostName in LOCAL_HOST_NAMES and not allow_localhost:
+            raise RemoteExecuteException("Execution on local host is not allowed.")
 
-    if remoteHostName == "":
-        raise RemoteExecuteException("Missing host name for event (%s)." % eventName)
+        if remoteHostName == "":
+            raise RemoteExecuteException("Missing host name for event (%s)." % eventName)
 
-    if not allow_root_events and localUid == 0:
-        raise RemoteExecuteException("Root user not allowed to execute.")
+        if not allow_root_events and localUid == 0:
+            raise RemoteExecuteException("Root user not allowed to execute.")
 
-    if remote_shell_type != "ssh":
-        raise RemoteExecuteException("Unknown remote shell type (%s)." % remote_shell_type)
+        if remote_shell_type != "ssh":
+            raise RemoteExecuteException("Unknown remote shell type (%s)." % remote_shell_type)
 
-    # spawn
-    retVal = -1
-    if command != "":
-        try:
-            args = [ remote_shell_exec, "-f", "-n", "-t", "-l", remoteUserName, remoteHostName, command ]
-            #args = [ remote_shell_exec, "-n", "-t", "-l", remoteUserName, remoteHostName, command ]
-            childPid = os.fork()
+        # spawn
+        retVal = -1
+        if command != "":
+            try:
+                args = [ remote_shell_exec, "-f", "-n", "-t", "-l", remoteUserName, remoteHostName, command ]
+                #args = [ remote_shell_exec, "-n", "-t", "-l", remoteUserName, remoteHostName, command ]
+                childPid = os.fork()
 
-            if childPid == 0:
+                if childPid == 0:
+                    #
+                    # child
+                    #
+                    try:
+                        os.setuid(localUid)
+                        os.setsid()
+                        os.execv(args[0], args)
+                        #retVal = subprocess.call(args)
+                    except (OSError, Exception), detail:
+                        os._exit(256)
+                        retVal = 256
+
+                    os._exit(retVal)
+
+                    # NEVER REACHES HERE
+
                 #
-                # child
+                # parent
                 #
-                try:
-                    os.setuid(localUid)
-                    os.setsid()
-                    os.execv(args[0], args)
-                    #retVal = subprocess.call(args)
-                except (OSError, Exception), detail:
-                    os._exit(256)
-                    retVal = 256
+                if 0:
+                    # poll and wait
+                    while timeout > 0:
+                        waitPid, waitStatus = os.waitpid(childPid, os.WNOHANG)
 
-                os._exit(retVal)
+                        #if waitPid != 0 and os.WIFEXITED(waitStatus):
+                        if waitPid != 0:
+                            break
 
-                # NEVER REACHES HERE
+                        time.sleep(0.01)
+                        timeout -= 0.01
 
-            #
-            # parent
-            #
-            if 0:
-                # poll and wait
-                while timeout > 0:
-                    waitPid, waitStatus = os.waitpid(childPid, os.WNOHANG)
-
-                    #if waitPid != 0 and os.WIFEXITED(waitStatus):
-                    if waitPid != 0:
-                        break
-
-                    time.sleep(0.01)
-                    timeout -= 0.01
+                    else:
+                        os.kill(childPid, signal.SIGKILL)
 
                 else:
-                    os.kill(childPid, signal.SIGKILL)
+                    # signal and wait
+                    signal.signal(signal.SIGALRM, alarm_handler)
+                    signal.alarm(timeout)
+                    waitPid, waitStatus = os.waitpid(childPid, 0)
+                    signal.signal(signal.SIGALRM, signal.SIG_IGN) # cancel alarm
 
-            else:
-                # signal and wait
-                signal.signal(signal.SIGALRM, alarm_handler)
-                signal.alarm(timeout)
-                waitPid, waitStatus = os.waitpid(childPid, 0)
-                signal.signal(signal.SIGALRM, signal.SIG_IGN) # cancel alarm
+                if os.WIFSIGNALED(waitStatus):
+                    retVal = -2
 
-            if os.WIFSIGNALED(waitStatus):
-                retVal = -2
+                elif os.WIFEXITED(waitStatus):
+                    retVal = (os.WEXITSTATUS(waitStatus) == 255) and -1 or 0
 
-            elif os.WIFEXITED(waitStatus):
-                retVal = (os.WEXITSTATUS(waitStatus) == 255) and -1 or 0
-
-        except Exception, detail:
-            log_message("error", "Execute failed (%s)." % detail)
+            except Exception, detail:
+                log_message("error", "Execute failed (%s)." % detail)
 
     log_execute(localUserName, remoteUserName, remoteHostName, eventName, retVal)
 
