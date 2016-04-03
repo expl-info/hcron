@@ -25,7 +25,7 @@
 """
 
 # system imports
-from datetime import datetime, timedelta
+from datetime import timedelta
 import os
 import sys
 from time import sleep, time
@@ -58,7 +58,6 @@ class Server:
     def run(self, immediate=False):
         """Run scheduling loop.
         """
-        minuteDelta = timedelta(minutes=1)
         now = datetime.now()
         next = now # special case
 
@@ -73,8 +72,8 @@ class Server:
             # to previous minute (not now() which may have passed 1
             # minute to get work done!)
             #
-            next = (next+minuteDelta).replace(second=0, microsecond=0)
             now = datetime.now()
+            next = (next+MINUTE_DELTA).replace(second=0, microsecond=0)
             if next > now:
                 # we need to wait
                 delta = (next-now).seconds+1

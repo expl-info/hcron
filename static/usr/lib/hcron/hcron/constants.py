@@ -25,6 +25,7 @@
 """
 
 # system imports
+import datetime
 import os.path
 import pwd
 import socket
@@ -137,6 +138,9 @@ LOCAL_HOST_NAMES = {
     SHORT_HOST_NAME: None,
 }
 
+MINUTE_DELTA = datetime.timedelta(minutes=1)
+
+del datetime
 del os.path
 del pwd
 del socket
