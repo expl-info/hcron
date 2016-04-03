@@ -26,6 +26,7 @@
 
 # system imports
 import logging
+import os.path
 
 # app imports
 from hcron.constants import *
