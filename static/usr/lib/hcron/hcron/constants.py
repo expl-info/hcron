@@ -137,3 +137,7 @@ LOCAL_HOST_NAMES = {
     SHORT_HOST_NAME: None,
 }
 
+del os.path
+del pwd
+del socket
+del sys
