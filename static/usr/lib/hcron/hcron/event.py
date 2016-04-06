@@ -33,6 +33,7 @@ import os.path
 import re
 import socket
 import stat
+import textwrap
 import time
 import traceback
 
@@ -45,6 +46,11 @@ from hcron.notify import send_email_notification
 from hcron.execute import remote_execute
 from hcron.logger import *
 from hcron import fspwd as pwd
+
+tw = textwrap.TextWrapper()
+tw.initial_indent = "    "
+tw.subsequent_indent = "    "
+tw.width = 128
 
 def signal_reload():
     """Signal to reload.
@@ -591,6 +597,24 @@ class Event:
         #else:
             #retVal = remote_execute(self.name, self.userName, event_as_user, event_host, event_command)
         retVal = remote_execute(self.name, self.userName, event_as_user, event_host, event_command)
+
+        if globls.simulate:
+            if globls.simulate_verbose:
+                fmt = "%s=%s"
+                print tw.fill(fmt % ("as_user", event_as_user))
+                print tw.fill(fmt % ("host", event_host))
+                print tw.fill(fmt % ("command", event_command))
+                print tw.fill(fmt % ("notify_email", event_notify_email))
+                print tw.fill(fmt % ("notify_subject", event_notify_subject))
+                print tw.fill(fmt % ("notify_message", event_notify_message))
+                print tw.fill(fmt % ("when_year", sched_datetime and sched_datetime.year))
+                print tw.fill(fmt % ("when_month", sched_datetime and sched_datetime.month))
+                print tw.fill(fmt % ("when_day", sched_datetime and sched_datetime.day))
+                print tw.fill(fmt % ("when_hour", sched_datetime and sched_datetime.hour))
+                print tw.fill(fmt % ("when_minute", sched_datetime and sched_datetime.minute))
+                print tw.fill(fmt % ("when_dow", sched_datetime and sched_datetime.weekday()))
+                print tw.fill(fmt % ("next_event", event_next_event))
+                print tw.fill(fmt % ("failover_event", event_failover_event))
 
         if retVal == 0:
             # success

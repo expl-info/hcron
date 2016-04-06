@@ -35,6 +35,7 @@ pidFile = None
 eventListList = None
 hcron_tree_cache = None
 simulate = False
+simulate_verbose = False
 clock = Clock()
 
 del Clock
