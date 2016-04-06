@@ -27,6 +27,7 @@
 # system imports
 import logging
 import os.path
+import sys
 
 # app imports
 from hcron.constants import *
@@ -43,9 +44,12 @@ def setup_logger():
         handler = logging.SysLogHandler()
     else:
         log_path = config.get("log_path", CONFIG_LOG_PATH)
-        if not log_path.startswith("/"):
-            log_path = os.path.join(HCRON_LOG_HOME, log_path)
-        handler = logging.FileHandler(log_path)
+        if log_path:
+            if not log_path.startswith("/"):
+                log_path = os.path.join(HCRON_LOG_HOME, log_path)
+            handler = logging.FileHandler(log_path)
+        else:
+            handler = logging.StreamHandler(sys.stdout)
     logger = logging.getLogger("")
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
