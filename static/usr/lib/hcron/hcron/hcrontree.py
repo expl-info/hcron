@@ -28,6 +28,10 @@
 import os
 import os.path
 import shutil
+try:
+    import cStringIO as StringIO
+except:
+    import StringIO
 import tarfile
 import tempfile
 
@@ -39,8 +43,8 @@ from hcron.logger import *
 from hcron import fspwd as pwd
 
 class HcronTreeCache:
-    """Interface to packaged hcron tree file containing members as:
-        events/...
+    """Interface to packaged hcron tree file containing members, or
+    a directory path, rooted at "events/".
     """
 
     #def __init__(self, path, ignore_match_fn=None):
@@ -50,7 +54,7 @@ class HcronTreeCache:
 
         self.username = username
         self.ignore_match_fn = ignore_match_fn or false_match
-        self.path = get_hcron_tree_filename(username, HOST_NAME)
+        self.path = os.path.realpath(get_hcron_tree_filename(username, HOST_NAME))
         self.ignored = {}
         self.cache = {}
         self.load()
@@ -62,7 +66,15 @@ class HcronTreeCache:
         - ignored are tracked
         - non-file members are discarded
         """
-        f = tarfile.open(self.path)
+        if os.path.isdir(self.path) \
+            and os.path.basename(self.path) == "events":
+            _f = StringIO.StringIO()
+            f = tarfile.open(mode="w", fileobj=_f)
+            f.add(self.path, "events")
+            _f = StringIO.StringIO(_f.getvalue())
+            f = tarfile.open(fileobj=_f)
+        else:
+            f = tarfile.open(self.path)
 
         ignored = {}
         link_cache = {}
