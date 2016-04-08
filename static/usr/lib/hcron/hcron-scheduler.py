@@ -124,6 +124,9 @@ if __name__ == "__main__":
     #
     # setup
     #
+    globls.remote_execute_enabled = True
+    globls.email_notify_enabled = True
+
     globls.config = ConfigFile(HCRON_CONFIG_PATH)
     setup_logger()
     globls.allowedUsers = AllowedUsersFile(HCRON_ALLOW_PATH)

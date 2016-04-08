@@ -38,4 +38,7 @@ simulate = False
 simulate_verbose = False
 clock = Clock()
 
+remote_execute_enabled = False
+email_notify_enabled = False
+
 del Clock

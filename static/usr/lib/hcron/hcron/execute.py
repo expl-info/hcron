@@ -88,9 +88,8 @@ def remote_execute(eventName, localUserName, remoteUserName, remoteHostName, com
     timeout = timeout or globls.config.get().get("command_spawn_timeout", CONFIG_COMMAND_SPAWN_TIMEOUT)
     command = command.strip()
 
-    if globls.simulate:
-        retVal = 0
-    else:
+    retVal = 0
+    if globls.remote_execute_enabled:
         # validate
         if remoteHostName in LOCAL_HOST_NAMES and not allow_localhost:
             raise RemoteExecuteException("Execution on local host is not allowed.")

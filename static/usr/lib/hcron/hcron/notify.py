@@ -47,7 +47,7 @@ def send_email_notification(eventName, fromUserName, toAddr, subject, content):
     message = """From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\n%s""" % \
         (fromAddr, toAddr, subject, content)
     try:
-        if not globls.simulate:
+        if globls.email_notify_enabled:
             m = smtplib.SMTP(smtp_server)
             m.sendmail(fromAddr, toAddr, message)
             m.quit()
