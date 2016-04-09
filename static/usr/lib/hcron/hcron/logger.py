@@ -53,7 +53,7 @@ def setup_logger():
     logger = logging.getLogger("")
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
-    logger.info("Starting hcron logging...")
+    log_any("start-logging")
 
 def log_any(*args):
     """Get around chicken and egg problem with logger.
