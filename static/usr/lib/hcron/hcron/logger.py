@@ -67,10 +67,10 @@ def log_any2(op, userName="", *args):
     global logger
 
     if args:
-        extra = ":".join([ str(el) for el in args ])
+        extra = "|".join([ str(el) for el in args ])
     else:
         extra = ""
-    logger.info("%s:%s:%s:%s" % (globls.clock.now().isoformat(), op, userName, extra))
+    logger.info("%s|%s|%s|%s" % (globls.clock.now().isoformat(), op, userName, extra))
 
 def log_message(typ, msg, user_name=""):
     log_any("message", user_name, typ, msg)
