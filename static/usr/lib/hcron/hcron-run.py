@@ -69,7 +69,13 @@ Options:
                 package (which is usually sufficient).
 -d <delay>      Delay (in seconds) to use between subsequent
                 simulated datetimes for which there are events being
-                fired. Default is 0s (no delay).""" % (PROG_NAME, PROG_NAME)
+                fired. Default is 0s (no delay).
+--show-all
+--show-email
+--show-event
+                Show email and/or event information as it would be
+                when an event fires. Early and late variable
+                substitution are applied.""" % (PROG_NAME, PROG_NAME)
 
 if __name__ == "__main__":
     whoami = pwd.getpwuid(os.getuid()).pw_name
@@ -91,8 +97,13 @@ if __name__ == "__main__":
                 confpath = args.pop(0)
             elif arg == "-d" and args:
                 delay = max(0, float(args.pop(0)))
-            elif arg in ["-v"]:
-                globls.simulate_verbose = True
+            elif arg in ["--show-all"]:
+                globls.simulate_show_email = True
+                globls.simulate_show_event = True
+            elif arg in ["--show-email"]:
+                globls.simulate_show_email = True
+            elif arg in ["--show-event"]:
+                globls.simulate_show_event = True
             elif len(args) == 2:
                 eventsdir = os.path.realpath(arg)
                 startdatetime = datetime.strptime((args.pop(0)+"0000")[:12], "%Y%m%d%H%M")

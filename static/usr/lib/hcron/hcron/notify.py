@@ -53,7 +53,7 @@ def send_email_notification(eventName, fromUserName, toAddr, subject, content):
             m.quit()
         log_notify_email(fromUserName, toAddr, eventName)
         if globls.simulate:
-            if globls.simulate_verbose:
+            if globls.simulate_show_email:
                 for line in message.split("\n"):
                     print tw.fill(line)
     except Exception, detail:

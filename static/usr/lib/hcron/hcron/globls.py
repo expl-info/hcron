@@ -35,7 +35,8 @@ pidFile = None
 eventListList = None
 hcron_tree_cache = None
 simulate = False
-simulate_verbose = False
+simulate_show_event = False
+simulate_show_email = False
 clock = Clock()
 
 remote_execute_enabled = False

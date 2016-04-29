@@ -599,7 +599,7 @@ class Event:
         retVal = remote_execute(self.name, self.userName, event_as_user, event_host, event_command)
 
         if globls.simulate:
-            if globls.simulate_verbose:
+            if globls.simulate_show_event:
                 fmt = "%s=%s"
                 print tw.fill(fmt % ("as_user", event_as_user))
                 print tw.fill(fmt % ("host", event_host))
