@@ -1,0 +1,43 @@
+.TH HCRON-RUN "1" "April 2016" "hcron 0.20" ""
+.SH NAME
+hcron-run \- Simulate scheduling of events
+.SH SYNOPSIS
+.B hcron-info
+.RB [<options>]
+.I <eventsdir>
+.I <startdatetime>
+.I <enddatetime>
+
+.SH DESCRIPTION
+Given a collection of events, a start and end datetime
+(YYYYMMDD[HHMM]), hcron-run iterates over each minute and simulates
+what events would run fire. This is useful for debugging scheduling
+issues (when_* settings) and variable substitution.
+
+Note: Event chaining works; since failures don't occur, failover
+events will never be fired via failover_event.
+
+Options:
+.TP
+.B -c <confpath>
+Path of the hcron configuration file. Default is to use the
+hcron-run.conf file provided with the package (which is usually
+sufficient).
+
+.TP
+.B -d <delay>
+Delay (in seconds) to use between subsequent simulated datetimes for
+which there are events being fired. Default is 0s (no delay).
+
+.SH SEE ALSO
+hcron(7)
+
+.SH AUTHOR
+Written by John Marshall.
+
+.SH COPYRIGHT
+Copyright \(co 2009-2016 Environment Canada.
+.br
+This is free software.  You may redistribute copies of it under the terms of
+the GNU General Public License <http://www.gnu.org/licenses/gpl.html>.
+There is NO WARRANTY, to the extent permitted by law.
