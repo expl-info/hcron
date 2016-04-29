@@ -1,10 +1,10 @@
 Package: hcron
-Version: 0.17.2
+Version: 0.20
 Section: admin
 Priority: optional
 Architecture: all
 Depends: python (>=2.3)
-Maintainer: John Marshall <John.Marshall@ec.gc.ca>
+Maintainer: John Marshall <John.Marshall@ssc-spc.gc.ca>
 Description: Hcron event scheduling tool
  Hcron does provides a similar service to the regular cron with
  the addition of:
