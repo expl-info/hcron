@@ -162,7 +162,7 @@ def remote_execute(eventName, localUserName, remoteUserName, remoteHostName, com
             except Exception, detail:
                 log_message("error", "Execute failed (%s)." % detail)
 
-    log_execute(localUserName, remoteUserName, remoteHostName, eventName, retVal)
+    log_execute(localUserName, remoteUserName, remoteHostName, eventName, childPid, retVal)
 
     return retVal
 

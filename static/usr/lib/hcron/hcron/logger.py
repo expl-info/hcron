@@ -97,8 +97,8 @@ def log_chain_events(userName, eventName0, eventName1, cycleDetected=False):
 def log_discard_events(userName, count):
     log_any("discard-events", userName, count)
 
-def log_execute(userName, asUser, host, eventName, retVal):
-    log_any("execute", userName, asUser, host, eventName, retVal)
+def log_execute(userName, asUser, host, eventName, pid, retVal):
+    log_any("execute", userName, asUser, host, eventName, pid, retVal)
 
 def log_alarm(msg=""):
     log_any("alarm", "", msg)
