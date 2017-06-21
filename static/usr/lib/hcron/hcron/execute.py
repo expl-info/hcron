@@ -87,6 +87,7 @@ def remote_execute(eventName, localUserName, remoteUserName, remoteHostName, com
     remote_shell_exec = config.get("remote_shell_exec", CONFIG_REMOTE_SHELL_EXEC)
     timeout = timeout or globls.config.get().get("command_spawn_timeout", CONFIG_COMMAND_SPAWN_TIMEOUT)
     command = command.strip()
+    spawn_starttime = time.time()
 
     retVal = 0
     if globls.remote_execute_enabled:
@@ -162,7 +163,8 @@ def remote_execute(eventName, localUserName, remoteUserName, remoteHostName, com
             except Exception, detail:
                 log_message("error", "Execute failed (%s)." % detail)
 
-    log_execute(localUserName, remoteUserName, remoteHostName, eventName, childPid, retVal)
+    spawn_endtime = time.time()
+    log_execute(localUserName, remoteUserName, remoteHostName, eventName, childPid, spawn_endtime-spawn_starttime, retVal)
 
     return retVal
 
