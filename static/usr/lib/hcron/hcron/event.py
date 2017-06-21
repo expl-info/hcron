@@ -149,7 +149,7 @@ def handle_events(events, sched_datetime):
             except OSError, detail:
                 log_message("warning", "Unexpected exception (%s)." % str(detail))
                 if detail.errno == errno.ECHILD:
-                    childPids = []
+                    childPids = {}
             except Exception, detail:
                 traceback.print_exc()
                 log_message("error", "Unexpected exception (%s)." % str(detail))
