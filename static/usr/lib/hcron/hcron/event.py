@@ -90,15 +90,15 @@ def handle_event(event, sched_datetime):
         #log_message("info", "Processing event (%s)." % event.get_name())
         try:
             # None, next_event, or failover_event is returned
-            nextEventName = event.activate(eventChainNames, sched_datetime=sched_datetime)
+            nextEventName, nextEventType = event.activate(eventChainNames, sched_datetime=sched_datetime)
         except Exception, detail:
             log_message("error", "handle_events (%s)" % detail, user_name=event.userName)
-            nextEventName = None
+            nextEventName, nextEventType = None, None
 
         if nextEventName == None:
             break
 
-        log_chain_events(event.userName, event.get_name(), nextEventName, eventChainNames, cycleDetected=(nextEventName in eventChainNames))
+        log_chain_events(event.userName, event.get_name(), nextEventName, nextEventType, eventChainNames, cycleDetected=(nextEventName in eventChainNames))
 
         # allow cycles up to a limit
         #if nextEventName in eventChainNames:
@@ -572,6 +572,8 @@ class Event:
         """Activate event and return next event in chain.
         """
         varInfo = self.get_var_info(eventChainNames, sched_datetime)
+        nextEventName = None
+        nextEventType = None
 
         # late substitution
         eval_assignments(self.assignments, varInfo)
@@ -626,17 +628,17 @@ class Event:
                     subject = event_notify_subject
                 subject = subject[:1024]
                 send_email_notification(self.name, self.userName, event_notify_email, subject, event_notify_message)
-    
-            nextEventName = event_next_event
-    
+
+            nextEventName, nextEventType = event_next_event, "next"
         else:
             # child, with problem
-            nextEventName = event_failover_event
+            nextEventName, nextEventType = event_failover_event, "failover"
 
         # handle None, "", and valid string
         nextEventName = nextEventName and self.resolve_event_name_to_name(self.name, nextEventName.strip()) or None
+        nextEventType = nextEventName and nextEventType or None
 
-        return nextEventName
+        return nextEventName, nextEventType
 
     def resolve_event_name_to_name(self, caller_name, name):
         """Resolve event name relative to the caller event.
