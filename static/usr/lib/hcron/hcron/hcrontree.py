@@ -66,6 +66,9 @@ class HcronTreeCache:
         - ignored are tracked
         - non-file members are discarded
         """
+        if not os.path.exists(self.path):
+            return
+
         if os.path.isdir(self.path) \
             and os.path.basename(self.path) == "events":
             _f = StringIO.StringIO()
