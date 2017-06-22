@@ -76,9 +76,9 @@ def log_any2(op, userName="", *args):
 def log_alarm(msg=""):
     log_any("alarm", "", msg)
 
-def log_chain_events(userName, eventName0, eventName1, cycleDetected=False):
-    cycleMsg = cycleDetected and " (cycle detected)" or ""
-    log_any("chain-events", userName, "%s -> %s%s" % (eventName0, eventName1, cycleMsg))
+def log_chain_events(userName, eventName0, eventName1, eventChainNames, cycleDetected=False):
+    cycleMsg = cycleDetected and "cycle" or ""
+    log_any("chain-events", userName, eventName0, eventName1, ":".join(eventChainNames), cycleMsg)
 
 def log_discard_events(userName, count):
     log_any("discard-events", userName, count)

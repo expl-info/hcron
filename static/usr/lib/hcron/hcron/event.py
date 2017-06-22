@@ -98,7 +98,7 @@ def handle_event(event, sched_datetime):
         if nextEventName == None:
             break
 
-        log_chain_events(event.userName, event.get_name(), nextEventName, cycleDetected=(nextEventName in eventChainNames))
+        log_chain_events(event.userName, event.get_name(), nextEventName, eventChainNames, cycleDetected=(nextEventName in eventChainNames))
 
         # allow cycles up to a limit
         #if nextEventName in eventChainNames:
