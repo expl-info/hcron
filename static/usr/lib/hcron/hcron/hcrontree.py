@@ -182,12 +182,17 @@ def get_hcron_tree_filename(username, hostname):
     """
     return os.path.normpath("%s/%s" % (get_hcron_tree_home(username, hostname), username))
 
-def create_user_hcron_tree_file(username, hostname, dst_path=None):
+def create_user_hcron_tree_file(username, hostname, dst_path=None, empty=False):
     """Create an hcron tree file at dst_path with select members from
     src_path.
     """
     if dst_path == None:
         dst_path = get_user_hcron_tree_filename(username, hostname)
+
+    if empty:
+        # truncate
+        open(dst_path, "w")
+        return
 
     names = [ "events" ]
     cwd = os.getcwd()
@@ -248,6 +253,7 @@ def install_hcron_tree_file(username, hostname):
     except:
         pass
 
-    max_hcron_tree_snapshot_size = globls.config.get().get("max_hcron_tree_snapshot_size", CONFIG_MAX_HCRON_TREE_SNAPSHOT_SIZE)
-    copyfile(src, dst_path, max_hcron_tree_snapshot_size)
+    if os.path.getsize(src_path) > 0:
+        max_hcron_tree_snapshot_size = globls.config.get().get("max_hcron_tree_snapshot_size", CONFIG_MAX_HCRON_TREE_SNAPSHOT_SIZE)
+        copyfile(src, dst_path, max_hcron_tree_snapshot_size)
 

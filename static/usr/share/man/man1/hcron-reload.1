@@ -3,11 +3,13 @@
 hcron-reload \- Signal hcron-scheduler to reload user hcron event definition files
 .SH SYNOPSIS
 .B hcron-reload
+.RB [--unload]
 
 .SH DESCRIPTION
 hcron-reload creates a "snapshot" of the hcron event definition tree and
 signals to the hcron-scheduler that it should reload the user's event
-information. This step is necessary in order for any changes to take effect.
+information. Use --unload to signal hcron-scheduler to unload events. This
+step is necessary in order for any changes to take effect.
 
 .SH FILES
 .IP /var/lib/hcron/event_lists/<username>

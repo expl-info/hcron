@@ -41,10 +41,11 @@ from hcron import globls
 
 def print_usage(progName):
     print """\
-usage: %s
+usage: %s [--unload]
 
 Signal to the hcron-scheduler running of the local machine to reload
-one's event defintion files.""" % progName
+one's event defintion files. Use --unload to unload events at the
+scheduler.""" % progName
 
 if __name__ == "__main__":
     progName = os.path.basename(sys.argv[0])
@@ -52,11 +53,16 @@ if __name__ == "__main__":
     #
     # parse command line
     #
+    unload = False
+
     args = sys.argv[1:]
-    if len(args) > 0:
-        if args[0] in [ "-h", "--help" ]:
+    while args:
+        arg = args.pop(0)
+        if arg in [ "-h", "--help" ]:
             print_usage(progName)
             sys.exit(0)
+        elif arg == "--unload":
+            unload = True
         else:
             print_usage(progName)
             sys.exit(-1)
@@ -65,7 +71,7 @@ if __name__ == "__main__":
     # work
     #
     try:
-        signal_reload()
+        signal_reload(unload)
         now = datetime.datetime.now()
         next_interval = (now+datetime.timedelta(seconds=60)).replace(second=0,microsecond=0)
         print "Reload signalled for machine (%s) at next interval (%s; in %ss)." % (HOST_NAME, next_interval, (next_interval-now).seconds)

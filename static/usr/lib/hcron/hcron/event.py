@@ -52,7 +52,7 @@ tw.initial_indent = "    "
 tw.subsequent_indent = "    "
 tw.width = 128
 
-def signal_reload():
+def signal_reload(unload=False):
     """Signal to reload.
     """
     import tempfile
@@ -68,7 +68,7 @@ def signal_reload():
         raise Exception("Warning: You are not an allowed hcron user.")
 
     try:
-        create_user_hcron_tree_file(userName, HOST_NAME)
+        create_user_hcron_tree_file(userName, HOST_NAME, empty=unload)
     except Exception, detail:
         raise Exception("Error: Could not create hcron snapshot file (%s)." % detail)
 
