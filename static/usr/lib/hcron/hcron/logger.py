@@ -87,7 +87,7 @@ def log_end():
     log_any("end")
 
 def log_execute(userName, asUser, host, eventName, pid, spawn_elapsed, retVal):
-    log_any("execute", userName, asUser, host, eventName, pid, spawn_elapsed, retVal)
+    log_any("execute", userName, asUser, host, eventName, pid, "%f" % spawn_elapsed, retVal)
 
 def log_exit():
     log_any("exit")
@@ -99,7 +99,7 @@ def log_load_config():
     log_any("load-config")
 
 def log_load_events(userName, count, elapsed):
-    log_any("load-events", userName, count, elapsed)
+    log_any("load-events", userName, count, "%f" % elapsed)
 
 def log_message(typ, msg, user_name=""):
     log_any("message", user_name, typ, msg)
@@ -114,6 +114,6 @@ def log_start():
     log_any("start")
 
 def log_work(count, elapsed):
-    log_any("work", "", count, elapsed)
+    log_any("work", "", count, "%f" % elapsed)
 
 
