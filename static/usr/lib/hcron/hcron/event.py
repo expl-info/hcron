@@ -420,10 +420,14 @@ class Event:
             activate_datetime_utc = globls.clock.utcnow()
             varInfo["HCRON_ACTIVATE_DATETIME"] = datetime.strftime(activate_datetime, "%Y:%m:%d:%H:%M:%S:%W:%w")
             varInfo["HCRON_ACTIVATE_DATETIME_UTC"] = datetime.strftime(activate_datetime_utc, "%Y:%m:%d:%H:%M:%S:%W:%w")
+            varInfo["HCRON_ACTIVATE_EPOCHTIME"] = datetime.strftime(activate_datetime, "%s")
+            varInfo["HCRON_ACTIVATE_EPOCHTIME_UTC"] = datetime.strftime(activate_datetime_utc, "%s")
 
             if sched_datetime:
                 varInfo["HCRON_SCHEDULE_DATETIME"] = sched_datetime.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
                 varInfo["HCRON_SCHEDULE_DATETIME_UTC"] = sched_datetime.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
+                varInfo["HCRON_SCHEDULE_EPOCHTIME"] = sched_datetime.strftime("%s")
+                varInfo["HCRON_SCHEDULE_EPOCHTIME_UTC"] = sched_datetime.strftime("%s")
         else:
             varInfo["HCRON_EVENT_CHAIN"] = ""
             varInfo["HCRON_SELF_CHAIN"] = ""

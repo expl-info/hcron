@@ -162,6 +162,11 @@ The time (local and UTC respectively) at which the event is activated/
 executed. The format is: YYYY:MM:DD:HH:MM:SS:WOY:DOW . [Late substitution.]
 
 .TP
+.B "$HCRON_ACTIVATE_EPOCHTIME, $HCRON_ACTIVATE_EPOCHTIME_UTC"
+The time since the UNIX epoch in seconds (integer) (local and UTC
+respectively) at which the event is activated/executed. [Late substitution.]
+
+.TP
 .B $HCRON_HOST_NAME
 The host name of the host executing hcron. [Early substitution.]
 
@@ -183,6 +188,11 @@ is /, not : . [Early substitution.]
 .B "$HCRON_SCHEDULE_DATETIME, $HCRON_SCHEDULE_DATETIME_UTC"
 The time (local and UTC respectively) for which the event was scheduled.
 The format is: YYYY:MM:DD:HH:MM:SS:WOY:DOW . [Late substitution.]
+
+.TP
+.B "$HCRON_SCHEDULE_EPOCHTIME, $HCRON_SCHEDULE_EPOCHTIME_UTC"
+The time since the UNIX epoch in seconds (integer) (local and UTC
+respectively) for which the event was scheduled. [Late substitution.]
 
 .TP
 .B $HCRON_SELF_CHAIN
