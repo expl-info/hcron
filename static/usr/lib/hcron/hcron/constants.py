@@ -60,6 +60,7 @@ __all__ = [
     "HCRON_TREES_HOME",
     "HCRON_VAR_PATH",
     "HOST_NAME",
+    "JOBQ_SIZE",
     "LOCAL_HOST_NAMES",
     "MINUTE_DELTA",
     "MONTH_NAMES_MAP",
@@ -185,3 +186,5 @@ LOCAL_HOST_NAMES = {
 }
 
 MINUTE_DELTA = datetime.timedelta(minutes=1)
+
+JOBQ_SIZE = 100000

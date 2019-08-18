@@ -41,7 +41,7 @@ import signal
 # app imports
 from hcron.constants import *
 from hcron import globls
-from hcron.event import EventListList
+from hcron.event import EventListList, handle_jobs
 from hcron.file import AllowedUsersFile, ConfigFile, PidFile, SignalHome
 from hcron.logger import *
 from hcron.server import Server

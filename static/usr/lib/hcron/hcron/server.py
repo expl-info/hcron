@@ -27,17 +27,30 @@
 # system imports
 from datetime import timedelta
 import os
+import Queue
 import sys
+import threading
 from time import sleep, time
 
 # app imports
 from hcron.constants import *
 from hcron import globls
-from hcron.event import EventListList, handle_events, reload_events
+from hcron.event import EventListList, handle_jobs, reload_events
 from hcron.library import date_to_bitmasks
 from hcron.logger import *
 
 class Server:
+
+    def __init__(self):
+        self.jobq = Queue.Queue(globls.config.get().get("jobq_size", JOBQ_SIZE))
+        self.jobqth = threading.Thread(target=handle_jobs, args=(self,))
+        self.jobqth.daemon = True
+        self.jobqth.start()
+
+    def __del__(self):
+        # will trigger jobqth to exit
+        self.jobq = None
+
     def serverize(self):
         if os.fork() != 0:
             # exit original/parent process
@@ -124,5 +137,6 @@ class Server:
         datemasks = date_to_bitmasks(now.year, now.month, now.day, now.hour, now.minute, hcronWeekday)
         events = globls.eventListList.test(datemasks)
         if events:
-            handle_events(events, sched_datetime=now)
+            for event in events:
+                self.jobq.put((event, now))
         log_work(len(events), (time()-t0))

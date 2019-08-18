@@ -30,6 +30,7 @@ import errno
 import fnmatch
 import os
 import os.path
+import Queue
 import re
 import socket
 import stat
@@ -118,9 +119,12 @@ def handle_event(event, sched_datetime):
 
             event = nextEvent
 
-def handle_events(events, sched_datetime):
-    """Coordinate handling of all events by calling handle_event()
-    for each event in an independent forked process.
+def handle_jobs(server):
+    """Read jobs from jobq. Each job is given as (event, schedtime).
+    This function is run in a separate thread.
+
+    handle_event() is called for each event to run in an independent
+    forked process.
 
     The main/parent process spawns a process for each event. Each
     event (with its chained events) runs in its own process. This
@@ -133,10 +137,36 @@ def handle_events(events, sched_datetime):
     Chain management (child): we can track and call chain events
     from here based on the return values of the event.activate.
     """
+    def reap_children(childPids):
+        if not childPids:
+            return
+
+        while 1:
+            try:
+                pid, status = os.waitpid(-1, os.WNOHANG)
+                if (pid, status) == (0, 0):
+                    break
+                del childPids[pid]
+            except OSError, detail:
+                if detail.errno == errno.ECHILD:
+                    childPids.clear()
+                    break
+
     childPids = {}
     max_activated_events = max(globls.config.get().get("max_activated_events", CONFIG_MAX_ACTIVATED_EVENTS), 1)
 
-    for event in events:
+    while True:
+        try:
+            reap_children(childPids)
+            job = server.jobq.get(timeout=5)
+            event, sched_datetime = job
+        except Queue.Empty:
+            continue
+        except Exception, detail:
+            if server.jobq != None:
+                log_message("error", "Unexpected exception (%s)." % str(detail))
+            return
+
         while len(childPids) >= max_activated_events:
             # reap 1+ child processes
             try:
@@ -149,7 +179,7 @@ def handle_events(events, sched_datetime):
             except OSError, detail:
                 log_message("warning", "Unexpected exception (%s)." % str(detail))
                 if detail.errno == errno.ECHILD:
-                    childPids = {}
+                    childPids.clear()
             except Exception, detail:
                 traceback.print_exc()
                 log_message("error", "Unexpected exception (%s)." % str(detail))
@@ -165,14 +195,15 @@ def handle_events(events, sched_datetime):
             # parent
             pass
 
-    # reap remaining child processes
-    while childPids:
-        try:
-            pid, status = os.waitpid(-1, 0)
-            del childPids[pid]
-        except Exception, detail:
-            traceback.print_exc()
-            log_message("error", "Unexpected exception (%s)." % str(detail))
+        if 0:
+            # reap remaining child processes
+            while childPids:
+                try:
+                    pid, status = os.waitpid(-1, 0)
+                    del childPids[pid]
+                except Exception, detail:
+                    traceback.print_exc()
+                    log_message("error", "Unexpected exception (%s)." % str(detail))
 
 def reload_events(signalHomeMtime):
     """Reload events for all users whose signal file mtime is <= to
