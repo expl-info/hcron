@@ -412,6 +412,7 @@ class Event:
         self.assignments = None
         self.when = None
         self.masks = None
+        self.deleted = False
 
         self.load()
 
