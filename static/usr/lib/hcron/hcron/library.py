@@ -25,8 +25,10 @@
 """
 
 # system imports
+import os
 import os.path
 import types
+import sys
 
 # app imports
 from hcron.constants import *
@@ -214,3 +216,20 @@ def get_events_home_snapshot(userName):
     path = os.path.join(HCRON_EVENTS_SNAPSHOT_HOME, userName)
 
     return path
+
+def serverize():
+    if os.fork() != 0:
+        # exit original/parent process
+        sys.exit(0)
+
+    # close streams - the Python way
+    sys.stdin.close(); os.close(0); os.open("/dev/null", os.O_RDONLY)
+    sys.stdout.close(); os.close(1); os.open("/dev/null", os.O_RDWR)
+    sys.stderr.close(); os.close(2); os.open("/dev/null", os.O_RDWR)
+
+    # detach from controlling terminal
+    os.setsid()
+
+    # misc
+    os.chdir("/")   # / is always available
+    os.umask(0022)

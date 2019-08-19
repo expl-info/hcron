@@ -43,6 +43,7 @@ from hcron.constants import *
 from hcron import globls
 from hcron.event import EventListList, handle_jobs
 from hcron.file import AllowedUsersFile, ConfigFile, PidFile, SignalHome
+from hcron import library
 from hcron.logger import *
 from hcron.server import Server
 
@@ -139,8 +140,9 @@ if __name__ == "__main__":
     signal.signal(signal.SIGQUIT, quit_signal_handler)
     ###signal.signal(signal.SIGCHLD, signal.SIG_IGN)   # we don't care about children/zombies
 
+    library.serverize()  # don't catch SystemExit
+
     globls.server = Server()
-    globls.server.serverize()  # don't catch SystemExit
     globls.pidFile = PidFile(HCRON_PID_FILE_PATH)
     globls.pidFile.create()
 

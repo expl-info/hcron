@@ -51,23 +51,6 @@ class Server:
         # will trigger jobqth to exit
         self.jobq = None
 
-    def serverize(self):
-        if os.fork() != 0:
-            # exit original/parent process
-            sys.exit(0)
-   
-        # close streams - the Python way
-        sys.stdin.close(); os.close(0); os.open("/dev/null", os.O_RDONLY)
-        sys.stdout.close(); os.close(1); os.open("/dev/null", os.O_RDWR)
-        sys.stderr.close(); os.close(2); os.open("/dev/null", os.O_RDWR)
-    
-        # detach from controlling terminal
-        os.setsid()
-    
-        # misc
-        os.chdir("/")   # / is always available
-        os.umask(0022)
-
     def run(self, immediate=False):
         """Run scheduling loop.
         """
