@@ -17,6 +17,8 @@ fi
 chmod 0755 /var/spool/hcron
 mkdir -p /var/spool/hcron/signal
 chmod a+rwx,o+t /var/spool/hcron/signal
+mkdir -p /var/spool/hcron/ondemand
+chmod a+rwx,o+t /var/spool/hcron/ondemand
 
 # /var/log/hcron
 if [ ! -d /var/log/hcron ]; then

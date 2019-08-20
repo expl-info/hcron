@@ -41,6 +41,7 @@ __all__ = [
     "CONFIG_USE_SYSLOG",
     "CRONTAB_ALIASES_MAP",
     "DOW_NAMES_MAP",
+    "ENQUEUE_ONDEMAND_DELAY",
     "HCRON_ALLOW_PATH",
     "HCRON_ALLOWED_USERS_DUMP_PATH",
     "HCRON_CONFIG_DUMP_PATH",
@@ -54,6 +55,7 @@ __all__ = [
     "HCRON_HOME",
     "HCRON_LIB_HOME",
     "HCRON_LOG_HOME",
+    "HCRON_ONDEMAND_HOME",
     "HCRON_PID_FILE_PATH",
     "HCRON_SIGNAL_HOME",
     "HCRON_SPOOL_HOME",
@@ -102,6 +104,7 @@ HCRON_LOG_HOME = os.path.join(HCRON_VAR_PATH, "log/hcron")
 # var/spool
 HCRON_SPOOL_HOME = os.path.join(HCRON_VAR_PATH, "spool/hcron")
 HCRON_SIGNAL_HOME = os.path.join(HCRON_SPOOL_HOME, "signal")
+HCRON_ONDEMAND_HOME = os.path.join(HCRON_SPOOL_HOME, "ondemand")
 
 HCRON_PID_FILE_PATH = os.path.join(HCRON_VAR_PATH, "run/hcron.pid")
 
@@ -188,3 +191,4 @@ LOCAL_HOST_NAMES = {
 MINUTE_DELTA = datetime.timedelta(minutes=1)
 
 JOBQ_SIZE = 100000
+ENQUEUE_ONDEMAND_DELAY = 5

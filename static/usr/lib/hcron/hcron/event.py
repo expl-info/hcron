@@ -30,6 +30,7 @@ import errno
 import fnmatch
 import os
 import os.path
+import pwd
 import Queue
 import re
 import socket
@@ -39,6 +40,7 @@ import time
 import traceback
 
 # app imports
+from hcron.clock import Clock
 from hcron.constants import *
 from hcron import globls
 from hcron.hcrontree import HcronTreeCache, create_user_hcron_tree_file, install_hcron_tree_file
@@ -233,6 +235,56 @@ def reload_events(signalHomeMtime):
                 os.remove(path) # remove singles and multiples
             except Exception, detail:
                 log_message("warning", "Could not remove signal file (%s)." % path)
+
+def enqueue_ondemand_jobs(server):
+    """Queue up on demand jobs.
+
+    TODO: track if a file without a sentinel has been around for
+    many iterations.
+    """
+    clock = Clock()
+
+    while True:
+        clock.set(None)
+        for filename in sorted(os.listdir(HCRON_ONDEMAND_HOME)):
+            try:
+                path = os.path.join(HCRON_ONDEMAND_HOME, filename)
+                st = os.stat(path)
+                uid = st[stat.ST_UID]
+                username = pwd.getpwuid(uid).pw_name
+                log_message("debug", "filename (%s) user (%s) path (%s)" % (filename, username, path))
+
+                if st.st_size > 4096:
+                    # too long
+                    log_message("error", "filename (%s) user (%s) too big (%s)" % (filename, user, st.st_size))
+                    raise Exception()
+
+                eventname = open(path).read(4096)
+                if not eventname.endswith("\n"):
+                    # no sentinel; skip it
+                    log_message("debug", "skipping filename (%s) user (%s) path (%s)" % (filename, username, path))
+                    path = None
+                    continue
+
+                eventname = eventname.strip()
+                eventlist = globls.eventListList.get(username)
+                if not eventlist:
+                    log_message("error", "Cannot find eventlist for user (%s)" % username)
+                    raise Exception()
+
+                event = eventlist.get(eventname)
+                if not event:
+                    log_message("error", "Cannot find event by name (%s)" % eventname)
+                    raise Exception()
+
+                server.jobq.put((event, clock.now()))
+                log_message("info", "Queued ondemand event (%s)" % eventname)
+            except:
+                log_message("warning", "Failed to queue ondemand event (%s)" % eventname)
+            finally:
+                if path:
+                    os.remove(path)
+        time.sleep(ENQUEUE_ONDEMAND_DELAY)
 
 class CannotLoadFileException(Exception):
     pass
