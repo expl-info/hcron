@@ -14,7 +14,9 @@ done
 if [ ! -d /var/spool/hcron ]; then
 	mkdir -p /var/spool/hcron
 fi
-chmod a+rwx,o+t /var/spool/hcron
+chmod 0755 /var/spool/hcron
+mkdir -p /var/spool/hcron/signal
+chmod a+rwx,o+t /var/spool/hcron/signal
 
 # /var/log/hcron
 if [ ! -d /var/log/hcron ]; then
