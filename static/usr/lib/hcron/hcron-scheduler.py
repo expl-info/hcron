@@ -37,6 +37,7 @@ del firstPath
 import os.path
 import pprint
 import signal
+from sys import stderr
 import threading
 
 # app imports
@@ -90,38 +91,43 @@ def quit_signal_handler(num, frame):
     globls.pidFile.remove()
     sys.exit(0)
 
-def print_usage(progName):
+def print_usage():
+    d = {
+        "progname": os.path.basename(sys.argv[0])
+    }
     print """\
-usage: %s [--immediate]
+usage: %(progname)s [--immediate]
+       %(progname)s -h|--help
 
-This program loads a collection of event definitions from one or
-more users and executes commands according their defined schedulues.
-When run as root, event definitions are read from registered users
-(listed in hcron.allow) for the local host; otherwise, this is done
-for the current user, only.
+This program loads a collection of event files from one or more users
+and executes commands according their defined schedulues. When run as
+root, event files are read from registered users (listed in hcron.allow)
+for the local host. Otherwise, this is done for the current user, only.
 
 Options:
 --immediate         Forces the scheduling of events to be done
                     immediately (i.e., now, the current interval)
-                    rather than wait for the next interval""" % progName
+                    rather than wait for the next interval.""" % d
 
 if __name__ == "__main__":
-    progName = os.path.basename(sys.argv[0])
+    try:
+        immediate = False
 
-    #
-    # parse command line
-    #
-    args = sys.argv[1:]
-    if len(args) > 0:
-        if args[0] in [ "-h", "--help" ]:
-            print_usage(progName)
-            sys.exit(0)
-        elif "--immediate" in args:
-            # picked up by server.run()
-            pass
-        else:
-            print_usage(progName)
-            sys.exit(-1)
+        args = sys.argv[1:]
+        while args:
+            arg = args.pop(0)
+            if arg == "--immediate":
+                immediate = True
+            elif arg in ["-h", "--help"]:
+                print_usage()
+                sys.exit(0)
+            else:
+                raise Exception()
+    except SystemExit:
+        raise
+    except:
+        stderr.write("error: bad/missing argument\n")
+        sys.exit(1)
 
     #
     # setup
@@ -153,7 +159,7 @@ if __name__ == "__main__":
         odth.start()
 
         log_start()
-        globls.server.run()
+        globls.server.run(immediate=immediate)
     except Exception, detail:
         log_message("warning", "Unexpected exception (%s)." % detail)
         #import traceback
