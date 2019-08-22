@@ -31,25 +31,27 @@ import os.path
 import pwd
 import socket
 import sys
+from sys import stderr
 
 # hcron imports
 from hcron.constants import *
 
-# constants
-PROG_NAME = os.path.basename(sys.argv[0])
-
-def print_usage(PROG_NAME):
+def print_usage():
+    d = {
+        "progname": os.path.basename(sys.argv[0])
+    }
     print """\
-usage: %s --allowed
-       %s -es
-       %s --fqdn
+usage: %(progname)s --allowed
+       %(progname)s -es
+       %(progname)s --fqdn
+       %(progname)s -h|--help
 
 Print hcron related information.
 
 Where:
---allowed           output "yes" if permitted to use hcron
--es                 event statuses
---fqdn              fully qualified hostname""" % (PROG_NAME, PROG_NAME, PROG_NAME)
+--allowed           Output "yes" if permitted to use hcron.
+-es                 Event statuses.
+--fqdn              Fully qualified hostname.""" % d
 
 def print_allowed():
     try:
@@ -78,32 +80,25 @@ def print_user_event_status():
         print "Error: Could not read event status information."
 
 if __name__ == "__main__":
-    args = sys.argv[1:]
+    try:
+        args = sys.argv[1:]
 
-    if len(args) == 0:
-        print_usage(PROG_NAME)
-        sys.exit(-1)
-
-    while args:
+        # expect at least 1 arg
         arg = args.pop(0)
-
-        if arg in [ "--allowed" ]:
+        if arg == "--allowed":
             print_allowed()
-            break
-
-        if arg in [ "-es" ]:
+        elif arg == "-es":
             print_user_event_status()
-            break
-
-        elif arg in [ "--fqdn" ]:
+        elif arg == "--fqdn":
             print_fqdn()
-            break
 
-
-        elif arg in [ "-h", "--help" ]:
-            print_usage(PROG_NAME)
-            break
-        
+        elif arg in ["-h", "--help"]:
+            print_usage()
+            sys.exit(0)
         else:
-            print_usage(PROG_NAME)
-            sys.exit(-1)
+            raise Exception()
+    except SystemExit:
+        raise
+    except:
+        stderr.write("error: bad/missing argument\n")
+        sys.exit(1)
