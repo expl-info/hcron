@@ -152,7 +152,7 @@ if __name__ == "__main__":
             datemasks = date_to_bitmasks(now.year, now.month, now.day, now.hour, now.minute, hcronWeekday)
             events = globls.eventListList.test(datemasks)
             for event in events:
-                handle_event(event, now)
+                handle_event("clock", event, now)
                 time.sleep(delay)
             now += minute
             globls.clock.set(now)

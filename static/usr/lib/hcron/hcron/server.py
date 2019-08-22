@@ -104,11 +104,11 @@ class Server:
                 globls.signalHome.load()
                 reload_events(globls.signalHome.get_modified_time())
 
-            self.run_now(next)
+            self.run_now("clock", next)
 
     # TODO: should run_now fork so that the child handled the "now"
     # events and the parent returns to wait for the next "now"?
-    def run_now(self, now):
+    def run_now(self, triggername, now):
         """Run using the "now" time value.
         """
         #
@@ -121,5 +121,5 @@ class Server:
         events = globls.eventListList.test(datemasks)
         if events:
             for event in events:
-                self.jobq.put((event, now))
+                self.jobq.put((triggername, event, now))
         log_work(len(events), (time()-t0))

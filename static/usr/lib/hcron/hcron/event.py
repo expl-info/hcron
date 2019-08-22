@@ -80,7 +80,7 @@ def signal_reload(unload=False):
     except:
         raise Exception("Error: Could not signal for reload.")
 
-def handle_event(event, sched_datetime):
+def handle_event(triggername, event, sched_datetime):
     """Handle a single event and related/followon chain events
     according to the event(s) defined.
     """
@@ -93,7 +93,7 @@ def handle_event(event, sched_datetime):
         #log_message("info", "Processing event (%s)." % event.get_name())
         try:
             # None, next_event, or failover_event is returned
-            nextEventName, nextEventType = event.activate(eventChainNames, sched_datetime=sched_datetime)
+            nextEventName, nextEventType = event.activate(triggername, eventChainNames, sched_datetime=sched_datetime)
         except Exception, detail:
             log_message("error", "handle_events (%s)" % detail, user_name=event.userName)
             nextEventName, nextEventType = None, None
@@ -122,8 +122,9 @@ def handle_event(event, sched_datetime):
             event = nextEvent
 
 def handle_jobs(server):
-    """Read jobs from jobq. Each job is given as (event, schedtime).
-    This function is run in a separate thread.
+    """Read jobs from jobq. Each job is given as
+    (triggername, event, schedtime). This function is run in a
+    separate thread.
 
     handle_event() is called for each event to run in an independent
     forked process.
@@ -161,7 +162,7 @@ def handle_jobs(server):
         try:
             reap_children(childPids)
             job = server.jobq.get(timeout=5)
-            event, sched_datetime = job
+            triggername, event, sched_datetime = job
         except Queue.Empty:
             continue
         except Exception, detail:
@@ -191,7 +192,7 @@ def handle_jobs(server):
 
         if pid == 0:
             # child
-            handle_event(event, sched_datetime)
+            handle_event(triggername, event, sched_datetime)
             os._exit(0)
         else:
             # parent
@@ -277,7 +278,7 @@ def enqueue_ondemand_jobs(server):
                     log_message("error", "Cannot find event by name (%s)" % eventname)
                     raise Exception()
 
-                server.jobq.put((event, clock.now()))
+                server.jobq.put(("ondemand", event, clock.now()))
                 log_message("info", "Queued ondemand event (%s)" % eventname)
             except:
                 log_message("warning", "Failed to queue ondemand event (%s)" % eventname)
@@ -471,7 +472,7 @@ class Event:
     def get_name(self):
         return self.name
 
-    def get_var_info(self, eventChainNames=None, sched_datetime=None):
+    def get_var_info(self, triggername=None, eventChainNames=None, sched_datetime=None):
         """Set variable values.
 
         Early substitution: at event load time.
@@ -487,6 +488,7 @@ class Event:
             "template_name": None,
             "HCRON_HOST_NAME": socket.getfqdn(),
             "HCRON_EVENT_NAME": self.name,
+            "HCRON_TRIGGER_NAME": triggername,
         }
         
         if eventChainNames:
@@ -656,10 +658,10 @@ class Event:
 
         return 1
 
-    def activate(self, eventChainNames=None, sched_datetime=None):
+    def activate(self, triggername, eventChainNames=None, sched_datetime=None):
         """Activate event and return next event in chain.
         """
-        varInfo = self.get_var_info(eventChainNames, sched_datetime)
+        varInfo = self.get_var_info(triggername, eventChainNames, sched_datetime)
         nextEventName = None
         nextEventType = None
 
