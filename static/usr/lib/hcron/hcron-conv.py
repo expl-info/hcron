@@ -29,29 +29,37 @@ import os
 import os.path
 import socket
 import sys
+from sys import stderr
 
 # app import
 from hcron.constants import *
 from hcron.event import Event
 
 def convert_to_events_main(args):
-    # setup
-    mailAddr = ""
+    """main for "--to-events".
+    """
+    try:
+        crontabpath = None
+        dirpath = None
+        hostname = None
+        mailaddr = ""
 
-    while args:
-        arg = args.pop(0)
-        if arg in [ "--mail" ]:
-            mailAddr = args.pop(0)
-        else:
-            args.insert(0, arg)
-            break
+        while args:
+            arg = args.pop(0)
+            if arg in [ "--mail" ]:
+                mailaddr = args.pop(0)
+            elif len(args) == 2:
+                hostname, crontabpath, dirpath = [arg]+args
+                del args[:]
+            else:
+                raise Exception()
 
-    if len(args) != 3:
-        print_usage(PROG_NAME)
-        sys.exit(-1)
-    else:
-        hostName, crontabPath, dirPath = args
-    convert_to_events(hostName, crontabPath, dirPath, mailAddr=mailAddr)
+        if None in [crontabpath, dirpath, hostname]:
+            raise Exception()
+
+        convert_to_events(hostName, crontabPath, dirPath, mailAddr=mailaddr)
+    except:
+        raise
 
 def convert_to_events(hostName, crontabPath, dirPath, mailAddr=""):
     try:
@@ -134,23 +142,29 @@ def convert_to_events(hostName, crontabPath, dirPath, mailAddr=""):
             raise Exception("Error: Could not create event definition file (%s)." % path)
 
 def convert_to_crontab_main(args):
-    # setup
-    remoteShell = "ssh"
+    """main for "--to-crontab".
+    """
+    try:
+        crontabpath = None
+        dirpath = None
+        remoteshell = "ssh"
 
-    while args:
-        arg = args.pop(0)
-        if arg in [ "--remoteShell" ]:
-            remoteShell = args.pop(0)
-        else:
-            args.insert(0, arg)
-            break
-    if len(args) != 2:
-        print_usage(PROG_NAME)
-        sys.exit(-1)
-    else:
-        crontabPath, dirPath = args
+        while args:
+            arg = args.pop(0)
+            if arg in ["--remoteshell", "--remoteShell"]:
+                remoteshell = args.pop(0)
+            elif len(args) == 1:
+                crontabpath, dirpath = [arg]+args
+                del args[:]
+            else:
+                raise Exception()
 
-    convert_to_crontab(crontabPath, dirPath, remoteShell=remoteShell)
+        if None in [crontabpath, dirpath]:
+            raise Exception()
+
+        convert_to_crontab(crontabpath, dirpath, remoteShell=remoteshell)
+    except:
+        raise
 
 def convert_to_crontab(crontabPath, dirPath, remoteShell):
     try:
@@ -183,49 +197,52 @@ def convert_to_crontab(crontabPath, dirPath, remoteShell):
     crontabFile.write("\n".join(l))
     crontabFile.close()
 
-def print_usage(progName):
+def print_usage():
+    d = {
+        "progname": os.path.basename(sys.argv[0])
+    }
+
     print """\
-usage: %s --to-events [options] <hostName> <crontabPath> <dirPath>
-       %s --to-crontab [options] <crontabPath> <dirPath>
-       %s [-h|--help]
+usage: %(progname)s --to-events [<options>] <host> <crontabpath> <dirpath>
+       %(progname)s --to-crontab [<options>] <crontabpath> <dirpath>
+       %(progname)s -h|--help
 
-Convert between crontab and hcron event defintion file formats.
+Convert between crontab and hcron event file formats.
 
-Converting from crontab to event definitions (--to-events) takes a
-standard crontab file and generates an event definition file for each
-command.
+Use --to-events to convert from a basic crontab to hcron event files.
+An event file is created for each crontab command. Event files are
+put into a directory.
 
-Converting from hcron event definitions to a standard crontab file
-(--to-crontab) takes a directory containing hcron event definition
-files and generates a single crontab file.
+Use --to-crontab to convert hcron event files to a crontab. A crontab
+command is created for each event file. Event files are taken from a
+directory.
 
-Where --to-events parameters and options are:
---mail <address>    Email address used when populating the "mail" entry.
+Options for --to-events:
+--mail <address>    Email address used when populating the "mail"
+                    setting.
 
-Where --to-crontab options are:
---remoteShell <shell>
-                    The remote shell to prepend to each command when a
-                    "host" entry is not empty. The default is ssh.
-""" % (progName, progName, progName)
+Options for --to-crontab:
+--remoteshell <shell>
+                    Remote shell to prepend to each crontab command when
+                    the "host" setting is not empty. Default is ssh.""" % d
 
 if __name__ == "__main__":
-    args = sys.argv[1:]
-    if len(args) < 1 or args[0] in [ "-h", "--help" ]:
-        print_usage(PROG_NAME)
-        sys.exit(0)
-
     try:
+        args = sys.argv[1:]
+
         arg = args.pop(0)
         if arg == "--to-events":
             convert_to_events_main(args)
         elif arg == "--to-crontab":
             convert_to_crontab_main(args)
+        elif arg in ["-h", "--help"]:
+            print_usage()
         else:
-            print_usage(PROG_NAME)
+            raise Exception()
     except SystemExit, detail:
         raise
     except Exception, detail:
-        sys.stderr.write("%s\n" % detail)
-        sys.exit(-1)
+        stderr.write("error: bad/missing argument\n")
+        sys.exit(1)
 
     sys.exit(0)
