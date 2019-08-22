@@ -27,6 +27,7 @@ import os
 import os.path
 import subprocess
 import sys
+from sys import stderr
 
 # app import
 from hcron.constants import *
@@ -34,49 +35,51 @@ from hcron.event import signal_reload
 
 # constants
 EDITOR = os.environ.get("EDITOR", "vi")
-PROG_NAME = os.path.basename(sys.argv[0])
 
-def print_usage(progName):
+def print_usage():
+    d = {
+        "progname": os.path.basename(sys.argv[0])
+    }
     print """\
-usage: %s [-c] [-y|-n] <path> [...]
-       %s [-h|--help]
+usage: %(progname)s [-c] [-y] <path> [...]
+       %(progname)s -h|--help
 
-Create/edit an hcron event definition at the given path(s) (note:
-the last component of the path is taken as the event name). An event
-definition is stored in a text file in which each field and value
-pair is set as name=value.
+Create/edit an hcron event file at the given path(s). Start editor
+unless -c is specified.
 
 Where:
--c                  create only, do not edit
--y|-n               reload or do not reload after create/edit""" % (progName, progName)
+-c                  Create event file. Do not start editor.
+-y                  Reload after create/edit.""" % d
 
 if __name__ == "__main__":
-    args = sys.argv[1:]
-    createOnly = False
-    reload = None
+    try:
+        createonly = False
+        reloadevents = False
+        paths = None
 
-    # parse command line
-    while args:
-        arg = args.pop(0)
+        args = sys.argv[1:]
+        while args:
+            arg = args.pop(0)
 
-        if arg in [ "-h", "--help" ]:
-            print_usage(PROG_NAME)
-            sys.exit(0)
-        elif arg in [ "-y" ]:
-            reload = True
-        elif arg in [ "-n" ]:
-            reload = False
-        elif arg in [ "-c" ]:
-            createOnly = True
-        else:
-            args.insert(0, arg)
-            break
+            if arg == "-c":
+                createonly = True
+            elif arg == "-y":
+                reloadevents = True
+            elif arg in ["-h", "--help"]:
+                print_usage()
+                sys.exit(0)
+            else:
+                args.insert(0, arg)
+                paths = [arg]+args
+                del args[:]
 
-    paths = args
-
-    if len(paths) < 1:
-        print_usage(PROG_NAME)
-        sys.exit(-1)
+        if paths == None:
+            raise Exception()
+    except SystemExit:
+        raise
+    except:
+        stderr.write("error: bad/missing arguments\n")
+        sys.exit(1)
 
     for path in paths:
         try:
@@ -85,24 +88,22 @@ if __name__ == "__main__":
                 f.write(HCRON_EVENT_DEFINITION)
                 f.close()
 
-            if not createOnly:
-                subprocess.call([ EDITOR, path ])
+            if not createonly:
+                subprocess.call([EDITOR, path])
 
         except Exception, detail:
-            print "Error: Problem creating/opening event file (%s)." % path
-            sys.exit(-1)
+            stderr.write("error: problem creating/opening event file (%s)\n" % path)
+            sys.exit(1)
 
-    if reload in [ None, True ]:
-        try:
-            if reload == True or raw_input("Reload events (y/n)? ") in [ "y" ]:
-                signal_reload()
-                now = datetime.datetime.now()
-                next_interval = (now+datetime.timedelta(seconds=60)).replace(second=0,microsecond=0)
-                print "Reload signalled for machine (%s) at next interval (%s; in %ss)." % (HOST_NAME, next_interval, (next_interval-now).seconds)
-            else:
-                print "Reload deferred."
-    
-        except Exception, detail:
-            #print detail
-            sys.exit(-1)
-
+    try:
+        if reloadevents or raw_input("reload events (y/n)? ") == "y":
+            signal_reload()
+            now = datetime.datetime.now()
+            next_interval = (now+datetime.timedelta(seconds=60)).replace(second=0,microsecond=0)
+            print "Reload signalled for machine (%s) at next interval (%s; in %ss)." % (HOST_NAME, next_interval, (next_interval-now).seconds)
+        else:
+            print "Reload deferred."
+    except Exception, detail:
+        stderr.write("error: could not reload\n")
+        #print detail
+        sys.exit(1)
