@@ -43,7 +43,7 @@ import threading
 # app imports
 from hcron.constants import *
 from hcron import globls
-from hcron.event import EventListList, handle_jobs, enqueue_ondemand_jobs
+from hcron.event import EventListList
 from hcron.file import AllowedUsersFile, ConfigFile, PidFile, SignalHome
 from hcron import library
 from hcron.logger import *
@@ -154,7 +154,7 @@ if __name__ == "__main__":
     globls.pidFile.create()
 
     try:
-        odth = threading.Thread(target=enqueue_ondemand_jobs, args=(globls.server,))
+        odth = threading.Thread(target=globls.server.jobq.enqueue_ondemand_jobs)
         odth.daemon = True
         odth.start()
 

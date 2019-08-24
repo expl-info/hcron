@@ -27,7 +27,6 @@
 # system imports
 from datetime import timedelta
 import os
-import Queue
 import sys
 import threading
 from time import sleep, time
@@ -35,15 +34,16 @@ from time import sleep, time
 # app imports
 from hcron.constants import *
 from hcron import globls
-from hcron.event import EventListList, handle_jobs, reload_events
+from hcron.event import EventListList, reload_events
+from hcron.job import JobQueue
 from hcron.library import date_to_bitmasks
 from hcron.logger import *
 
 class Server:
 
     def __init__(self):
-        self.jobq = Queue.Queue(globls.config.get().get("jobq_size", JOBQ_SIZE))
-        self.jobqth = threading.Thread(target=handle_jobs, args=(self,))
+        self.jobq = JobQueue()
+        self.jobqth = threading.Thread(target=self.jobq.handle_jobs)
         self.jobqth.daemon = True
         self.jobqth.start()
 

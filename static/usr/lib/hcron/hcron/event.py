@@ -26,12 +26,9 @@
 
 # system imports
 from datetime import datetime
-import errno
 import fnmatch
 import os
 import os.path
-import pwd
-import Queue
 import re
 import socket
 import stat
@@ -40,7 +37,6 @@ import time
 import traceback
 
 # app imports
-from hcron.clock import Clock
 from hcron.constants import *
 from hcron import globls
 from hcron.hcrontree import HcronTreeCache, create_user_hcron_tree_file, install_hcron_tree_file
@@ -121,93 +117,6 @@ def handle_event(triggername, event, sched_datetime):
 
             event = nextEvent
 
-def handle_jobs(server):
-    """Read jobs from jobq. Each job is given as
-    (triggername, event, schedtime). This function is run in a
-    separate thread.
-
-    handle_event() is called for each event to run in an independent
-    forked process.
-
-    The main/parent process spawns a process for each event. Each
-    event (with its chained events) runs in its own process. This
-    allows Event to be simple (i.e., no process management, chain
-    management).
-
-    Process management (parent): we can regulate the number of
-    processes running from here, based on the number of children.
-
-    Chain management (child): we can track and call chain events
-    from here based on the return values of the event.activate.
-    """
-    def reap_children(childPids):
-        if not childPids:
-            return
-
-        while 1:
-            try:
-                pid, status = os.waitpid(-1, os.WNOHANG)
-                if (pid, status) == (0, 0):
-                    break
-                del childPids[pid]
-            except OSError, detail:
-                if detail.errno == errno.ECHILD:
-                    childPids.clear()
-                    break
-
-    childPids = {}
-    max_activated_events = max(globls.config.get().get("max_activated_events", CONFIG_MAX_ACTIVATED_EVENTS), 1)
-
-    while True:
-        try:
-            reap_children(childPids)
-            job = server.jobq.get(timeout=5)
-            triggername, event, sched_datetime = job
-        except Queue.Empty:
-            continue
-        except Exception, detail:
-            if server.jobq != None:
-                log_message("error", "Unexpected exception (%s)." % str(detail))
-            return
-
-        while len(childPids) >= max_activated_events:
-            # reap 1+ child processes
-            try:
-                # block-wait for one
-                pid, status = os.waitpid(-1, 0)
-                while pid != 0:
-                    del childPids[pid]
-                    # opportunistic clean up others without waiting
-                    pid, status = os.waitpid(-1, os.WNOHANG)
-            except OSError, detail:
-                log_message("warning", "Unexpected exception (%s)." % str(detail))
-                if detail.errno == errno.ECHILD:
-                    childPids.clear()
-            except Exception, detail:
-                traceback.print_exc()
-                log_message("error", "Unexpected exception (%s)." % str(detail))
-
-        pid = os.fork()
-        childPids[pid] = None
-
-        if pid == 0:
-            # child
-            handle_event(triggername, event, sched_datetime)
-            os._exit(0)
-        else:
-            # parent
-            pass
-
-        if 0:
-            # reap remaining child processes
-            while childPids:
-                try:
-                    pid, status = os.waitpid(-1, 0)
-                    del childPids[pid]
-                except Exception, detail:
-                    traceback.print_exc()
-                    log_message("error", "Unexpected exception (%s)." % str(detail))
-
 def reload_events(signalHomeMtime):
     """Reload events for all users whose signal file mtime is <= to
     that of the signal home directory. Any signal files that are
@@ -236,56 +145,6 @@ def reload_events(signalHomeMtime):
                 os.remove(path) # remove singles and multiples
             except Exception, detail:
                 log_message("warning", "Could not remove signal file (%s)." % path)
-
-def enqueue_ondemand_jobs(server):
-    """Queue up on demand jobs.
-
-    TODO: track if a file without a sentinel has been around for
-    many iterations.
-    """
-    clock = Clock()
-
-    while True:
-        clock.set(None)
-        for filename in sorted(os.listdir(HCRON_ONDEMAND_HOME)):
-            try:
-                path = os.path.join(HCRON_ONDEMAND_HOME, filename)
-                st = os.stat(path)
-                uid = st[stat.ST_UID]
-                username = pwd.getpwuid(uid).pw_name
-                log_message("debug", "filename (%s) user (%s) path (%s)" % (filename, username, path))
-
-                if st.st_size > 4096:
-                    # too long
-                    log_message("error", "filename (%s) user (%s) too big (%s)" % (filename, user, st.st_size))
-                    raise Exception()
-
-                eventname = open(path).read(4096)
-                if not eventname.endswith("\n"):
-                    # no sentinel; skip it
-                    log_message("debug", "skipping filename (%s) user (%s) path (%s)" % (filename, username, path))
-                    path = None
-                    continue
-
-                eventname = eventname.strip()
-                eventlist = globls.eventListList.get(username)
-                if not eventlist:
-                    log_message("error", "Cannot find eventlist for user (%s)" % username)
-                    raise Exception()
-
-                event = eventlist.get(eventname)
-                if not event:
-                    log_message("error", "Cannot find event by name (%s)" % eventname)
-                    raise Exception()
-
-                server.jobq.put(("ondemand", event, clock.now()))
-                log_message("info", "Queued ondemand event (%s)" % eventname)
-            except:
-                log_message("warning", "Failed to queue ondemand event (%s)" % eventname)
-            finally:
-                if path:
-                    os.remove(path)
-        time.sleep(ENQUEUE_ONDEMAND_DELAY)
 
 class CannotLoadFileException(Exception):
     pass
