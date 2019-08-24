@@ -38,7 +38,6 @@ import os.path
 import pprint
 import signal
 from sys import stderr
-import threading
 
 # app imports
 from hcron.constants import *
@@ -154,10 +153,6 @@ if __name__ == "__main__":
     globls.pidFile.create()
 
     try:
-        odth = threading.Thread(target=globls.server.jobq.enqueue_ondemand_jobs)
-        odth.daemon = True
-        odth.start()
-
         log_start()
         globls.server.run(immediate=immediate)
     except Exception, detail:

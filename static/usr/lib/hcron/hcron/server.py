@@ -43,9 +43,14 @@ class Server:
 
     def __init__(self):
         self.jobq = JobQueue()
+
         self.jobqth = threading.Thread(target=self.jobq.handle_jobs)
         self.jobqth.daemon = True
         self.jobqth.start()
+
+        self.odth = threading.Thread(target=self.jobq.enqueue_ondemand_jobs)
+        self.odth.daemon = True
+        self.odth.start()
 
     def __del__(self):
         # will trigger jobqth to exit
