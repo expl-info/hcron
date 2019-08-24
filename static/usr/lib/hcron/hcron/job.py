@@ -38,11 +38,12 @@ from hcron.logger import *
 
 class Job:
 
-	def __init__(self):
-		self.jobid = None
-		self.triggername = None
-		self.eventname = None
-		self.schedtime = None
+    def __init__(self):
+        self.jobid = None
+        self.event = None
+        self.eventname = None
+        self.sched_datetime = None
+        self.triggername = None
 
 class JobQueue:
 
@@ -90,7 +91,12 @@ class JobQueue:
                         log_message("error", "Cannot find event by name (%s)" % eventname)
                         raise Exception()
 
-                    self.q.put(("ondemand", event, clock.now()))
+                    job = Job()
+                    job.triggername = "ondemand"
+                    job.event = event
+                    job.eventname = event.name
+                    job.sched_datetime = clock.now()
+                    self.q.put(job)
                     log_message("info", "Queued ondemand event (%s)" % eventname)
                 except:
                     log_message("warning", "Failed to queue ondemand event (%s)" % eventname)
@@ -103,8 +109,7 @@ class JobQueue:
         return self.q.get(*args, **kwargs)
 
     def handle_jobs(self):
-        """Read jobs from the job queue. Each job is given as
-        (triggername, event, schedtime). This function is run in a
+        """Read jobs from the job queue. This function is run in a
         separate thread.
 
         handle_event() is called for each event to run in an independent
@@ -143,7 +148,6 @@ class JobQueue:
             try:
                 reap_children(childPids)
                 job = self.q.get(timeout=5)
-                triggername, event, sched_datetime = job
             except Queue.Empty:
                 continue
             except Exception, detail:
@@ -173,7 +177,7 @@ class JobQueue:
 
             if pid == 0:
                 # child
-                handle_event(triggername, event, sched_datetime)
+                handle_event(job.triggername, job.event, job.sched_datetime)
                 os._exit(0)
             else:
                 # parent

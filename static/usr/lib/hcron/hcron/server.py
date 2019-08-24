@@ -35,7 +35,7 @@ from time import sleep, time
 from hcron.constants import *
 from hcron import globls
 from hcron.event import EventListList, reload_events
-from hcron.job import JobQueue
+from hcron.job import Job, JobQueue
 from hcron.library import date_to_bitmasks
 from hcron.logger import *
 
@@ -126,5 +126,10 @@ class Server:
         events = globls.eventListList.test(datemasks)
         if events:
             for event in events:
-                self.jobq.put((triggername, event, now))
+                job = Job()
+                job.triggername = triggername
+                job.event = event
+                job.eventname = event.name
+                job.sched_datetime = now
+                self.jobq.put(job)
         log_work(len(events), (time()-t0))
