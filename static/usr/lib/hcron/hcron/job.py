@@ -97,7 +97,7 @@ class JobQueue:
                     job.eventname = event.name
                     job.sched_datetime = clock.now()
                     self.q.put(job)
-                    log_message("info", "Queued ondemand event (%s)" % eventname)
+                    log_queue(job.triggername, job.event.userName, job.eventname, job.sched_datetime)
                 except:
                     log_message("warning", "Failed to queue ondemand event (%s)" % eventname)
                 finally:

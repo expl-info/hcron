@@ -107,6 +107,9 @@ def log_message(typ, msg, user_name=""):
 def log_notify_email(userName, addrs, eventName):
     log_any("notify-email", userName, addrs, eventName)
 
+def log_queue(triggername, username, eventname, queuetime):
+    log_any("queue", triggername, username, eventname, queuetime)
+
 def log_sleep(seconds):
     log_any("sleep", "", seconds)
 
