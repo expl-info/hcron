@@ -36,10 +36,46 @@ from hcron import globls
 from hcron.event import handle_event
 from hcron.logger import *
 
+class Jobid:
+    """Job id consisting of <48-bit time><16-bit counter>.
+    """
+
+    def __init__(self, tm, counter):
+        self.tm = tm
+        self.counter = counter
+        self.value = (tm << 16)+counter
+
+    def __str__(self):
+        return "%x" % self.value
+
+class JobidGenerator:
+    """Generates unique job ids based on the time since epoch and a
+    resetting 16-bit counter to produce a 64-bit number:
+        <48-bit time><16-bit counter>
+    """
+
+    def __init__(self):
+        self.counter = 0
+        self.lasttm = 0
+
+    def next(self):
+        tm = int(time.time())
+        if tm == self.lasttm:
+            self.counter += 1
+            if self.counter > 65500:
+                # very unlikely, this is a problem!
+                pass
+        else:
+            self.lasttm = tm
+            self.counter = 0
+        return Jobid(tm, self.counter)
+
+jobidgen = JobidGenerator()
+
 class Job:
 
     def __init__(self):
-        self.jobid = None
+        self.jobid = jobidgen.next()
         self.event = None
         self.eventname = None
         self.sched_datetime = None
@@ -97,7 +133,7 @@ class JobQueue:
                     job.eventname = event.name
                     job.sched_datetime = clock.now()
                     self.q.put(job)
-                    log_queue(job.triggername, job.event.userName, job.eventname, job.sched_datetime)
+                    log_queue(job.jobid, job.triggername, job.event.userName, job.eventname, job.sched_datetime)
                 except:
                     log_message("warning", "Failed to queue ondemand event (%s)" % eventname)
                 finally:

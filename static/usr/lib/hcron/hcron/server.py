@@ -131,6 +131,6 @@ class Server:
                 job.event = event
                 job.eventname = event.name
                 job.sched_datetime = now
-                log_queue(job.triggername, job.event.userName, job.eventname, job.sched_datetime)
+                log_queue(job.jobid, job.triggername, job.event.userName, job.eventname, job.sched_datetime)
                 self.jobq.put(job)
         log_work(len(events), (time()-t0))
