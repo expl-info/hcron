@@ -66,18 +66,12 @@ def remote_execute(eventName, localUserName, remoteUserName, remoteHostName, com
     """Securely execute a command at remoteUserName@remoteHostName from
     localUserName@localhost within timeout time.
 
-    Two approaches are coded below:
-        1) poll+sleep
-        2) signal+wait
-
-    childPid is a module global, accessible to the alarm_handler.
+    A poll+sleep approach is used.
 
     Return values:
     0   okay
     -1  error/failure
     """
-    global childPid
-
     # setup
     config = globls.config.get()
     allow_localhost = config.get("allow_localhost", CONFIG_ALLOW_LOCALHOST) 
@@ -89,7 +83,9 @@ def remote_execute(eventName, localUserName, remoteUserName, remoteHostName, com
     command = command.strip()
     spawn_starttime = time.time()
 
-    retVal = 0
+    childPid = 0
+
+    rv = 0
     if globls.remote_execute_enabled:
         # validate
         if remoteHostName in LOCAL_HOST_NAMES and not allow_localhost:
@@ -105,7 +101,7 @@ def remote_execute(eventName, localUserName, remoteUserName, remoteHostName, com
             raise RemoteExecuteException("Unknown remote shell type (%s)." % remote_shell_type)
 
         # spawn
-        retVal = -1
+        rv = -1
         if command != "":
             try:
                 args = [ remote_shell_exec, "-f", "-n", "-t", "-l", remoteUserName, remoteHostName, command ]
@@ -113,58 +109,37 @@ def remote_execute(eventName, localUserName, remoteUserName, remoteHostName, com
                 childPid = os.fork()
 
                 if childPid == 0:
-                    #
-                    # child
-                    #
+                    ### child
                     try:
                         os.setuid(localUid)
                         os.setsid()
                         os.execv(args[0], args)
-                        #retVal = subprocess.call(args)
                     except (OSError, Exception), detail:
-                        os._exit(256)
-                        retVal = 256
-
-                    os._exit(retVal)
+                        rv = 256
+                    os._exit(rv)
 
                     # NEVER REACHES HERE
 
-                #
-                # parent
-                #
-                if 0:
-                    # poll and wait
-                    while timeout > 0:
-                        waitPid, waitStatus = os.waitpid(childPid, os.WNOHANG)
+                ### parent
+                # poll and wait
+                while timeout > 0:
+                    waitPid, waitStatus = os.waitpid(childPid, os.WNOHANG)
+                    if waitPid != 0:
+                        break
 
-                        #if waitPid != 0 and os.WIFEXITED(waitStatus):
-                        if waitPid != 0:
-                            break
-
-                        time.sleep(0.01)
-                        timeout -= 0.01
-
-                    else:
-                        os.kill(childPid, signal.SIGKILL)
-
+                    time.sleep(0.01)
+                    timeout -= 0.01
                 else:
-                    # signal and wait
-                    signal.signal(signal.SIGALRM, alarm_handler)
-                    signal.alarm(timeout)
-                    waitPid, waitStatus = os.waitpid(childPid, 0)
-                    signal.signal(signal.SIGALRM, signal.SIG_IGN) # cancel alarm
+                    os.kill(childPid, signal.SIGKILL)
 
                 if os.WIFSIGNALED(waitStatus):
-                    retVal = -2
-
+                    rv = -2
                 elif os.WIFEXITED(waitStatus):
-                    retVal = (os.WEXITSTATUS(waitStatus) == 255) and -1 or 0
-
+                    rv = (os.WEXITSTATUS(waitStatus) == 255) and -1 or 0
             except Exception, detail:
                 log_message("error", "Execute failed (%s)." % detail)
 
     spawn_endtime = time.time()
-    log_execute(localUserName, remoteUserName, remoteHostName, eventName, childPid, spawn_endtime-spawn_starttime, retVal)
+    log_execute(localUserName, remoteUserName, remoteHostName, eventName, childPid, spawn_endtime-spawn_starttime, rv)
 
-    return retVal
-
+    return rv

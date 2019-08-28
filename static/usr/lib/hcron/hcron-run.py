@@ -38,9 +38,10 @@ import traceback
 from hcron import constants
 from hcron import globls
 from hcron import event
-from hcron.event import EventList, EventListList, handle_event
+from hcron.event import EventList, EventListList
 from hcron.file import ConfigFile
 from hcron import hcrontree
+from hcron.job import handle_event
 from hcron.logger import *
 from hcron.library import date_to_bitmasks
 

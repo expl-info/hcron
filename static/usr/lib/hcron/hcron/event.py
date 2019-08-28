@@ -43,6 +43,7 @@ from hcron.hcrontree import HcronTreeCache, create_user_hcron_tree_file, install
 from hcron.library import WHEN_BITMASKS, WHEN_INDEXES, WHEN_MIN_MAX, list_st_to_bitmask
 from hcron.notify import send_email_notification
 from hcron.execute import remote_execute
+from hcron.job import Job
 from hcron.logger import *
 from hcron import fspwd as pwd
 
@@ -75,47 +76,6 @@ def signal_reload(unload=False):
         tempfile.mkstemp(prefix=userName, dir=signalHome)
     except:
         raise Exception("Error: Could not signal for reload.")
-
-def handle_event(triggername, event, sched_datetime):
-    """Handle a single event and related/followon chain events
-    according to the event(s) defined.
-    """
-    max_chain_events = max(globls.config.get().get("max_chain_events", CONFIG_MAX_CHAIN_EVENTS), 1)
-
-    eventChainNames = []
-    while event:
-        eventChainNames.append(event.get_name())
-
-        #log_message("info", "Processing event (%s)." % event.get_name())
-        try:
-            # None, next_event, or failover_event is returned
-            nextEventName, nextEventType = event.activate(triggername, eventChainNames, sched_datetime=sched_datetime)
-        except Exception, detail:
-            log_message("error", "handle_events (%s)" % detail, user_name=event.userName)
-            nextEventName, nextEventType = None, None
-
-        if nextEventName == None:
-            break
-
-        log_chain_events(event.userName, event.get_name(), nextEventName, nextEventType, eventChainNames, cycleDetected=(nextEventName in eventChainNames))
-
-        # allow cycles up to a limit
-        #if nextEventName in eventChainNames:
-        if len(eventChainNames) >= max_chain_events:
-            log_message("error", "Event chain limit (%s) reached at (%s)." % (max_chain_events, nextEventName), user_name=event.userName)
-            break
-        else:
-            eventList = globls.eventListList.get(event.userName)
-            nextEvent = eventList and eventList.get(nextEventName)
-
-            # problem cases for nextEvent
-            if nextEvent == None:
-                log_message("error", "Chained event (%s) does not exist." % nextEventName, user_name=event.userName)
-            elif nextEvent.assignments == None and nextEvent.reason not in [ None, "template" ]:
-                log_message("error", "Chained event (%s) was rejected (%s)." % (nextEventName, nextEvent.reason), user_name=event.userName)
-                nextEvent = None
-
-            event = nextEvent
 
 def reload_events(signalHomeMtime):
     """Reload events for all users whose signal file mtime is <= to
