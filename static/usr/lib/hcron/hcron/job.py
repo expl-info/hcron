@@ -36,52 +36,6 @@ from hcron import globls
 from hcron.logger import *
 from hcron.threadpool import ThreadPool
 
-def handle_job(triggername, event, eventchainnames, sched_datetime):
-    """Handle a single job and queue related/followon chain jobs
-    according to the event(s) defined.
-    """
-    max_chain_events = max(globls.config.get().get("max_chain_events", CONFIG_MAX_CHAIN_EVENTS), 1)
-
-    if eventchainnames:
-        eventChainNames = eventchainnames.split(":")
-    else:
-        eventChainNames = []
-    eventChainNames.append(event.get_name())
-
-    #log_message("info", "Processing event (%s)." % event.get_name())
-    try:
-        # None, next_event, or failover_event is returned
-        nextEventName, nextEventType = event.activate(triggername, eventChainNames, sched_datetime=sched_datetime)
-    except Exception, detail:
-        log_message("error", "handle_job (%s)" % detail, user_name=event.userName)
-        nextEventName, nextEventType = None, None
-
-    if nextEventName:
-        if len(eventChainNames) >= max_chain_events:
-            log_message("error", "Event chain limit (%s) reached at (%s)." % (max_chain_events, nextEventName), user_name=event.userName)
-            return
-
-        log_chain_events(event.userName, event.get_name(), nextEventName, nextEventType, eventChainNames, cycleDetected=(nextEventName in eventChainNames))
-
-        eventList = globls.eventListList.get(event.userName)
-        nextEvent = eventList and eventList.get(nextEventName)
-
-        # problem cases for nextEvent
-        if nextEvent == None:
-            log_message("error", "Chained event (%s) does not exist." % nextEventName, user_name=event.userName)
-        elif nextEvent.assignments == None and nextEvent.reason not in [ None, "template" ]:
-            log_message("error", "Chained event (%s) was rejected (%s)." % (nextEventName, nextEvent.reason), user_name=event.userName)
-            nextEvent = None
-
-        job = Job()
-        job.triggername = nextEventType
-        job.event = nextEvent
-        job.eventname = nextEventName
-        job.eventchainnames = ":".join(eventChainNames)
-        job.sched_datetime = globls.clock.now()
-        globls.server.jobq.put(job)
-        log_queue(job.jobid, job.triggername, job.event.userName, job.eventname, job.eventchainnames, job.sched_datetime)
-
 class Jobid:
     """Job id consisting of <48-bit time><16-bit counter>.
     """
@@ -192,6 +146,52 @@ class JobQueue:
     def get(self, *args, **kwargs):
         return self.q.get(*args, **kwargs)
 
+    def handle_job(self, triggername, event, eventchainnames, sched_datetime):
+        """Handle a single job and queue related/followon chain jobs
+        according to the event(s) defined.
+        """
+        max_chain_events = max(globls.config.get().get("max_chain_events", CONFIG_MAX_CHAIN_EVENTS), 1)
+
+        if eventchainnames:
+            eventChainNames = eventchainnames.split(":")
+        else:
+            eventChainNames = []
+        eventChainNames.append(event.get_name())
+
+        #log_message("info", "Processing event (%s)." % event.get_name())
+        try:
+            # None, next_event, or failover_event is returned
+            nextEventName, nextEventType = event.activate(triggername, eventChainNames, sched_datetime=sched_datetime)
+        except Exception, detail:
+            log_message("error", "handle_job (%s)" % detail, user_name=event.userName)
+            nextEventName, nextEventType = None, None
+
+        if nextEventName:
+            if len(eventChainNames) >= max_chain_events:
+                log_message("error", "Event chain limit (%s) reached at (%s)." % (max_chain_events, nextEventName), user_name=event.userName)
+                return
+
+            log_chain_events(event.userName, event.get_name(), nextEventName, nextEventType, eventChainNames, cycleDetected=(nextEventName in eventChainNames))
+
+            eventList = globls.eventListList.get(event.userName)
+            nextEvent = eventList and eventList.get(nextEventName)
+
+            # problem cases for nextEvent
+            if nextEvent == None:
+                log_message("error", "Chained event (%s) does not exist." % nextEventName, user_name=event.userName)
+            elif nextEvent.assignments == None and nextEvent.reason not in [ None, "template" ]:
+                log_message("error", "Chained event (%s) was rejected (%s)." % (nextEventName, nextEvent.reason), user_name=event.userName)
+                nextEvent = None
+
+            job = Job()
+            job.triggername = nextEventType
+            job.event = nextEvent
+            job.eventname = nextEventName
+            job.eventchainnames = ":".join(eventChainNames)
+            job.sched_datetime = globls.clock.now()
+            self.q.put(job)
+            log_queue(job.jobid, job.triggername, job.event.userName, job.eventname, job.eventchainnames, job.sched_datetime)
+
     def handle_jobs(self):
         max_activated_events = max(globls.config.get().get("max_activated_events", CONFIG_MAX_ACTIVATED_EVENTS), 1)
         tp = ThreadPool(max_activated_events)
@@ -200,7 +200,7 @@ class JobQueue:
             try:
                 job = self.q.get(timeout=5)
                 if job:
-                    tp.add(None, handle_job, args=(job.triggername, job.event, job.eventchainnames, job.sched_datetime))
+                    tp.add(None, self.handle_job, args=(job.triggername, job.event, job.eventchainnames, job.sched_datetime))
                 while tp.has_done():
                     res = tp.reap()
             except Queue.Empty:
