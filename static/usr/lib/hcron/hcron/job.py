@@ -36,8 +36,8 @@ from hcron import globls
 from hcron.logger import *
 from hcron.threadpool import ThreadPool
 
-def handle_event(triggername, event, eventchainnames, sched_datetime):
-    """Handle a single event and queue related/followon chain events
+def handle_job(triggername, event, eventchainnames, sched_datetime):
+    """Handle a single job and queue related/followon chain jobs
     according to the event(s) defined.
     """
     max_chain_events = max(globls.config.get().get("max_chain_events", CONFIG_MAX_CHAIN_EVENTS), 1)
@@ -53,7 +53,7 @@ def handle_event(triggername, event, eventchainnames, sched_datetime):
         # None, next_event, or failover_event is returned
         nextEventName, nextEventType = event.activate(triggername, eventChainNames, sched_datetime=sched_datetime)
     except Exception, detail:
-        log_message("error", "handle_events (%s)" % detail, user_name=event.userName)
+        log_message("error", "handle_job (%s)" % detail, user_name=event.userName)
         nextEventName, nextEventType = None, None
 
     if nextEventName:
@@ -200,7 +200,7 @@ class JobQueue:
             try:
                 job = self.q.get(timeout=5)
                 if job:
-                    tp.add(None, handle_event, args=(job.jobid, job.triggername, job.event, job.eventchainnames, job.sched_datetime))
+                    tp.add(None, handle_job, args=(job.triggername, job.event, job.eventchainnames, job.sched_datetime))
                 while tp.has_done():
                     res = tp.reap()
             except Queue.Empty:
