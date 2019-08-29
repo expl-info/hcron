@@ -544,7 +544,11 @@ class Event:
             nextEventName, nextEventType = event_failover_event, "failover"
 
         # handle None, "", and valid string
-        nextEventName = nextEventName and self.resolve_event_name_to_name(self.name, nextEventName.strip()) or None
+        if nextEventName:
+            names = []
+            for name in nextEventName.split(":"):
+                names.append(self.resolve_event_name_to_name(self.name, name.strip()))
+            nextEventName = ":".join(names)
         nextEventType = nextEventName and nextEventType or None
 
         return nextEventName, nextEventType

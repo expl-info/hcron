@@ -179,26 +179,27 @@ class JobQueue:
                 log_message("error", "Event chain limit (%s) reached at (%s)." % (max_chain_events, nextEventName), user_name=event.userName)
                 return
 
-            log_chain_events(event.userName, event.get_name(), nextEventName, nextEventType, eventChainNames, cycleDetected=(nextEventName in eventChainNames))
+            for _nexteventname in nextEventName.split(":"):
+                log_chain_events(event.userName, event.get_name(), _nexteventname, nextEventType, eventChainNames, cycleDetected=(_nexteventname in eventChainNames))
 
-            eventList = globls.eventListList.get(event.userName)
-            nextEvent = eventList and eventList.get(nextEventName)
+                eventList = globls.eventListList.get(event.userName)
+                nextEvent = eventList and eventList.get(_nexteventname)
 
-            # problem cases for nextEvent
-            if nextEvent == None:
-                log_message("error", "Chained event (%s) does not exist." % nextEventName, user_name=event.userName)
-            elif nextEvent.assignments == None and nextEvent.reason not in [ None, "template" ]:
-                log_message("error", "Chained event (%s) was rejected (%s)." % (nextEventName, nextEvent.reason), user_name=event.userName)
-                nextEvent = None
+                # problem cases for nextEvent
+                if nextEvent == None:
+                    log_message("error", "Chained event (%s) does not exist." % _nexteventname, user_name=event.userName)
+                elif nextEvent.assignments == None and nextEvent.reason not in [ None, "template" ]:
+                    log_message("error", "Chained event (%s) was rejected (%s)." % (_nexteventname, nextEvent.reason), user_name=event.userName)
+                    nextEvent = None
 
-            nextjob = Job(job.jobid)
-            nextjob.triggername = nextEventType
-            nextjob.event = nextEvent
-            nextjob.eventname = nextEventName
-            nextjob.eventchainnames = ":".join(eventChainNames)
-            nextjob.sched_datetime = globls.clock.now()
-            self.q.put(nextjob)
-            log_queue(nextjob.jobid, nextjob.jobgid, nextjob.triggername, nextjob.event.userName, nextjob.eventname, nextjob.eventchainnames, nextjob.sched_datetime)
+                nextjob = Job(job.jobid)
+                nextjob.triggername = nextEventType
+                nextjob.event = nextEvent
+                nextjob.eventname = _nexteventname
+                nextjob.eventchainnames = ":".join(eventChainNames)
+                nextjob.sched_datetime = globls.clock.now()
+                self.q.put(nextjob)
+                log_queue(nextjob.jobid, nextjob.jobgid, nextjob.triggername, nextjob.event.userName, nextjob.eventname, nextjob.eventchainnames, nextjob.sched_datetime)
 
     def handle_jobs(self):
         max_activated_events = max(globls.config.get().get("max_activated_events", CONFIG_MAX_ACTIVATED_EVENTS), 1)
