@@ -146,14 +146,16 @@ class JobQueue:
     def get(self, *args, **kwargs):
         return self.q.get(*args, **kwargs)
 
-    def handle_job(self, triggername, event, eventchainnames, sched_datetime):
+    def handle_job(self, job):
         """Handle a single job and queue related/followon chain jobs
         according to the event(s) defined.
         """
+        event = job.event
+
         max_chain_events = max(globls.config.get().get("max_chain_events", CONFIG_MAX_CHAIN_EVENTS), 1)
 
-        if eventchainnames:
-            eventChainNames = eventchainnames.split(":")
+        if job.eventchainnames:
+            eventChainNames = job.eventchainnames.split(":")
         else:
             eventChainNames = []
         eventChainNames.append(event.get_name())
@@ -161,7 +163,7 @@ class JobQueue:
         #log_message("info", "Processing event (%s)." % event.get_name())
         try:
             # None, next_event, or failover_event is returned
-            nextEventName, nextEventType = event.activate(triggername, eventChainNames, sched_datetime=sched_datetime)
+            nextEventName, nextEventType = event.activate(job.triggername, eventChainNames, sched_datetime=job.sched_datetime)
         except Exception, detail:
             log_message("error", "handle_job (%s)" % detail, user_name=event.userName)
             nextEventName, nextEventType = None, None
@@ -183,14 +185,14 @@ class JobQueue:
                 log_message("error", "Chained event (%s) was rejected (%s)." % (nextEventName, nextEvent.reason), user_name=event.userName)
                 nextEvent = None
 
-            job = Job()
-            job.triggername = nextEventType
-            job.event = nextEvent
-            job.eventname = nextEventName
-            job.eventchainnames = ":".join(eventChainNames)
-            job.sched_datetime = globls.clock.now()
-            self.q.put(job)
-            log_queue(job.jobid, job.triggername, job.event.userName, job.eventname, job.eventchainnames, job.sched_datetime)
+            nextjob = Job()
+            nextjob.triggername = nextEventType
+            nextjob.event = nextEvent
+            nextjob.eventname = nextEventName
+            nextjob.eventchainnames = ":".join(eventChainNames)
+            nextjob.sched_datetime = globls.clock.now()
+            self.q.put(nextjob)
+            log_queue(nextjob.jobid, nextjob.triggername, nextjob.event.userName, nextjob.eventname, nextjob.eventchainnames, nextjob.sched_datetime)
 
     def handle_jobs(self):
         max_activated_events = max(globls.config.get().get("max_activated_events", CONFIG_MAX_ACTIVATED_EVENTS), 1)
@@ -200,7 +202,7 @@ class JobQueue:
             try:
                 job = self.q.get(timeout=5)
                 if job:
-                    tp.add(None, self.handle_job, args=(job.triggername, job.event, job.eventchainnames, job.sched_datetime))
+                    tp.add(None, self.handle_job, args=(job,))
                 while tp.has_done():
                     res = tp.reap()
             except Queue.Empty:
