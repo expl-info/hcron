@@ -41,7 +41,7 @@ from sys import stderr
 
 # app imports
 from hcron.constants import *
-from hcron import globls
+from hcron import globs
 from hcron.event import EventListList
 from hcron.file import AllowedUsersFile, ConfigFile, PidFile, SignalHome
 from hcron import library
@@ -55,7 +55,7 @@ def dump_signal_handler(num, frame):
 
     # config
     try:
-        config = globls.config.get()
+        config = globs.config.get()
         f = open(HCRON_CONFIG_DUMP_PATH, "w+")
         f.write(pp.pformat(config))
         f.close()
@@ -65,7 +65,7 @@ def dump_signal_handler(num, frame):
 
     # allowed users
     try:
-        allowedUsers = globls.allowedUsers.get()
+        allowedUsers = globs.allowedUsers.get()
         f = open(HCRON_ALLOWED_USERS_DUMP_PATH, "w+")
         f.write("\n".join(allowedUsers))
         f.close()
@@ -74,8 +74,8 @@ def dump_signal_handler(num, frame):
             f.close()
 
     # event list
-    ell = globls.eventListList
-    for userName in globls.allowedUsers.get():
+    ell = globs.eventListList
+    for userName in globs.allowedUsers.get():
         el = ell.eventLists.get(userName)
         if el:
             el.dump()
@@ -83,11 +83,11 @@ def dump_signal_handler(num, frame):
 def reload_signal_handler(num, frame):
     log_message("info", "Received signal to reload.")
     signal.signal(num, reload_signal_handler)
-    globls.eventListList.load(globls.allowedUsers.get())
+    globs.eventListList.load(globs.allowedUsers.get())
 
 def quit_signal_handler(num, frame):
     log_message("info", "Received signal to exit.")
-    globls.pidFile.remove()
+    globs.pidFile.remove()
     sys.exit(0)
 
 def print_usage():
@@ -131,14 +131,14 @@ if __name__ == "__main__":
     #
     # setup
     #
-    globls.remote_execute_enabled = True
-    globls.email_notify_enabled = True
+    globs.remote_execute_enabled = True
+    globs.email_notify_enabled = True
 
-    globls.config = ConfigFile(HCRON_CONFIG_PATH)
+    globs.config = ConfigFile(HCRON_CONFIG_PATH)
     setup_logger()
-    globls.allowedUsers = AllowedUsersFile(HCRON_ALLOW_PATH)
-    globls.signalHome = SignalHome(HCRON_SIGNAL_HOME)
-    globls.eventListList = EventListList(globls.allowedUsers.get())
+    globs.allowedUsers = AllowedUsersFile(HCRON_ALLOW_PATH)
+    globs.signalHome = SignalHome(HCRON_SIGNAL_HOME)
+    globs.eventListList = EventListList(globs.allowedUsers.get())
 
     signal.signal(signal.SIGHUP, reload_signal_handler)
     #signal.signal(signal.SIGUSR1, dump_signal_handler)
@@ -148,13 +148,13 @@ if __name__ == "__main__":
 
     library.serverize()  # don't catch SystemExit
 
-    globls.server = Server()
-    globls.pidFile = PidFile(HCRON_PID_FILE_PATH)
-    globls.pidFile.create()
+    globs.server = Server()
+    globs.pidFile = PidFile(HCRON_PID_FILE_PATH)
+    globs.pidFile.create()
 
     try:
         log_start()
-        globls.server.run(immediate=immediate)
+        globs.server.run(immediate=immediate)
     except Exception, detail:
         log_message("warning", "Unexpected exception (%s)." % detail)
         #import traceback
@@ -162,6 +162,6 @@ if __name__ == "__main__":
         #print detail
         pass
 
-    globls.pidFile.remove()
+    globs.pidFile.remove()
     log_exit()
     sys.exit(-1)

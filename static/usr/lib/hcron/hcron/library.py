@@ -32,7 +32,7 @@ import sys
 
 # app imports
 from hcron.constants import *
-from hcron import globls
+from hcron import globs
 
 #
 # bitmasks makes for easy comparisons (bitwise-and), where each value
@@ -183,7 +183,7 @@ def dir_walk(top, topdown=True, onerror=None, ignoreMatchFn=None):
 def get_events_home(userName):
     """Returns the user-specific events/ directory path.
     """
-    config = globls.config.get()
+    config = globs.config.get()
     events_base_path = (config.get("events_base_path") or "").strip()
 
     if events_base_path == "":
@@ -199,7 +199,7 @@ def get_events_home(userName):
 def get_includes_home(userName):
     """Returns the user-specific includes/ directory path.
     """
-    config = globls.config.get()
+    config = globs.config.get()
     events_base_path = (config.get("events_base_path") or "").strip()
 
     if events_base_path == "":

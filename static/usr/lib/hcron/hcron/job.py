@@ -32,7 +32,7 @@ import traceback
 
 from clock import Clock
 from hcron.constants import *
-from hcron import globls
+from hcron import globs
 from hcron.logger import *
 from hcron.threadpool import ThreadPool
 
@@ -91,7 +91,7 @@ class Job:
 class JobQueue:
 
     def __init__(self):
-        self.q = Queue.Queue(globls.config.get().get("jobq_size", JOBQ_SIZE))
+        self.q = Queue.Queue(globs.config.get().get("jobq_size", JOBQ_SIZE))
 
     def enqueue_ondemand_jobs(self):
         """Queue up on demand jobs.
@@ -124,7 +124,7 @@ class JobQueue:
                         continue
 
                     eventname = eventname.strip()
-                    eventlist = globls.eventListList.get(username)
+                    eventlist = globs.eventListList.get(username)
                     if not eventlist:
                         log_message("error", "Cannot find eventlist for user (%s)" % username)
                         raise Exception()
@@ -158,7 +158,7 @@ class JobQueue:
         """
         event = job.event
 
-        max_chain_events = max(globls.config.get().get("max_chain_events", CONFIG_MAX_CHAIN_EVENTS), 1)
+        max_chain_events = max(globs.config.get().get("max_chain_events", CONFIG_MAX_CHAIN_EVENTS), 1)
 
         if job.eventchainnames:
             eventChainNames = job.eventchainnames.split(":")
@@ -182,7 +182,7 @@ class JobQueue:
             for _nexteventname in nextEventName.split(":"):
                 log_chain_events(event.userName, event.get_name(), _nexteventname, nextEventType, eventChainNames, cycleDetected=(_nexteventname in eventChainNames))
 
-                eventList = globls.eventListList.get(event.userName)
+                eventList = globs.eventListList.get(event.userName)
                 nextEvent = eventList and eventList.get(_nexteventname)
 
                 # problem cases for nextEvent
@@ -197,12 +197,12 @@ class JobQueue:
                 nextjob.event = nextEvent
                 nextjob.eventname = _nexteventname
                 nextjob.eventchainnames = ":".join(eventChainNames)
-                nextjob.sched_datetime = globls.clock.now()
+                nextjob.sched_datetime = globs.clock.now()
                 self.q.put(nextjob)
                 log_queue(nextjob.jobid, nextjob.jobgid, nextjob.triggername, nextjob.event.userName, nextjob.eventname, nextjob.eventchainnames, nextjob.sched_datetime)
 
     def handle_jobs(self):
-        max_activated_events = max(globls.config.get().get("max_activated_events", CONFIG_MAX_ACTIVATED_EVENTS), 1)
+        max_activated_events = max(globs.config.get().get("max_activated_events", CONFIG_MAX_ACTIVATED_EVENTS), 1)
         tp = ThreadPool(max_activated_events)
 
         while True:

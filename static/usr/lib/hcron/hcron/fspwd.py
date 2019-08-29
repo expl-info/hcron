@@ -33,25 +33,25 @@ import time
 
 #
 from hcron.constants import *
-from hcron import globls
+from hcron import globs
 
 def get_test_net_delay():
     try:
-        test_net_delay = globls.config.get().get("test_net_delay", CONFIG_TEST_NET_DELAY)
+        test_net_delay = globs.config.get().get("test_net_delay", CONFIG_TEST_NET_DELAY)
     except:
         test_net_delay = CONFIG_TEST_NET_DELAY
     return test_net_delay
 
 def get_test_net_retry():
     try:
-        test_net_retry = globls.config.get().get("test_net_retry", CONFIG_TEST_NET_RETRY)
+        test_net_retry = globs.config.get().get("test_net_retry", CONFIG_TEST_NET_RETRY)
     except:
         test_net_retry = CONFIG_TEST_NET_RETRY
     return test_net_retry
 
 def test_service():
     # check if network service is really answering
-    test_net_username = globls.config.get().get("test_net_username")
+    test_net_username = globs.config.get().get("test_net_username")
     test_net_delay = get_test_net_delay()
     if test_net_username:
         # test with know username until success

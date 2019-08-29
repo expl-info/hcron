@@ -36,7 +36,7 @@ import time
 import traceback
 
 from hcron import constants
-from hcron import globls
+from hcron import globs
 from hcron import event
 from hcron.event import EventList, EventListList
 from hcron.file import ConfigFile
@@ -98,12 +98,12 @@ if __name__ == "__main__":
             elif arg == "-d" and args:
                 delay = max(0, float(args.pop(0)))
             elif arg == "--show-all":
-                globls.simulate_show_email = True
-                globls.simulate_show_event = True
+                globs.simulate_show_email = True
+                globs.simulate_show_event = True
             elif arg == "--show-email":
-                globls.simulate_show_email = True
+                globs.simulate_show_email = True
             elif arg == "--show-event":
-                globls.simulate_show_event = True
+                globs.simulate_show_event = True
             elif len(args) == 2:
                 eventsdir = os.path.realpath(arg)
                 startdatetime = datetime.strptime((args.pop(0)+"0000")[:12], "%Y%m%d%H%M")
@@ -124,15 +124,15 @@ if __name__ == "__main__":
         sys.exit(1)
 
     try:
-        globls.remote_execute_enabled = False
-        globls.email_notify_enabled = False
+        globs.remote_execute_enabled = False
+        globs.email_notify_enabled = False
 
         allowedUsers = [whoami]
 
         minute = timedelta(minutes=1)
         now = startdatetime
-        globls.clock.set(now)
-        globls.simulate = True
+        globs.clock.set(now)
+        globs.simulate = True
 
         if confpath:
             constants.HCRON_CONFIG_PATH = os.path.realpath(confpath)
@@ -141,22 +141,22 @@ if __name__ == "__main__":
             constants.HCRON_CONFIG_PATH = os.path.join(etcdir, "hcron/hcron-run.conf")
         constants.HOST_NAME = eventsdir.split("/")[-2]
 
-        globls.config = ConfigFile(constants.HCRON_CONFIG_PATH)
-        globls.config.get()["log_path"] = None
+        globs.config = ConfigFile(constants.HCRON_CONFIG_PATH)
+        globs.config.get()["log_path"] = None
         setup_logger()
 
-        globls.eventListList = EventListList(allowedUsers)
+        globs.eventListList = EventListList(allowedUsers)
 
         log_start()
         while now < enddatetime:
             hcronWeekday = now.isoweekday() % 7
             datemasks = date_to_bitmasks(now.year, now.month, now.day, now.hour, now.minute, hcronWeekday)
-            events = globls.eventListList.test(datemasks)
+            events = globs.eventListList.test(datemasks)
             for event in events:
                 handle_event("clock", event, now)
                 time.sleep(delay)
             now += minute
-            globls.clock.set(now)
+            globs.clock.set(now)
     except:
         stderr.write("error: unexpected situation\n")
         sys.exit(1)

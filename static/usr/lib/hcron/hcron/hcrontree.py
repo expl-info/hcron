@@ -37,7 +37,7 @@ import tempfile
 
 #
 from constants import *
-from hcron import globls
+from hcron import globs
 from hcron.library import copyfile
 from hcron.logger import *
 from hcron import fspwd as pwd
@@ -226,7 +226,7 @@ def create_user_hcron_tree_file(username, hostname, dst_path=None, empty=False):
             f.close()
     os.chdir(cwd)
 
-    max_hcron_tree_snapshot_size = globls.config.get().get("max_hcron_tree_snapshot_size", CONFIG_MAX_HCRON_TREE_SNAPSHOT_SIZE)
+    max_hcron_tree_snapshot_size = globs.config.get().get("max_hcron_tree_snapshot_size", CONFIG_MAX_HCRON_TREE_SNAPSHOT_SIZE)
     if os.path.getsize(dst_path) > max_hcron_tree_snapshot_size:
         raise Exception("snapshot file too big (>%s)" % max_hcron_tree_snapshot_size)
 
@@ -257,6 +257,6 @@ def install_hcron_tree_file(username, hostname):
         pass
 
     if os.path.getsize(src_path) > 0:
-        max_hcron_tree_snapshot_size = globls.config.get().get("max_hcron_tree_snapshot_size", CONFIG_MAX_HCRON_TREE_SNAPSHOT_SIZE)
+        max_hcron_tree_snapshot_size = globs.config.get().get("max_hcron_tree_snapshot_size", CONFIG_MAX_HCRON_TREE_SNAPSHOT_SIZE)
         copyfile(src, dst_path, max_hcron_tree_snapshot_size)
 

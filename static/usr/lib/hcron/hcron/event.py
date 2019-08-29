@@ -38,7 +38,7 @@ import traceback
 
 # app imports
 from hcron.constants import *
-from hcron import globls
+from hcron import globs
 from hcron.hcrontree import HcronTreeCache, create_user_hcron_tree_file, install_hcron_tree_file
 from hcron.library import WHEN_BITMASKS, WHEN_INDEXES, WHEN_MIN_MAX, list_st_to_bitmask
 from hcron.notify import send_email_notification
@@ -58,13 +58,13 @@ def signal_reload(unload=False):
     import tempfile
     from hcron.file import AllowedUsersFile, ConfigFile
 
-    globls.config = ConfigFile(HCRON_CONFIG_PATH)
-    globls.allowedUsers = AllowedUsersFile(HCRON_ALLOW_PATH)
-    config = globls.config.get()
+    globs.config = ConfigFile(HCRON_CONFIG_PATH)
+    globs.allowedUsers = AllowedUsersFile(HCRON_ALLOW_PATH)
+    config = globs.config.get()
     signalHome = config.get("signalHome") or HCRON_SIGNAL_HOME
     userName = pwd.getpwuid(os.getuid()).pw_name
 
-    if userName not in globls.allowedUsers.get():
+    if userName not in globs.allowedUsers.get():
         raise Exception("Warning: You are not an allowed hcron user.")
 
     try:
@@ -96,7 +96,7 @@ def reload_events(signalHomeMtime):
             if userName not in userNames:
                 try:
                     install_hcron_tree_file(userName, HOST_NAME)
-                    globls.eventListList.reload(userName)
+                    globs.eventListList.reload(userName)
                     userNames[userName] = None
                 except Exception, detail:
                     log_message("warning", "Could not install snapshot file for user (%s)." % userName)
@@ -195,12 +195,12 @@ class EventList:
         self.events = {}
 
         try:
-            max_events_per_user = globls.config.get().get("max_events_per_user", CONFIG_MAX_EVENTS_PER_USER)
-            names_to_ignore_cregexp = globls.config.get().get("names_to_ignore_cregexp")
+            max_events_per_user = globs.config.get().get("max_events_per_user", CONFIG_MAX_EVENTS_PER_USER)
+            names_to_ignore_cregexp = globs.config.get().get("names_to_ignore_cregexp")
             ignoreMatchFn = names_to_ignore_cregexp and names_to_ignore_cregexp.match
 
             # global cache assumes single-threaded load!
-            hcron_tree_cache = globls.hcron_tree_cache = HcronTreeCache(self.userName, ignoreMatchFn)
+            hcron_tree_cache = globs.hcron_tree_cache = HcronTreeCache(self.userName, ignoreMatchFn)
             for name in hcron_tree_cache.get_event_names():
                 try:
                     if hcron_tree_cache.is_ignored_event(name):
@@ -223,7 +223,7 @@ class EventList:
 
         # delete any caches (and references) before moving on with or
         # without an prior exception!
-        hcron_tree_cache = globls.hcron_tree_cache = None
+        hcron_tree_cache = globs.hcron_tree_cache = None
 
         self.dump()
 
@@ -321,8 +321,8 @@ class Event:
             varInfo["HCRON_EVENT_CHAIN"] = ":".join(eventChainNames)
             varInfo["HCRON_SELF_CHAIN"] = ":".join(selfEventChainNames)
 
-            activate_datetime = globls.clock.now()
-            activate_datetime_utc = globls.clock.utcnow()
+            activate_datetime = globs.clock.now()
+            activate_datetime_utc = globs.clock.utcnow()
             varInfo["HCRON_ACTIVATE_DATETIME"] = activate_datetime.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
             varInfo["HCRON_ACTIVATE_DATETIME_UTC"] = activate_datetime_utc.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
             varInfo["HCRON_ACTIVATE_EPOCHTIME"] = activate_datetime.strftime("%s")
@@ -371,7 +371,7 @@ class Event:
             t = line.split()
             if len(t) == 2 and t[0] == "include":
                 include_name = self.resolve_event_name_to_name(caller_name, t[1])
-                lines2 = globls.hcron_tree_cache.get_include_contents(include_name).split("\n")
+                lines2 = globs.hcron_tree_cache.get_include_contents(include_name).split("\n")
                 lines2 = self.process_lines(lines2)
                 lines2 = self.process_includes(include_name, lines2, depth+1)
                 l.extend(lines2)
@@ -389,7 +389,7 @@ class Event:
 
         try:
             try:
-                lines = globls.hcron_tree_cache.get_event_contents(self.name).split("\n")
+                lines = globs.hcron_tree_cache.get_event_contents(self.name).split("\n")
                 lines = self.process_lines(lines)
             except Exception, detail:
                 self.reason = "cannot load file"
@@ -509,8 +509,8 @@ class Event:
             #retVal = remote_execute(self.name, self.userName, event_as_user, event_host, event_command)
         retVal = remote_execute(self.name, self.userName, event_as_user, event_host, event_command)
 
-        if globls.simulate:
-            if globls.simulate_show_event:
+        if globs.simulate:
+            if globs.simulate_show_event:
                 fmt = "%s=%s"
                 print tw.fill(fmt % ("as_user", event_as_user))
                 print tw.fill(fmt % ("host", event_host))

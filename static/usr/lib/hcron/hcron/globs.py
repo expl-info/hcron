@@ -1,6 +1,6 @@
 #! /usr/bin/env python2
 #
-# globls.py
+# globs.py
 
 # GPL--start
 # This file is part of hcron
@@ -21,7 +21,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # GPL--end
 
-"""Globals. Should be imported as "from hcron import globls".
+"""Globals. Should be imported as "from hcron import globs".
 """
 
 from clock import Clock

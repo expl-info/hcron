@@ -33,7 +33,7 @@ from time import sleep, time
 
 # app imports
 from hcron.constants import *
-from hcron import globls
+from hcron import globs
 from hcron.event import EventListList, reload_events
 from hcron.job import Job, JobQueue
 from hcron.library import date_to_bitmasks
@@ -59,7 +59,7 @@ class Server:
     def run(self, immediate=False):
         """Run scheduling loop.
         """
-        now = globls.clock.now()
+        now = globs.clock.now()
         next = now # special case
 
         if immediate:
@@ -74,7 +74,7 @@ class Server:
             # minute to get work done!)
             #
             next = (next+MINUTE_DELTA).replace(second=0, microsecond=0)
-            now = globls.clock.now()
+            now = globs.clock.now()
             if next > now:
                 # we need to wait
                 delta = (next-now).seconds+1
@@ -85,29 +85,29 @@ class Server:
     
             log_sleep(delta)
             sleep(delta)
-            now = globls.clock.now()
+            now = globs.clock.now()
             log_message("info", "scheduling for next interval (%s)" % next)
 
             #
             # check and update as necessary
             #
-            if globls.config.is_modified():
+            if globs.config.is_modified():
                 ### this is a problem if we are behind schedule!!!
                 log_message("info", "hcron.conf was modified")
                 # restart
-                globls.pidFile.remove()
+                globs.pidFile.remove()
                 if "--immediate" not in sys.argv:
                     # do not miss current "now" time
                     sys.argv.append("--immediate")
                 os.execv(sys.argv[0], sys.argv)
-            if globls.allowedUsers.is_modified():
+            if globs.allowedUsers.is_modified():
                 log_message("info", "hcron.allow was modified")
-                globls.allowedUsers.load()
-                globls.eventListList = EventListList(globls.allowedUsers.get())
-            if globls.signalHome.is_modified():
+                globs.allowedUsers.load()
+                globs.eventListList = EventListList(globs.allowedUsers.get())
+            if globs.signalHome.is_modified():
                 log_message("info", "signalHome was modified")
-                globls.signalHome.load()
-                reload_events(globls.signalHome.get_modified_time())
+                globs.signalHome.load()
+                reload_events(globs.signalHome.get_modified_time())
 
             self.run_now("clock", next)
 
@@ -123,7 +123,7 @@ class Server:
         # hcron: 0=sun - 6=sat; isoweekday: 1=mon = 7=sun
         hcronWeekday = now.isoweekday() % 7
         datemasks = date_to_bitmasks(now.year, now.month, now.day, now.hour, now.minute, hcronWeekday)
-        events = globls.eventListList.test(datemasks)
+        events = globs.eventListList.test(datemasks)
         if events:
             for event in events:
                 job = Job()

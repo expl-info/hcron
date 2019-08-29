@@ -34,7 +34,6 @@ import sys
 
 # app imports
 from hcron.constants import *
-from hcron import globls
 from hcron.logger import *
 from hcron.safeeval import safe_eval
 

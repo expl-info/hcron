@@ -38,7 +38,6 @@ from sys import stderr
 from hcron.constants import *
 from hcron.event import signal_reload
 from hcron.file import ConfigFile
-from hcron import globls
 
 def print_usage():
     d = {

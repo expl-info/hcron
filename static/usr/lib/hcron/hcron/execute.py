@@ -32,7 +32,7 @@ import time
 
 # app imports
 from hcron.constants import *
-from hcron import globls
+from hcron import globs
 from hcron.logger import *
 from hcron import fspwd as pwd
 
@@ -73,20 +73,20 @@ def remote_execute(eventName, localUserName, remoteUserName, remoteHostName, com
     -1  error/failure
     """
     # setup
-    config = globls.config.get()
+    config = globs.config.get()
     allow_localhost = config.get("allow_localhost", CONFIG_ALLOW_LOCALHOST) 
     allow_root_events = config.get("allow_root_events", CONFIG_ALLOW_ROOT_EVENTS)
     localUid = pwd.getpwnam(localUserName).pw_uid
     remote_shell_type = config.get("remote_shell_type", CONFIG_REMOTE_SHELL_TYPE)
     remote_shell_exec = config.get("remote_shell_exec", CONFIG_REMOTE_SHELL_EXEC)
-    timeout = timeout or globls.config.get().get("command_spawn_timeout", CONFIG_COMMAND_SPAWN_TIMEOUT)
+    timeout = timeout or globs.config.get().get("command_spawn_timeout", CONFIG_COMMAND_SPAWN_TIMEOUT)
     command = command.strip()
     spawn_starttime = time.time()
 
     childPid = 0
 
     rv = 0
-    if globls.remote_execute_enabled:
+    if globs.remote_execute_enabled:
         # validate
         if remoteHostName in LOCAL_HOST_NAMES and not allow_localhost:
             raise RemoteExecuteException("Execution on local host is not allowed.")

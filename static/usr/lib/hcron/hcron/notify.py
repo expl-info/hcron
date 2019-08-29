@@ -30,7 +30,7 @@ import textwrap
 
 # app imports
 from hcron.constants import *
-from hcron import globls
+from hcron import globs
 from hcron.logger import *
 
 tw = textwrap.TextWrapper()
@@ -40,20 +40,20 @@ tw.width = 1024
 tw.replace_whitespace = False
 
 def send_email_notification(eventName, fromUserName, toAddr, subject, content):
-    config = globls.config.get()
+    config = globs.config.get()
     smtp_server = config.get("smtp_server", "localhost")
 
     fromAddr = "%s@%s" % (fromUserName, HOST_NAME)
     message = """From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\n%s""" % \
         (fromAddr, toAddr, subject, content)
     try:
-        if globls.email_notify_enabled:
+        if globs.email_notify_enabled:
             m = smtplib.SMTP(smtp_server)
             m.sendmail(fromAddr, toAddr, message)
             m.quit()
         log_notify_email(fromUserName, toAddr, eventName)
-        if globls.simulate:
-            if globls.simulate_show_email:
+        if globs.simulate:
+            if globs.simulate_show_email:
                 for line in message.split("\n"):
                     print tw.fill(line)
     except Exception, detail:

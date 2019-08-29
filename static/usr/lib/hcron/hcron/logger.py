@@ -31,7 +31,7 @@ import sys
 
 # app imports
 from hcron.constants import *
-from hcron import globls
+from hcron import globs
 
 # globals
 logger = None
@@ -39,7 +39,7 @@ logger = None
 def setup_logger():
     global logger
 
-    config = globls.config.get()
+    config = globs.config.get()
     if config.get("use_syslog", CONFIG_USE_SYSLOG):
         handler = logging.SysLogHandler()
     else:
@@ -70,7 +70,7 @@ def log_any2(op, userName="", *args):
         extra = "|".join([ str(el) for el in args ])
     else:
         extra = ""
-    logger.info("%s|%s|%s|%s" % (globls.clock.now().isoformat(), op, userName, extra))
+    logger.info("%s|%s|%s|%s" % (globs.clock.now().isoformat(), op, userName, extra))
 
 # specific logging functions
 def log_alarm(msg=""):
