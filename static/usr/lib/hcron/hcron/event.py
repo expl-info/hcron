@@ -477,7 +477,7 @@ class Event:
 
         return 1
 
-    def activate(self, triggername, eventChainNames=None, sched_datetime=None):
+    def activate(self, job, triggername, eventChainNames=None, sched_datetime=None):
         """Activate event and return next event in chain.
         """
         varInfo = self.get_var_info(triggername, eventChainNames, sched_datetime)
@@ -507,7 +507,7 @@ class Event:
             #retVal = -1
         #else:
             #retVal = remote_execute(self.name, self.userName, event_as_user, event_host, event_command)
-        retVal = remote_execute(self.name, self.userName, event_as_user, event_host, event_command)
+        retVal = remote_execute(job, self.name, self.userName, event_as_user, event_host, event_command)
 
         if globs.simulate:
             if globs.simulate_show_event:

@@ -62,7 +62,7 @@ def alarm_handler(signum, frame):
     except:
         pass
 
-def remote_execute(eventName, localUserName, remoteUserName, remoteHostName, command, timeout=None):
+def remote_execute(job, eventName, localUserName, remoteUserName, remoteHostName, command, timeout=None):
     """Securely execute a command at remoteUserName@remoteHostName from
     localUserName@localhost within timeout time.
 
@@ -140,6 +140,6 @@ def remote_execute(eventName, localUserName, remoteUserName, remoteHostName, com
                 log_message("error", "Execute failed (%s)." % detail)
 
     spawn_endtime = time.time()
-    log_execute(localUserName, remoteUserName, remoteHostName, eventName, childPid, spawn_endtime-spawn_starttime, rv)
+    log_execute(job.jobid, job.jobgid, localUserName, remoteUserName, remoteHostName, eventName, childPid, spawn_endtime-spawn_starttime, rv)
 
     return rv

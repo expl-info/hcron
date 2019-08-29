@@ -86,8 +86,8 @@ def log_discard_events(userName, count):
 def log_end():
     log_any("end")
 
-def log_execute(userName, asUser, host, eventName, pid, spawn_elapsed, retVal):
-    log_any("execute", userName, asUser, host, eventName, pid, "%f" % spawn_elapsed, retVal)
+def log_execute(jobid, jobgid, userName, asUser, host, eventName, pid, spawn_elapsed, retVal):
+    log_any("execute", jobid, jobgid, userName, asUser, host, eventName, pid, "%f" % spawn_elapsed, retVal)
 
 def log_exit():
     log_any("exit")
