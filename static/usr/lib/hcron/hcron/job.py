@@ -73,9 +73,15 @@ class JobidGenerator:
 jobidgen = JobidGenerator()
 
 class Job:
+    """Job corresponding to an event that has been triggered.
 
-    def __init__(self):
+    The jobid is unique to each job. The jobgid is shared among all
+    jobs that have the same parentage (via failover or next events).
+    """
+
+    def __init__(self, jobgid=None):
         self.jobid = jobidgen.next()
+        self.jobgid = jobgid or self.jobid
         self.event = None
         self.eventchainnames = None
         self.eventname = None
@@ -135,7 +141,7 @@ class JobQueue:
                     job.eventchainnames = None
                     job.sched_datetime = clock.now()
                     self.q.put(job)
-                    log_queue(job.jobid, job.triggername, job.event.userName, job.eventname, job.eventchainnames, job.sched_datetime)
+                    log_queue(job.jobid, job.jobgid, job.triggername, job.event.userName, job.eventname, job.eventchainnames, job.sched_datetime)
                 except:
                     log_message("warning", "Failed to queue ondemand event (%s)" % eventname)
                 finally:
@@ -185,14 +191,14 @@ class JobQueue:
                 log_message("error", "Chained event (%s) was rejected (%s)." % (nextEventName, nextEvent.reason), user_name=event.userName)
                 nextEvent = None
 
-            nextjob = Job()
+            nextjob = Job(job.jobid)
             nextjob.triggername = nextEventType
             nextjob.event = nextEvent
             nextjob.eventname = nextEventName
             nextjob.eventchainnames = ":".join(eventChainNames)
             nextjob.sched_datetime = globls.clock.now()
             self.q.put(nextjob)
-            log_queue(nextjob.jobid, nextjob.triggername, nextjob.event.userName, nextjob.eventname, nextjob.eventchainnames, nextjob.sched_datetime)
+            log_queue(nextjob.jobid, nextjob.jobgid, nextjob.triggername, nextjob.event.userName, nextjob.eventname, nextjob.eventchainnames, nextjob.sched_datetime)
 
     def handle_jobs(self):
         max_activated_events = max(globls.config.get().get("max_activated_events", CONFIG_MAX_ACTIVATED_EVENTS), 1)
