@@ -25,25 +25,19 @@ from datetime import datetime, timedelta
 import os
 import os.path
 import pwd
-try:
-    import cStringIO as StringIO
-except:
-    import StringIO
 import sys
 from sys import stderr
-import tarfile
 import time
 import traceback
 
 from hcron import constants
 from hcron import globs
-from hcron import event
-from hcron.event import EventList, EventListList
+from hcron.event import EventListList
 from hcron.file import ConfigFile
 from hcron import hcrontree
-from hcron.job import handle_event
-from hcron.logger import *
 from hcron.library import date_to_bitmasks
+from hcron.logger import *
+from hcron.server import Server
 
 # override
 def get_hcron_tree_filename(username, hostname):
@@ -147,14 +141,15 @@ if __name__ == "__main__":
 
         globs.eventListList = EventListList(allowedUsers)
 
+        globs.server = Server(False)
         log_start()
+
         while now < enddatetime:
-            hcronWeekday = now.isoweekday() % 7
-            datemasks = date_to_bitmasks(now.year, now.month, now.day, now.hour, now.minute, hcronWeekday)
-            events = globs.eventListList.test(datemasks)
-            for event in events:
-                handle_event("clock", event, now)
-                time.sleep(delay)
+            globs.server.run_now("clock", now)
+            while globs.server.jobq.q.qsize():
+                job = globs.server.jobq.get()
+                globs.server.jobq.handle_job(job)
+            time.sleep(delay)
             now += minute
             globs.clock.set(now)
     except:
