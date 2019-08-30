@@ -25,7 +25,10 @@ import errno
 import os
 import os.path
 import pwd
-import Queue
+try:
+    import Queue as queue
+except:
+    import queue
 import stat
 import time
 import traceback
@@ -91,7 +94,7 @@ class Job:
 class JobQueue:
 
     def __init__(self):
-        self.q = Queue.Queue(globs.config.get().get("jobq_size", JOBQ_SIZE))
+        self.q = queue.Queue(globs.config.get().get("jobq_size", JOBQ_SIZE))
 
     def enqueue_ondemand_jobs(self):
         """Queue up on demand jobs.
@@ -212,7 +215,7 @@ class JobQueue:
                     tp.add(None, self.handle_job, args=(job,))
                 while tp.has_done():
                     res = tp.reap()
-            except Queue.Empty:
+            except queue.Empty:
                 pass
             except Exception as detail:
                 if self.q != None:
