@@ -25,6 +25,8 @@
 Simply print the fully qualified host name of the executing machine.
 """
 
+from __future__ import print_function
+
 # system imports
 import os
 import os.path
