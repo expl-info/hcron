@@ -32,8 +32,8 @@ import threading
 from time import sleep, time
 
 # app imports
-from hcron.constants import *
 from hcron import globs
+from hcron.constants import *
 from hcron.event import EventListList, reload_events
 from hcron.job import Job, JobQueue
 from hcron.library import date_to_bitmasks

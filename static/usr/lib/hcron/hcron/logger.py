@@ -30,8 +30,8 @@ import os.path
 import sys
 
 # app imports
-from hcron.constants import *
 from hcron import globs
+from hcron.constants import *
 
 # globals
 logger = None

@@ -40,11 +40,11 @@ import signal
 from sys import stderr
 
 # app imports
-from hcron.constants import *
 from hcron import globs
+from hcron import library
+from hcron.constants import *
 from hcron.event import EventListList
 from hcron.file import AllowedUsersFile, ConfigFile, PidFile, SignalHome
-from hcron import library
 from hcron.logger import *
 from hcron.server import Server
 

@@ -24,7 +24,7 @@
 """Globals. Should be imported as "from hcron import globs".
 """
 
-from clock import Clock
+from hcron.clock import Clock
 
 config = None
 allowedUsers = None

@@ -32,8 +32,8 @@ import pwd
 import time
 
 #
-from hcron.constants import *
 from hcron import globs
+from hcron.constants import *
 
 def get_test_net_delay():
     try:

@@ -31,8 +31,8 @@ import types
 import sys
 
 # app imports
-from hcron.constants import *
 from hcron import globs
+from hcron.constants import *
 
 #
 # bitmasks makes for easy comparisons (bitwise-and), where each value

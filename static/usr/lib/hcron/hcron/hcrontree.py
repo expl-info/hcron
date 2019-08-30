@@ -36,11 +36,11 @@ import tarfile
 import tempfile
 
 #
-from constants import *
+from hcron import fspwd as pwd
 from hcron import globs
+from hcron.constants import *
 from hcron.library import copyfile
 from hcron.logger import *
-from hcron import fspwd as pwd
 
 class HcronTreeCache:
     """Interface to packaged hcron tree file containing members, or

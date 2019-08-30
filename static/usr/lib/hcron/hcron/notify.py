@@ -29,8 +29,8 @@ import smtplib
 import textwrap
 
 # app imports
-from hcron.constants import *
 from hcron import globs
+from hcron.constants import *
 from hcron.logger import *
 
 tw = textwrap.TextWrapper()

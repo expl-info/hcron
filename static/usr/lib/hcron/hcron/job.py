@@ -30,9 +30,9 @@ import stat
 import time
 import traceback
 
-from clock import Clock
-from hcron.constants import *
 from hcron import globs
+from hcron.clock import Clock
+from hcron.constants import *
 from hcron.logger import *
 from hcron.threadpool import ThreadPool
 
