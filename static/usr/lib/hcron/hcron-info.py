@@ -40,7 +40,7 @@ def print_usage():
     d = {
         "progname": os.path.basename(sys.argv[0])
     }
-    print """\
+    print("""\
 usage: %(progname)s --allowed
        %(progname)s -es
        %(progname)s --fqdn
@@ -51,7 +51,7 @@ Print hcron related information.
 Where:
 --allowed           Output "yes" if permitted to use hcron.
 -es                 Event statuses.
---fqdn              Fully qualified hostname.""" % d
+--fqdn              Fully qualified hostname.""" % d)
 
 def print_allowed():
     try:
@@ -59,25 +59,25 @@ def print_allowed():
         userEventListsPath = "%s/%s" % (HCRON_EVENT_LISTS_DUMP_DIR, userName)
 
         if os.path.exists(userEventListsPath):
-            print "yes"
+            print("yes")
 
     except Exception as detail:
         pass
 
 def print_fqdn():
     try:
-        print socket.getfqdn()
+        print(socket.getfqdn())
     except Exception as detail:
-        print "Error: Could not determine the fully qualified host name."
+        print("Error: Could not determine the fully qualified host name.")
 
 def print_user_event_status():
     try:
         userName = pwd.getpwuid(os.getuid()).pw_name
         userEventListsPath = "%s/%s" % (HCRON_EVENT_LISTS_DUMP_DIR, userName)
 
-        print open(userEventListsPath, "r").read(),
+        print(open(userEventListsPath, "r").read(), end="")
     except Exception as detail:
-        print "Error: Could not read event status information."
+        print("Error: Could not read event status information.")
 
 if __name__ == "__main__":
     try:

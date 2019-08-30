@@ -202,7 +202,7 @@ def print_usage():
         "progname": os.path.basename(sys.argv[0])
     }
 
-    print """\
+    print("""\
 usage: %(progname)s --to-events [<options>] <host> <crontabpath> <dirpath>
        %(progname)s --to-crontab [<options>] <crontabpath> <dirpath>
        %(progname)s -h|--help
@@ -224,7 +224,7 @@ Options for --to-events:
 Options for --to-crontab:
 --remoteshell <shell>
                     Remote shell to prepend to each crontab command when
-                    the "host" setting is not empty. Default is ssh.""" % d
+                    the "host" setting is not empty. Default is ssh.""" % d)
 
 if __name__ == "__main__":
     try:

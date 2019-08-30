@@ -43,12 +43,12 @@ def print_usage():
     d = {
         "progname": os.path.basename(sys.argv[0])
     }
-    print """\
+    print("""\
 usage: %(progname)s [--unload]
        %(progname)s -h|--help
 
 Signal the hcron scheduler running on the local machine to reload one's
-event files. Use --unload to unload all one's events at the scheduler.""" % d
+event files. Use --unload to unload all one's events at the scheduler.""" % d)
 
 if __name__ == "__main__":
     try:
@@ -77,10 +77,10 @@ if __name__ == "__main__":
         signal_reload(unload)
         now = datetime.datetime.now()
         next_interval = (now+datetime.timedelta(seconds=60)).replace(second=0,microsecond=0)
-        print "Reload signalled for machine (%s) at next interval (%s; in %ss)." % (HOST_NAME, next_interval, (next_interval-now).seconds)
+        print("Reload signalled for machine (%s) at next interval (%s; in %ss)." % (HOST_NAME, next_interval, (next_interval-now).seconds))
     except Exception as detail:
         stderr.write("error: failed to reload/unload events\n")
-        #print detail
+        #print(detail)
         sys.exit(1)
 
     sys.exit(0)

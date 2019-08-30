@@ -94,7 +94,7 @@ def print_usage():
     d = {
         "progname": os.path.basename(sys.argv[0])
     }
-    print """\
+    print("""\
 usage: %(progname)s [--immediate]
        %(progname)s -h|--help
 
@@ -106,7 +106,7 @@ for the local host. Otherwise, this is done for the current user, only.
 Options:
 --immediate         Forces the scheduling of events to be done
                     immediately (i.e., now, the current interval)
-                    rather than wait for the next interval.""" % d
+                    rather than wait for the next interval.""" % d)
 
 if __name__ == "__main__":
     try:
@@ -159,7 +159,7 @@ if __name__ == "__main__":
         log_message("warning", "Unexpected exception (%s)." % detail)
         #import traceback
         #log_message("warning", "trace (%s)." % traceback.format_exc())
-        #print detail
+        #print(detail)
         pass
 
     globs.pidFile.remove()

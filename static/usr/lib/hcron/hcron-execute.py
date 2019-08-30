@@ -37,11 +37,11 @@ def print_usage():
     d = {
         "progname": os.path.basename(sys.argv[0])
     }
-    print """\
+    print("""\
 usage: %(progname)s <eventname>
        %(progname)s -h|--help
 
-Request for the named event to execute now.""" % d
+Request for the named event to execute now.""" % d)
 
 if __name__ == "__main__":
     progname = os.path.basename(sys.argv[0])
@@ -74,7 +74,7 @@ if __name__ == "__main__":
         os.close(fd)
     except Exception as detail:
         stderr.write("error: unexpected situation\n")
-        #print detail
+        #print(detail)
         sys.exit(1)
 
     sys.exit(0)

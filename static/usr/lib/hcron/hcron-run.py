@@ -50,7 +50,7 @@ def print_usage():
     d = {
         "progname": os.path.basename(sys.argv[0])
     }
-    print """\
+    print("""\
 usage: %(progname)s [<options>] <eventsdir> <startdatetime> <enddatetime>
        %(progname)s -h|--help
 
@@ -72,7 +72,7 @@ Options:
 --show-event
                     Show email and/or event information as it would be
                     when an event executes. Early and late variable
-                    substitutions are applied.""" % d
+                    substitutions are applied.""" % d)
 
 if __name__ == "__main__":
     whoami = pwd.getpwuid(os.getuid()).pw_name

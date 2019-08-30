@@ -265,7 +265,7 @@ class EventList:
 
     def print_events(self):
         for name, event in self.events.items():
-            print "name (%s) event (%s)" % (name, event)
+            print("name (%s) event (%s)" % (name, event))
 
     def test(self, datemasks):
         events = []
@@ -512,21 +512,20 @@ class Event:
         if globs.simulate:
             if globs.simulate_show_event:
                 fmt = "%s=%s"
-                print tw.fill(fmt % ("as_user", event_as_user))
-                print tw.fill(fmt % ("host", event_host))
-                print tw.fill(fmt % ("command", event_command))
-                print tw.fill(fmt % ("notify_email", event_notify_email))
-                print tw.fill(fmt % ("notify_subject", event_notify_subject))
-                print tw.fill(fmt % ("notify_message", event_notify_message))
-                print tw.fill(fmt % ("when_year", sched_datetime and sched_datetime.year))
-                print tw.fill(fmt % ("when_month", sched_datetime and sched_datetime.month))
-                print tw.fill(fmt % ("when_day", sched_datetime and sched_datetime.day))
-                print tw.fill(fmt % ("when_hour", sched_datetime and sched_datetime.hour))
-                print tw.fill(fmt % ("when_minute", sched_datetime and sched_datetime.minute))
-                print tw.fill(fmt % ("when_dow", sched_datetime and sched_datetime.weekday()))
-                print tw.fill(fmt % ("next_event", event_next_event))
-                print tw.fill(fmt % ("failover_event", event_failover_event))
-
+                print(tw.fill(fmt % ("as_user", event_as_user)))
+                print(tw.fill(fmt % ("host", event_host)))
+                print(tw.fill(fmt % ("command", event_command)))
+                print(tw.fill(fmt % ("notify_email", event_notify_email)))
+                print(tw.fill(fmt % ("notify_subject", event_notify_subject)))
+                print(tw.fill(fmt % ("notify_message", event_notify_message)))
+                print(tw.fill(fmt % ("when_year", sched_datetime and sched_datetime.year)))
+                print(tw.fill(fmt % ("when_month", sched_datetime and sched_datetime.month)))
+                print(tw.fill(fmt % ("when_day", sched_datetime and sched_datetime.day)))
+                print(tw.fill(fmt % ("when_hour", sched_datetime and sched_datetime.hour)))
+                print(tw.fill(fmt % ("when_minute", sched_datetime and sched_datetime.minute)))
+                print(tw.fill(fmt % ("when_dow", sched_datetime and sched_datetime.weekday())))
+                print(tw.fill(fmt % ("next_event", event_next_event)))
+                print(tw.fill(fmt % ("failover_event", event_failover_event)))
         if retVal == 0:
             # success
             # notify
@@ -754,7 +753,7 @@ def hcron_variable_substitution2(value, varInfo, depth=1):
             #open("/tmp/hc", "a").write("*** name (%s) nameValue (%s) sep (%s) value (%s) count (%s)\n" % (substName, nameValue, substSplitSep, value, value.count(substSplitSep)+1))
             value = str(value.count(substSplitSep)+1)
     except:
-        #print traceback.print_exc()
+        #print(traceback.print_exc())
         pass
 
     return value

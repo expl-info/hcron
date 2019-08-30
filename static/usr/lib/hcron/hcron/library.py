@@ -82,7 +82,7 @@ def list_st_to_bitmask(st, minMax, fullBitmask):
     mn, mx = minMax
     offset, mn, mx = mn, 0, mx-mn   # index everything to 0
 
-    #print "offset (%s) mn (%s) mx (%s) minMax (%s)" % (offset, mn, mx, minMax)
+    #print("offset (%s) mn (%s) mx (%s) minMax (%s)" % (offset, mn, mx, minMax))
     for el in st.split(","):
         if el == "*":
             mask = fullBitmask

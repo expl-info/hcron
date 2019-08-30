@@ -55,6 +55,6 @@ def send_email_notification(eventName, fromUserName, toAddr, subject, content):
         if globs.simulate:
             if globs.simulate_show_email:
                 for line in message.split("\n"):
-                    print tw.fill(line)
+                    print(tw.fill(line))
     except Exception as detail:
         log_message("error", "Failed to send email (%s) for event (%s)." % (detail, eventName))

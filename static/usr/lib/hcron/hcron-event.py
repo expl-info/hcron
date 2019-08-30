@@ -40,7 +40,7 @@ def print_usage():
     d = {
         "progname": os.path.basename(sys.argv[0])
     }
-    print """\
+    print("""\
 usage: %(progname)s [-c] [-y] <path> [...]
        %(progname)s -h|--help
 
@@ -49,7 +49,7 @@ unless -c is specified.
 
 Where:
 -c                  Create event file. Do not start editor.
--y                  Reload after create/edit.""" % d
+-y                  Reload after create/edit.""" % d)
 
 if __name__ == "__main__":
     try:
@@ -100,10 +100,10 @@ if __name__ == "__main__":
             signal_reload()
             now = datetime.datetime.now()
             next_interval = (now+datetime.timedelta(seconds=60)).replace(second=0,microsecond=0)
-            print "Reload signalled for machine (%s) at next interval (%s; in %ss)." % (HOST_NAME, next_interval, (next_interval-now).seconds)
+            print("Reload signalled for machine (%s) at next interval (%s; in %ss)." % (HOST_NAME, next_interval, (next_interval-now).seconds))
         else:
-            print "Reload deferred."
+            print("Reload deferred.")
     except Exception as detail:
         stderr.write("error: could not reload\n")
-        #print detail
+        #print(detail)
         sys.exit(1)
