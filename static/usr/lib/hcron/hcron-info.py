@@ -61,13 +61,13 @@ def print_allowed():
         if os.path.exists(userEventListsPath):
             print "yes"
 
-    except Exception, detail:
+    except Exception as detail:
         pass
 
 def print_fqdn():
     try:
         print socket.getfqdn()
-    except Exception, detail:
+    except Exception as detail:
         print "Error: Could not determine the fully qualified host name."
 
 def print_user_event_status():
@@ -76,7 +76,7 @@ def print_user_event_status():
         userEventListsPath = "%s/%s" % (HCRON_EVENT_LISTS_DUMP_DIR, userName)
 
         print open(userEventListsPath, "r").read(),
-    except Exception, detail:
+    except Exception as detail:
         print "Error: Could not read event status information."
 
 if __name__ == "__main__":

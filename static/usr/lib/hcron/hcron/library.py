@@ -136,7 +136,7 @@ def copyfile(src, dst, max_size):
             if max_size < 0:
                 buf = buf[:max_size]
             dst.write(buf)
-    except Exception, detail:
+    except Exception as detail:
         pass
 
     if src:
@@ -154,7 +154,7 @@ def dir_walk(top, topdown=True, onerror=None, ignoreMatchFn=None):
 
     try:
         names = listdir(top)
-    except error, err:
+    except error as err:
         if onerror is not None:
             onerror(err)
         return

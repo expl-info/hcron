@@ -59,7 +59,7 @@ def test_service():
             try:
                 test_pw = pwd.getpwnam(test_net_username)
                 break
-            except Exception, detail:
+            except Exception as detail:
                 time.sleep(test_net_delay)
 
 def getpwnam(name):

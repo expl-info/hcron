@@ -78,7 +78,7 @@ if __name__ == "__main__":
         now = datetime.datetime.now()
         next_interval = (now+datetime.timedelta(seconds=60)).replace(second=0,microsecond=0)
         print "Reload signalled for machine (%s) at next interval (%s; in %ss)." % (HOST_NAME, next_interval, (next_interval-now).seconds)
-    except Exception, detail:
+    except Exception as detail:
         stderr.write("error: failed to reload/unload events\n")
         #print detail
         sys.exit(1)

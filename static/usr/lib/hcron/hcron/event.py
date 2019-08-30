@@ -69,7 +69,7 @@ def signal_reload(unload=False):
 
     try:
         create_user_hcron_tree_file(userName, HOST_NAME, empty=unload)
-    except Exception, detail:
+    except Exception as detail:
         raise Exception("Error: Could not create hcron snapshot file (%s)." % detail)
 
     try:
@@ -98,12 +98,12 @@ def reload_events(signalHomeMtime):
                     install_hcron_tree_file(userName, HOST_NAME)
                     globs.eventListList.reload(userName)
                     userNames[userName] = None
-                except Exception, detail:
+                except Exception as detail:
                     log_message("warning", "Could not install snapshot file for user (%s)." % userName)
 
             try:
                 os.remove(path) # remove singles and multiples
-            except Exception, detail:
+            except Exception as detail:
                 log_message("warning", "Could not remove signal file (%s)." % path)
 
 class CannotLoadFileException(Exception):
@@ -207,7 +207,7 @@ class EventList:
                         continue
 
                     event = Event(name, self.userName)
-                except Exception, detail:
+                except Exception as detail:
                     # bad Event definition
                     pass
                     #continue
@@ -218,7 +218,7 @@ class EventList:
                     event.reason = "maximum events reached"
                     log_message("warning", "Reached maximum events allowed (%s)." % max_events_per_user)
 
-        except Exception, detail:
+        except Exception as detail:
             log_message("error", "Could not load events.")
 
         # delete any caches (and references) before moving on with or
@@ -257,7 +257,7 @@ class EventList:
                     f.write("rejected:%s:%s\n" % (reason, name))
 
             f.close()
-        except Exception, detail:
+        except Exception as detail:
             if f != None:
                 f.close()
 
@@ -391,26 +391,26 @@ class Event:
             try:
                 lines = globs.hcron_tree_cache.get_event_contents(self.name).split("\n")
                 lines = self.process_lines(lines)
-            except Exception, detail:
+            except Exception as detail:
                 self.reason = "cannot load file"
                 raise CannotLoadFileException("Ignored event file (%s)." % self.name)
 
             try:
                 lines = self.process_includes(self.name, lines)
-            except Exception, detail:
+            except Exception as detail:
                 self.reason = "cannot process include(s)"
                 raise CannotLoadFileException("Ignored event file (%s)." % self.name)
 
             try:
                 assignments = load_assignments(lines)
-            except Exception, detail:
+            except Exception as detail:
                 self.reason = "bad definition"
                 raise BadEventDefinitionException("Ignored event file (%s)." % self.name)
 
             try:
                 # early substitution
                 eval_assignments(assignments, varInfo)
-            except Exception, detail:
+            except Exception as detail:
                 self.reason = "bad variable substitution"
                 raise BadVariableSubstitutionException("Ignored event file (%s)." % self.name)
 
@@ -432,7 +432,7 @@ class Event:
                     if name.startswith("when_"):
                         masks[WHEN_INDEXES[name]] = list_st_to_bitmask(value, WHEN_MIN_MAX[name], WHEN_BITMASKS[name])
     
-            except Exception, detail:
+            except Exception as detail:
                 self.reason = "bad when_* setting"
                 raise BadEventDefinitionException("Ignored event file (%s)." % self.name)
 
@@ -469,7 +469,7 @@ class Event:
             try:
                 if not (datemasks[i] & masks[i]):
                     return 0
-            except Exception, detail:
+            except Exception as detail:
                 # should not get here
                 log_message("error", "detail (%s) self.reason (%s) user (%s) name (%s) when (%s)." % \
                     (detail, self.reason, self.userName, self.name, self.when))

@@ -114,7 +114,7 @@ def remote_execute(job, eventName, localUserName, remoteUserName, remoteHostName
                         os.setuid(localUid)
                         os.setsid()
                         os.execv(args[0], args)
-                    except (OSError, Exception), detail:
+                    except (OSError, Exception) as detail:
                         rv = 256
                     os._exit(rv)
 
@@ -136,7 +136,7 @@ def remote_execute(job, eventName, localUserName, remoteUserName, remoteHostName
                     rv = -2
                 elif os.WIFEXITED(waitStatus):
                     rv = (os.WEXITSTATUS(waitStatus) == 255) and -1 or 0
-            except Exception, detail:
+            except Exception as detail:
                 log_message("error", "Execute failed (%s)." % detail)
 
     spawn_endtime = time.time()

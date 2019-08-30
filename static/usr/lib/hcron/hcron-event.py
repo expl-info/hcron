@@ -91,7 +91,7 @@ if __name__ == "__main__":
             if not createonly:
                 subprocess.call([EDITOR, path])
 
-        except Exception, detail:
+        except Exception as detail:
             stderr.write("error: problem creating/opening event file (%s)\n" % path)
             sys.exit(1)
 
@@ -103,7 +103,7 @@ if __name__ == "__main__":
             print "Reload signalled for machine (%s) at next interval (%s; in %ss)." % (HOST_NAME, next_interval, (next_interval-now).seconds)
         else:
             print "Reload deferred."
-    except Exception, detail:
+    except Exception as detail:
         stderr.write("error: could not reload\n")
         #print detail
         sys.exit(1)

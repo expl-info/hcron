@@ -59,7 +59,7 @@ def dump_signal_handler(num, frame):
         f = open(HCRON_CONFIG_DUMP_PATH, "w+")
         f.write(pp.pformat(config))
         f.close()
-    except Exception, detail:
+    except Exception as detail:
         if f != None:
             f.close()
 
@@ -69,7 +69,7 @@ def dump_signal_handler(num, frame):
         f = open(HCRON_ALLOWED_USERS_DUMP_PATH, "w+")
         f.write("\n".join(allowedUsers))
         f.close()
-    except Exception, detail:
+    except Exception as detail:
         if f != None:
             f.close()
 
@@ -155,7 +155,7 @@ if __name__ == "__main__":
     try:
         log_start()
         globs.server.run(immediate=immediate)
-    except Exception, detail:
+    except Exception as detail:
         log_message("warning", "Unexpected exception (%s)." % detail)
         #import traceback
         #log_message("warning", "trace (%s)." % traceback.format_exc())

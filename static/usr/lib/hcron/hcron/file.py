@@ -67,7 +67,7 @@ class ConfigFile(TrackableFile):
             st = open(self.path, "r").read()
             d = safe_eval(st)
             log_load_config()
-        except Exception, detail:
+        except Exception as detail:
             log_message("error", "Cannot load hcron.config file (%s)." % self.path)
             sys.exit(-1)
 
@@ -98,7 +98,7 @@ class AllowedUsersFile(TrackableFile):
                     allowedUsers.append(userName)
 
             log_load_allow()
-        except Exception, detail:
+        except Exception as detail:
                 log_message("error", "Cannot load hcron.allow file (%s)." % self.path)
 
         self.contents = list(set(allowedUsers))
@@ -119,7 +119,7 @@ class old_AllowedUsersFile(TrackableFile):
                     if userName != "":
                         allowedUsers.append(userName)
                 log_load_allow()
-            except Exception, detail:
+            except Exception as detail:
                 log_message("error", "Cannot load hcron.allow file (%s)." % self.path)
         else:
             allowedUsers = [ USER_NAME ]
@@ -131,7 +131,7 @@ class SignalHome(TrackableFile):
     def load(self):
         try:
             self.mtime = os.stat(self.path)[stat.ST_MTIME]
-        except Exception, detail:
+        except Exception as detail:
             log_message("error", "Cannot stat signal directory (%s)." % self.path)
             raise
 
@@ -143,7 +143,7 @@ class PidFile:
         try:
             pid = open(self.path, "r").read()
             log_message("error", "Cannot create pid file (%s)." % self.path)
-        except Exception, detail:
+        except Exception as detail:
             log_message("info", "Creating pid file (%s)." % self.path)
             pid = os.getpid()
             open(self.path, "w").write("%s" % pid)
@@ -153,5 +153,5 @@ class PidFile:
         try:
             log_message("info", "Removing pid file (%s)." % self.path)
             os.remove(self.path)
-        except Exception, detail:
+        except Exception as detail:
             log_message("error", "Cannot remove pid file (%s)." % self.path)

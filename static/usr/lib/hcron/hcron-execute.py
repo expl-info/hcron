@@ -72,7 +72,7 @@ if __name__ == "__main__":
         fd, path = tempfile.mkstemp(dir=HCRON_ONDEMAND_HOME)
         os.write(fd, "%s\n" % eventname)
         os.close(fd)
-    except Exception, detail:
+    except Exception as detail:
         stderr.write("error: unexpected situation\n")
         #print detail
         sys.exit(1)

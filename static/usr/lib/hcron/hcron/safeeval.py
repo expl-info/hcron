@@ -39,6 +39,7 @@ and the implemenation is very straightforward.
 
 Support for None is added in visitName() [JM].
 Support for True|False is added in visitName() [JM - 2008/05/02].
+Use "as" for except [JM - 2019-08-30].
 """
 
 import compiler
@@ -108,9 +109,9 @@ def safe_eval(source, fail_on_error = True):
     walker = fail_on_error and SafeEvalWithErrors() or SafeEval()
     try:
         ast = compiler.parse(source,"eval")
-    except SyntaxError, err:
+    except SyntaxError as err:
         raise
     try:
         return walker.visit(ast)
-    except Unsafe_Source_Error, err:
+    except Unsafe_Source_Error as err:
         raise

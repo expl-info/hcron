@@ -170,7 +170,7 @@ class JobQueue:
         try:
             # None, next_event, or failover_event is returned
             nextEventName, nextEventType = event.activate(job, job.triggername, eventChainNames, sched_datetime=job.sched_datetime)
-        except Exception, detail:
+        except Exception as detail:
             log_message("error", "handle_job (%s)" % detail, user_name=event.userName)
             nextEventName, nextEventType = None, None
 
@@ -214,7 +214,7 @@ class JobQueue:
                     res = tp.reap()
             except Queue.Empty:
                 pass
-            except Exception, detail:
+            except Exception as detail:
                 if self.q != None:
                     log_message("error", "Unexpected exception (%s)." % str(detail))
                 return
