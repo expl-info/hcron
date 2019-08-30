@@ -234,7 +234,7 @@ class EventList:
             # paranoia?
             return
 
-        oldUmask = os.umask(0337)
+        oldUmask = os.umask(0o337)
 
         try:
             os.remove(eventListFileName)

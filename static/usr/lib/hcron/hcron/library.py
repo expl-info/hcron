@@ -232,4 +232,4 @@ def serverize():
 
     # misc
     os.chdir("/")   # / is always available
-    os.umask(0022)
+    os.umask(0o022)
