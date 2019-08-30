@@ -27,7 +27,6 @@
 # system imports
 import os
 import signal
-import subprocess
 import time
 
 # app imports
@@ -36,31 +35,8 @@ from hcron.constants import *
 from hcron.library import username2uid
 from hcron.logger import *
 
-# global
-childPid = None
-
 class RemoteExecuteException(Exception):
     pass
-
-def alarm_handler(signum, frame):
-    """Terminate process with pid stashed in module childPid.
-    """
-    global childPid
-
-    log_alarm("process (%s) to be killed" % childPid)
-    try:
-        os.kill(childPid, signal.SIGKILL)
-        log_alarm("process (%s) killed" % childPid)
-        return
-    except:
-        pass
-
-    try:
-        time.sleep(1)
-        os.kill(childPid, 0)
-        log_alarm("process (%s) could not be killed" % childPid)
-    except:
-        pass
 
 def remote_execute(job, eventName, localUserName, remoteUserName, remoteHostName, command, timeout=None):
     """Securely execute a command at remoteUserName@remoteHostName from
@@ -83,20 +59,18 @@ def remote_execute(job, eventName, localUserName, remoteUserName, remoteHostName
     command = command.strip()
     spawn_starttime = time.time()
 
-    childPid = 0
-
-    rv = 0
-    if globs.remote_execute_enabled:
+    if not globs.remote_execute_enabled:
+        # simulation
+        pid = 0
+        rv = 0
+    else:
         # validate
         if remoteHostName in LOCAL_HOST_NAMES and not allow_localhost:
             raise RemoteExecuteException("Execution on local host is not allowed.")
-
         if remoteHostName == "":
             raise RemoteExecuteException("Missing host name for event (%s)." % eventName)
-
         if not allow_root_events and localUid == 0:
             raise RemoteExecuteException("Root user not allowed to execute.")
-
         if remote_shell_type != "ssh":
             raise RemoteExecuteException("Unknown remote shell type (%s)." % remote_shell_type)
 
@@ -104,11 +78,10 @@ def remote_execute(job, eventName, localUserName, remoteUserName, remoteHostName
         rv = -1
         if command != "":
             try:
-                args = [ remote_shell_exec, "-f", "-n", "-t", "-l", remoteUserName, remoteHostName, command ]
-                #args = [ remote_shell_exec, "-n", "-t", "-l", remoteUserName, remoteHostName, command ]
-                childPid = os.fork()
+                args = [remote_shell_exec, "-f", "-n", "-t", "-l", remoteUserName, remoteHostName, command]
+                pid = os.fork()
 
-                if childPid == 0:
+                if pid == 0:
                     ### child
                     try:
                         os.setuid(localUid)
@@ -123,14 +96,14 @@ def remote_execute(job, eventName, localUserName, remoteUserName, remoteHostName
                 ### parent
                 # poll and wait
                 while timeout > 0:
-                    waitPid, waitStatus = os.waitpid(childPid, os.WNOHANG)
+                    waitPid, waitStatus = os.waitpid(pid, os.WNOHANG)
                     if waitPid != 0:
                         break
 
                     time.sleep(0.01)
                     timeout -= 0.01
                 else:
-                    os.kill(childPid, signal.SIGKILL)
+                    os.kill(pid, signal.SIGKILL)
 
                 if os.WIFSIGNALED(waitStatus):
                     rv = -2
@@ -140,6 +113,6 @@ def remote_execute(job, eventName, localUserName, remoteUserName, remoteHostName
                 log_message("error", "Execute failed (%s)." % detail)
 
     spawn_endtime = time.time()
-    log_execute(job.jobid, job.jobgid, localUserName, remoteUserName, remoteHostName, eventName, childPid, spawn_endtime-spawn_starttime, rv)
+    log_execute(job.jobid, job.jobgid, localUserName, remoteUserName, remoteHostName, eventName, pid, spawn_endtime-spawn_starttime, rv)
 
     return rv
