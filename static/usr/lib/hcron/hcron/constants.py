@@ -28,6 +28,7 @@ __all__ = [
     "CONFIG_ALLOW_LOCALHOST",
     "CONFIG_ALLOW_ROOT_EVENTS",
     "CONFIG_COMMAND_SPAWN_TIMEOUT",
+    "CONFIG_ERROR_ON_EMPTY_COMMAND",
     "CONFIG_LOG_PATH",
     "CONFIG_MAX_ACTIVATED_EVENTS",
     "CONFIG_MAX_CHAIN_EVENTS",
@@ -130,6 +131,7 @@ HCRON_EVENT_DEFINITION_MAP = dict([ (name, "") for name in HCRON_EVENT_DEFINITIO
 CONFIG_ALLOW_LOCALHOST = False              # allow_localhost
 CONFIG_ALLOW_ROOT_EVENTS = False            # allow_root_events
 CONFIG_COMMAND_SPAWN_TIMEOUT = 15           # command_spawn_timeout
+CONFIG_ERROR_ON_EMPTY_COMMAND = False       # error_on_empty_command
 CONFIG_LOG_PATH = os.path.join(HCRON_LOG_HOME, "hcron.log") # log_path
 CONFIG_MAX_ACTIVATED_EVENTS = 20            # max_activated_events
 CONFIG_MAX_CHAIN_EVENTS = 5                 # max_chain_events

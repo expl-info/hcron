@@ -500,13 +500,14 @@ class Event:
         event_next_event = varInfo.get("next_event", "")
         event_failover_event = varInfo.get("failover_event", "")
 
-        # execute (host required)
-        #if event_host == "":
-            #retVal = 0
-            #retVal = -1
-        #else:
-            #retVal = remote_execute(self.name, self.userName, event_as_user, event_host, event_command)
-        retVal = remote_execute(job, self.name, self.userName, event_as_user, event_host, event_command)
+        if event_command:
+            rv = remote_execute(job, self.name, self.userName, event_as_user, event_host, event_command)
+        else:
+            error_on_empty_command = globs.config.get().get("error_on_empty_command", CONFIG_ERROR_ON_EMPTY_COMMAND)
+            if error_on_empty_command:
+                rv = -1
+            else:
+                rv = 0
 
         if globs.simulate:
             if globs.simulate_show_event:
@@ -525,7 +526,8 @@ class Event:
                 print(tw.fill(fmt % ("when_dow", sched_datetime and sched_datetime.weekday())))
                 print(tw.fill(fmt % ("next_event", event_next_event)))
                 print(tw.fill(fmt % ("failover_event", event_failover_event)))
-        if retVal == 0:
+
+        if rv == 0:
             # success
             # notify
             if event_notify_email:

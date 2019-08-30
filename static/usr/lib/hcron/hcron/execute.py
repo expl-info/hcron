@@ -75,44 +75,44 @@ def remote_execute(job, eventName, localUserName, remoteUserName, remoteHostName
             raise RemoteExecuteException("Unknown remote shell type (%s)." % remote_shell_type)
 
         # spawn
+        pid = 0
         rv = -1
-        if command != "":
-            try:
-                args = [remote_shell_exec, "-f", "-n", "-t", "-l", remoteUserName, remoteHostName, command]
-                pid = os.fork()
+        try:
+            args = [remote_shell_exec, "-f", "-n", "-t", "-l", remoteUserName, remoteHostName, command]
+            pid = os.fork()
 
-                if pid == 0:
-                    ### child
-                    try:
-                        os.setuid(localUid)
-                        os.setsid()
-                        os.execv(args[0], args)
-                    except (OSError, Exception) as detail:
-                        rv = 256
-                    os._exit(rv)
+            if pid == 0:
+                ### child
+                try:
+                    os.setuid(localUid)
+                    os.setsid()
+                    os.execv(args[0], args)
+                except (OSError, Exception) as detail:
+                    rv = 256
+                os._exit(rv)
 
-                    # NEVER REACHES HERE
+                # NEVER REACHES HERE
 
-                ### parent
-                # poll and wait
-                while timeout > 0:
-                    waitPid, waitStatus = os.waitpid(pid, os.WNOHANG)
-                    if waitPid != 0:
-                        break
+            ### parent
+            # poll and wait
+            while timeout > 0:
+                waitPid, waitStatus = os.waitpid(pid, os.WNOHANG)
+                if waitPid != 0:
+                    break
 
-                    time.sleep(0.01)
-                    timeout -= 0.01
-                else:
-                    os.kill(pid, signal.SIGKILL)
+                time.sleep(0.01)
+                timeout -= 0.01
+            else:
+                os.kill(pid, signal.SIGKILL)
 
-                if os.WIFSIGNALED(waitStatus):
-                    rv = -2
-                elif os.WIFEXITED(waitStatus):
-                    rv = (os.WEXITSTATUS(waitStatus) == 255) and -1 or 0
-            except Exception as detail:
-                log_message("error", "Execute failed (%s)." % detail)
+            if os.WIFSIGNALED(waitStatus):
+                rv = -2
+            elif os.WIFEXITED(waitStatus):
+                rv = (os.WEXITSTATUS(waitStatus) == 255) and -1 or 0
+        except Exception as detail:
+            log_message("error", "Execute failed (%s)." % detail)
 
-    spawn_endtime = time.time()
-    log_execute(job.jobid, job.jobgid, localUserName, remoteUserName, remoteHostName, eventName, pid, spawn_endtime-spawn_starttime, rv)
+        spawn_endtime = time.time()
+        log_execute(job.jobid, job.jobgid, localUserName, remoteUserName, remoteHostName, eventName, pid, spawn_endtime-spawn_starttime, rv)
 
     return rv

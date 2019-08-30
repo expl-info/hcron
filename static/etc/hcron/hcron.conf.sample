@@ -4,6 +4,7 @@
     "allow_root_events": False,
     "command_spawn_timeout": 15,
     "events_base_path": None,
+    "error_on_empty_command": False,
     "log_path": "hcron.log",
     "max_events_per_user": 25,
     # hidden files, emacs backup files
