@@ -134,7 +134,7 @@ def convert_to_events(hostName, crontabPath, dirPath, mailAddr=""):
         raise Exception("Error: Could not create directory (%s)." % dirPath)
 
     # write the events to individual event definition files
-    for num, event in zip(xrange(len(events)), events):
+    for num, event in zip(range(len(events)), events):
         path = os.path.join(dirPath, str(num))
         try:
             open(path, "w+").write(event)

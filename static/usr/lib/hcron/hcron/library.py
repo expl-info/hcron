@@ -69,7 +69,7 @@ def date_to_bitmasks(*y_m_d_h_m_dow):
     return datemasks
 
     datemasks = {}
-    for i in xrange(len(m_d_h_m_dow)):
+    for i in range(len(m_d_h_m_dow)):
         datemasks[i] = 2**(m_d_h_m_dow[i]-1)
     return datemasks
     

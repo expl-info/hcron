@@ -105,7 +105,7 @@ class HcronTreeCache:
 
         # resolve for symlinks
         for name, linkname in link_cache.items():
-            for _ in xrange(10):
+            for _ in range(10):
                 if linkname in cache:
                     cache[name] = cache[linkname]
                     break

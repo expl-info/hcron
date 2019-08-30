@@ -465,7 +465,7 @@ class Event:
             return 0
 
         masks = self.masks
-        for i in xrange(len(datemasks)):
+        for i in range(len(datemasks)):
             try:
                 if not (datemasks[i] & masks[i]):
                     return 0
@@ -710,7 +710,7 @@ def hcron_variable_substitution2(value, varInfo, depth=1):
 
             if substBracket == "[":
                 # indexing
-                for i in xrange(len(ll)):
+                for i in range(len(ll)):
                     ll[i] = hcron_variable_substitution2(ll[i], varInfo, depth+1)
                     #open("/tmp/hc", "a").write("---- ll (%s) i (%s) ll[i] (%s)\n" % (str(ll), i, ll[i]))
                     # normalize: empty -> None
