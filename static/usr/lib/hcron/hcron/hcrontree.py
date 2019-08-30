@@ -121,7 +121,7 @@ class HcronTreeCache:
                 #del cache[name]
 
         # discard non-files
-        for name in cache.keys():
+        for name in list(cache.keys()):
             if cache[name] == None:
                 del cache[name]
 
@@ -162,7 +162,7 @@ class HcronTreeCache:
         return names
 
     def get_names(self):
-        return self.cache.keys()
+        return list(self.cache.keys())
 
     def get_contents(self, tree_path):
         return self.cache.get(tree_path)
