@@ -25,6 +25,7 @@
 """
 
 # system imports
+import ast
 import os
 import os.path
 import pwd
@@ -35,7 +36,6 @@ import sys
 # app imports
 from hcron.constants import *
 from hcron.logger import *
-from hcron.safeeval import safe_eval
 
 class TrackableFile:
     def __init__(self, path):
@@ -65,7 +65,7 @@ class ConfigFile(TrackableFile):
         try:
             mtime = os.stat(self.path)[stat.ST_MTIME]
             st = open(self.path, "r").read()
-            d = safe_eval(st)
+            d = ast.literal_eval(st)
             log_load_config()
         except Exception as detail:
             log_message("error", "Cannot load hcron.config file (%s)." % self.path)
