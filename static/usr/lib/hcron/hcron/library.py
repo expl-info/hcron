@@ -233,3 +233,13 @@ def serverize():
     # misc
     os.chdir("/")   # / is always available
     os.umask(0o022)
+
+def __tostrutf8(b):
+    """Convert to "utf-8" for python3.
+    """
+    return str(b, "utf-8")
+
+if sys.version_info.major == 3:
+    tostr = __tostrutf8
+else:
+    tostr = str

@@ -41,7 +41,7 @@ import tempfile
 from hcron import fspwd as pwd
 from hcron import globs
 from hcron.constants import *
-from hcron.library import copyfile
+from hcron.library import copyfile, tostr
 from hcron.logger import *
 
 class HcronTreeCache:
@@ -97,7 +97,7 @@ class HcronTreeCache:
                     if m.issym():
                         link_cache[m.name] = self.resolve_symlink(m.name, m.linkname)
                     elif m.isfile():
-                        cache[m.name] = f.extractfile(m).read()
+                        cache[m.name] = tostr(f.extractfile(m).read())
                     else:
                         # need to track
                         cache[m.name] = None
