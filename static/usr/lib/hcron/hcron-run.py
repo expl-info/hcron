@@ -24,7 +24,6 @@
 from datetime import datetime, timedelta
 import os
 import os.path
-import pwd
 import sys
 from sys import stderr
 import time
@@ -35,7 +34,7 @@ from hcron import globs
 from hcron import hcrontree
 from hcron.event import EventListList
 from hcron.file import ConfigFile
-from hcron.library import date_to_bitmasks
+from hcron.library import date_to_bitmasks, whoami
 from hcron.logger import *
 from hcron.server import Server
 
@@ -75,8 +74,6 @@ Options:
                     substitutions are applied.""" % d)
 
 if __name__ == "__main__":
-    whoami = pwd.getpwuid(os.getuid()).pw_name
-
     try:
         confpath = None
         delay = 0
@@ -121,7 +118,7 @@ if __name__ == "__main__":
         globs.remote_execute_enabled = False
         globs.email_notify_enabled = False
 
-        allowedUsers = [whoami]
+        allowedUsers = [whoami()]
 
         minute = timedelta(minutes=1)
         now = startdatetime

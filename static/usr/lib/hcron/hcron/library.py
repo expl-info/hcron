@@ -33,6 +33,7 @@ import sys
 # app imports
 from hcron import globs
 from hcron.constants import *
+from hcron.fspwd import getpwnam, getpwuid
 
 #
 # bitmasks makes for easy comparisons (bitwise-and), where each value
@@ -233,6 +234,15 @@ def serverize():
     # misc
     os.chdir("/")   # / is always available
     os.umask(0o022)
+
+def uid2username(uid):
+    return getpwuid(uid).pw_name
+
+def username2uid(name):
+    return getpwnam(name).pw_uid
+
+def whoami():
+    return uid2username(os.getuid())
 
 def __tostrutf8(b):
     """Convert to "utf-8" for python3.

@@ -29,7 +29,6 @@ files.
 import datetime
 import os
 import os.path
-import pwd
 import shutil
 import sys
 from sys import stderr

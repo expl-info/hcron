@@ -31,9 +31,9 @@ import subprocess
 import time
 
 # app imports
-from hcron import fspwd as pwd
 from hcron import globs
 from hcron.constants import *
+from hcron.library import username2uid
 from hcron.logger import *
 
 # global
@@ -76,7 +76,7 @@ def remote_execute(job, eventName, localUserName, remoteUserName, remoteHostName
     config = globs.config.get()
     allow_localhost = config.get("allow_localhost", CONFIG_ALLOW_LOCALHOST) 
     allow_root_events = config.get("allow_root_events", CONFIG_ALLOW_ROOT_EVENTS)
-    localUid = pwd.getpwnam(localUserName).pw_uid
+    localUid = username2uid(localUserName)
     remote_shell_type = config.get("remote_shell_type", CONFIG_REMOTE_SHELL_TYPE)
     remote_shell_exec = config.get("remote_shell_exec", CONFIG_REMOTE_SHELL_EXEC)
     timeout = timeout or globs.config.get().get("command_spawn_timeout", CONFIG_COMMAND_SPAWN_TIMEOUT)

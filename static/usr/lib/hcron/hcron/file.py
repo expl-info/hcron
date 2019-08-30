@@ -28,7 +28,6 @@
 import ast
 import os
 import os.path
-import pwd
 import re
 import stat
 import sys

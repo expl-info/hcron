@@ -24,7 +24,6 @@
 import errno
 import os
 import os.path
-import pwd
 try:
     import Queue as queue
 except:
@@ -36,6 +35,7 @@ import traceback
 from hcron import globs
 from hcron.clock import Clock
 from hcron.constants import *
+from hcron.library import uid2username
 from hcron.logger import *
 from hcron.threadpool import ThreadPool
 
@@ -111,7 +111,7 @@ class JobQueue:
                     path = os.path.join(HCRON_ONDEMAND_HOME, filename)
                     st = os.stat(path)
                     uid = st[stat.ST_UID]
-                    username = pwd.getpwuid(uid).pw_name
+                    username = uid2username(uid)
                     log_message("debug", "filename (%s) user (%s) path (%s)" % (filename, username, path))
 
                     if st.st_size > 4096:

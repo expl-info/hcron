@@ -28,13 +28,13 @@ Simply print the fully qualified host name of the executing machine.
 # system imports
 import os
 import os.path
-import pwd
 import socket
 import sys
 from sys import stderr
 
 # hcron imports
 from hcron.constants import *
+from hcron.library import whoami
 
 def print_usage():
     d = {
@@ -55,7 +55,7 @@ Where:
 
 def print_allowed():
     try:
-        userName = pwd.getpwuid(os.getuid()).pw_name
+        userName = whoami()
         userEventListsPath = "%s/%s" % (HCRON_EVENT_LISTS_DUMP_DIR, userName)
 
         if os.path.exists(userEventListsPath):
@@ -72,7 +72,7 @@ def print_fqdn():
 
 def print_user_event_status():
     try:
-        userName = pwd.getpwuid(os.getuid()).pw_name
+        userName = whoami()
         userEventListsPath = "%s/%s" % (HCRON_EVENT_LISTS_DUMP_DIR, userName)
 
         print(open(userEventListsPath, "r").read(), end="")

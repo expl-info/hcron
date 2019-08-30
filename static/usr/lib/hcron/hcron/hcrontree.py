@@ -38,10 +38,9 @@ import tarfile
 import tempfile
 
 #
-from hcron import fspwd as pwd
 from hcron import globs
 from hcron.constants import *
-from hcron.library import copyfile, tostr
+from hcron.library import copyfile, tostr, username2uid
 from hcron.logger import *
 
 class HcronTreeCache:
@@ -245,7 +244,7 @@ def install_hcron_tree_file(username, hostname):
         os.makedirs(system_ht_home)
 
     try:
-        uid = pwd.getpwnam(username).pw_uid
+        uid = username2uid(username)
         os.seteuid(uid)
         src = open(src_path, "r")
     except:

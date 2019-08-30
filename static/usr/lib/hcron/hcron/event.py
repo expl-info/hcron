@@ -37,13 +37,12 @@ import time
 import traceback
 
 # app imports
-from hcron import fspwd as pwd
 from hcron import globs
 from hcron.constants import *
 from hcron.execute import remote_execute
 from hcron.hcrontree import HcronTreeCache, create_user_hcron_tree_file, install_hcron_tree_file
 from hcron.job import Job
-from hcron.library import WHEN_BITMASKS, WHEN_INDEXES, WHEN_MIN_MAX, list_st_to_bitmask
+from hcron.library import WHEN_BITMASKS, WHEN_INDEXES, WHEN_MIN_MAX, list_st_to_bitmask, uid2username, username2uid
 from hcron.logger import *
 from hcron.notify import send_email_notification
 
@@ -62,7 +61,7 @@ def signal_reload(unload=False):
     globs.allowedUsers = AllowedUsersFile(HCRON_ALLOW_PATH)
     config = globs.config.get()
     signalHome = config.get("signalHome") or HCRON_SIGNAL_HOME
-    userName = pwd.getpwuid(os.getuid()).pw_name
+    userName = uid2username(os.getuid())
 
     if userName not in globs.allowedUsers.get():
         raise Exception("Warning: You are not an allowed hcron user.")
@@ -91,7 +90,7 @@ def reload_events(signalHomeMtime):
 
         if mtime <= signalHomeMtime:
             ownerId = st[stat.ST_UID]
-            userName = pwd.getpwuid(ownerId).pw_name
+            userName = uid2username(ownerId)
 
             if userName not in userNames:
                 try:
@@ -243,7 +242,7 @@ class EventList:
 
         try:
             f = None
-            userId = pwd.getpwnam(self.userName).pw_uid
+            userId = username2uid(self.userName)
             f = open(eventListFileName, "w+")
             os.chown(eventListFileName, userId, 0)
 
