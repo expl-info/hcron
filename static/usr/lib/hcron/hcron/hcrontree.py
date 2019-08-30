@@ -29,9 +29,11 @@ import os
 import os.path
 import shutil
 try:
-    import cStringIO as StringIO
+    # try this first since python-2.7 has io.StringIO
+    # which we do not want for python2
+    from StringIO import StringIO
 except:
-    import StringIO
+    from io import StringIO
 import tarfile
 import tempfile
 
@@ -71,10 +73,10 @@ class HcronTreeCache:
 
         if os.path.isdir(self.path) \
             and os.path.basename(self.path) == "events":
-            _f = StringIO.StringIO()
+            _f = StringIO()
             f = tarfile.open(mode="w", fileobj=_f)
             f.add(self.path, "events")
-            _f = StringIO.StringIO(_f.getvalue())
+            _f = StringIO(_f.getvalue())
             f = tarfile.open(fileobj=_f)
         else:
             f = tarfile.open(self.path)
