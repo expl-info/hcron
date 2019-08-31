@@ -73,6 +73,9 @@ def log_any2(op, userName="", *args):
     logger.info("%s|%s|%s|%s" % (globs.clock.now().isoformat(), op, userName, extra))
 
 # specific logging functions
+def log_activate(jobid, jobgid, triggername, username, eventname, eventchainnames):
+    log_any("activate", jobid, jobgid, triggername, username, eventname, eventchainnames)
+
 def log_alarm(msg=""):
     log_any("alarm", "", msg)
 

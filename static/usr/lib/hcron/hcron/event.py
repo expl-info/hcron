@@ -500,6 +500,8 @@ class Event:
         event_next_event = varInfo.get("next_event", "")
         event_failover_event = varInfo.get("failover_event", "")
 
+        log_activate(job.jobid, job.jobgid, triggername, self.userName, self.name, job.eventchainnames)
+
         if event_command:
             rv = remote_execute(job, self.name, self.userName, event_as_user, event_host, event_command)
         else:
