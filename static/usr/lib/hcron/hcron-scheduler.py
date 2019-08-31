@@ -74,16 +74,16 @@ def dump_signal_handler(num, frame):
             f.close()
 
     # event list
-    ell = globs.eventListList
+    ell = globs.eventlistlist
     for username in globs.allowedUsers.get():
-        el = ell.eventLists.get(username)
+        el = ell.eventlists.get(username)
         if el:
             el.dump()
 
 def reload_signal_handler(num, frame):
     log_message("info", "Received signal to reload.")
     signal.signal(num, reload_signal_handler)
-    globs.eventListList.load(globs.allowedUsers.get())
+    globs.eventlistlist.load(globs.allowedUsers.get())
 
 def quit_signal_handler(num, frame):
     log_message("info", "Received signal to exit.")
@@ -138,7 +138,7 @@ if __name__ == "__main__":
     setup_logger()
     globs.allowedUsers = AllowedUsersFile(HCRON_ALLOW_PATH)
     globs.signalHome = SignalHome(HCRON_SIGNAL_HOME)
-    globs.eventListList = EventListList(globs.allowedUsers.get())
+    globs.eventlistlist = EventListList(globs.allowedUsers.get())
 
     signal.signal(signal.SIGHUP, reload_signal_handler)
     #signal.signal(signal.SIGUSR1, dump_signal_handler)

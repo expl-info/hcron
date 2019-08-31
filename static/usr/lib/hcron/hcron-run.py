@@ -144,7 +144,7 @@ if __name__ == "__main__":
         globs.config.get()["log_path"] = None
         setup_logger()
 
-        globs.eventListList = EventListList(allowedUsers)
+        globs.eventlistlist = EventListList(allowedUsers)
 
         globs.server = Server(False)
         log_start()

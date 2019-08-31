@@ -32,7 +32,7 @@ signalHome = None
 
 server = None
 pidFile = None
-eventListList = None
+eventlistlist = None
 hcron_tree_cache = None
 simulate = False
 simulate_show_event = False

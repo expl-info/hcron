@@ -54,9 +54,37 @@ def get_event(username, eventname):
     """Return event object.
     """
     try:
-        return globs.eventListList.get(username).get(eventname)
+        return globs.eventlistlist.get(username).get(eventname)
     except:
         raise Exception("cannot find event (%s) for user (%s)" % (eventname, username))
+
+def reload_events(signalHomeMtime):
+    """Reload events for all users whose signal file mtime is <= to
+    that of the signal home directory. Any signal files that are
+    created subsequently, will be caught in the next pass.
+    """
+    usernames = {}  # to ensure reload only once per user
+
+    for filename in os.listdir(HCRON_SIGNAL_HOME):
+        path = os.path.join(HCRON_SIGNAL_HOME, filename)
+        st = os.stat(path)
+        mtime = st[stat.ST_MTIME]
+
+        if mtime <= signalHomeMtime:
+            username = uid2username(st[stat.ST_UID])
+
+            if username not in usernames:
+                try:
+                    install_hcron_tree_file(username, HOST_NAME)
+                    globs.eventlistlist.reload(username)
+                    usernames[username] = None
+                except Exception as detail:
+                    log_message("warning", "Could not install snapshot file for user (%s)." % username)
+
+            try:
+                os.remove(path) # remove singles and multiples
+            except Exception as detail:
+                log_message("warning", "Could not remove signal file (%s)." % path)
 
 def signal_reload(unload=False):
     """Signal to reload.
@@ -83,35 +111,6 @@ def signal_reload(unload=False):
     except:
         raise Exception("Error: Could not signal for reload.")
 
-def reload_events(signalHomeMtime):
-    """Reload events for all users whose signal file mtime is <= to
-    that of the signal home directory. Any signal files that are
-    created subsequently, will be caught in the next pass.
-    """
-    usernames = {}  # to ensure reload only once per user
-
-    for fileName in os.listdir(HCRON_SIGNAL_HOME):
-        path = os.path.join(HCRON_SIGNAL_HOME, fileName)
-        st = os.stat(path)
-        mtime = st[stat.ST_MTIME]
-
-        if mtime <= signalHomeMtime:
-            ownerId = st[stat.ST_UID]
-            username = uid2username(ownerId)
-
-            if username not in usernames:
-                try:
-                    install_hcron_tree_file(username, HOST_NAME)
-                    globs.eventListList.reload(username)
-                    usernames[username] = None
-                except Exception as detail:
-                    log_message("warning", "Could not install snapshot file for user (%s)." % username)
-
-            try:
-                os.remove(path) # remove singles and multiples
-            except Exception as detail:
-                log_message("warning", "Could not remove signal file (%s)." % path)
-
 class CannotLoadFileException(Exception):
     pass
 
@@ -134,7 +133,7 @@ class EventListList:
         self.load(usernames)
 
     def get(self, username):
-        return self.eventLists.get(username)
+        return self.eventlists.get(username)
 
     def load(self, usernames=None):
         """Load from scratch.
@@ -142,7 +141,7 @@ class EventListList:
         log_message("info", "Loading events.")
 
         t0 = time.time()
-        self.eventLists = {}
+        self.eventlists = {}
         self.usernames = usernames
         total = 0 
 
@@ -153,7 +152,7 @@ class EventListList:
         if username not in self.usernames:
             return
 
-        if username in self.eventLists:
+        if username in self.eventlists:
             self.remove(username)
 
         t0 = time.time()
@@ -161,23 +160,23 @@ class EventListList:
         t1 = time.time()
 
         if el:
-            self.eventLists[username] = el
+            self.eventlists[username] = el
             count = len(el.events)
             log_load_events(username, count, t1-t0)
 
     def remove(self, username):
-        if username in self.eventLists:
-            count = len(self.eventLists[username].events)
+        if username in self.eventlists:
+            count = len(self.eventlists[username].events)
 
             log_discard_events(username, count)
-            del self.eventLists[username]
+            del self.eventlists[username]
 
     def test(self, datemasks, usernames=None):
         events = []
         usernames = usernames or self.usernames
 
         for username in usernames:
-            el = self.eventLists.get(username)
+            el = self.eventlists.get(username)
 
             if el:
                 events.extend(el.test(datemasks))
@@ -192,7 +191,43 @@ class EventList:
 
     def __init__(self, username):
         self.username = username
+        self.events = None
         self.load()
+
+    def dump(self):
+        """Dump event list to a file.
+        """
+        path = "%s/%s" % (HCRON_EVENT_LISTS_DUMP_DIR, self.username)
+        if not path.startswith(HCRON_EVENT_LISTS_DUMP_DIR):
+            # paranoia?
+            return
+
+        oldumask = os.umask(0o337)
+
+        try:
+            os.remove(path)
+        except:
+            pass
+
+        try:
+            f = None
+            f = open(path, "w+")
+            os.chown(path, username2uid(self.username), 0)
+
+            events = self.events
+            for name in sorted(events.keys()):
+                reason = events[name].reason
+                if reason == None:
+                    f.write("accepted::%s\n" % name)
+                else:
+                    f.write("rejected:%s:%s\n" % (reason, name))
+        except Exception as detail:
+            pass
+        finally:
+            if f != None:
+                f.close()
+
+        os.umask(oldumask)
 
     def get(self, name):
         return self.events.get(name)
@@ -233,255 +268,31 @@ class EventList:
 
         self.dump()
 
-    def dump(self):
-        eventListFileName = "%s/%s" % (HCRON_EVENT_LISTS_DUMP_DIR, self.username)
-
-        if not eventListFileName.startswith(HCRON_EVENT_LISTS_DUMP_DIR):
-            # paranoia?
-            return
-
-        oldUmask = os.umask(0o337)
-
-        try:
-            os.remove(eventListFileName)
-        except:
-            pass
-
-        try:
-            f = None
-            userId = username2uid(self.username)
-            f = open(eventListFileName, "w+")
-            os.chown(eventListFileName, userId, 0)
-
-            events = self.events
-
-            for name in sorted(events.keys()):
-                reason = events[name].reason
-                if reason == None:
-                    f.write("accepted::%s\n" % name)
-                else:
-                    f.write("rejected:%s:%s\n" % (reason, name))
-
-            f.close()
-        except Exception as detail:
-            if f != None:
-                f.close()
-
-        os.umask(oldUmask)
-
     def print_events(self):
         for name, event in self.events.items():
             print("name (%s) event (%s)" % (name, event))
 
     def test(self, datemasks):
         events = []
-
         for event in self.events.values():
             if event.test(datemasks):
                 events.append(event)
-
         return events
 
 class Event:
     def __init__(self, name, username):
-        self.username = username
         self.name = name
-        self.reason = None
+        self.username = username
         self.assignments = None
-        self.when = None
-        self.masks = None
         self.deleted = False
+        self.masks = None
+        self.reason = None
+        self.when = None
 
         self.load()
 
-    def get_name(self):
-        return self.name
-
-    def get_var_info(self, triggername=None, eventChainNames=None, sched_datetime=None):
-        """Set variable values.
-
-        Early substitution: at event load time.
-        Late substitution: at event activate time.
-
-        eventChainNames != None means late since every event activate
-        has at least itself in the eventChainNames.
-        """
-
-        # early and late
-        varInfo = {
-            "when_year": "*",
-            "template_name": None,
-            "HCRON_HOST_NAME": socket.getfqdn(),
-            "HCRON_EVENT_NAME": self.name,
-            "HCRON_TRIGGER_NAME": triggername,
-        }
-        
-        if eventChainNames:
-            # late
-            selfEventChainNames = []
-            lastEventChainName = eventChainNames[-1]
-            for eventChainName in reversed(eventChainNames):
-                if eventChainName != lastEventChainName:
-                    break
-                selfEventChainNames.append(eventChainName)
-            varInfo["HCRON_EVENT_CHAIN"] = ":".join(eventChainNames)
-            varInfo["HCRON_SELF_CHAIN"] = ":".join(selfEventChainNames)
-
-            activate_datetime = globs.clock.now()
-            activate_datetime_utc = globs.clock.utcnow()
-            varInfo["HCRON_ACTIVATE_DATETIME"] = activate_datetime.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
-            varInfo["HCRON_ACTIVATE_DATETIME_UTC"] = activate_datetime_utc.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
-            varInfo["HCRON_ACTIVATE_EPOCHTIME"] = activate_datetime.strftime("%s")
-            varInfo["HCRON_ACTIVATE_EPOCHTIME_UTC"] = activate_datetime_utc.strftime("%s")
-
-            if sched_datetime:
-                varInfo["HCRON_SCHEDULE_DATETIME"] = sched_datetime.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
-                varInfo["HCRON_SCHEDULE_DATETIME_UTC"] = sched_datetime.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
-                varInfo["HCRON_SCHEDULE_EPOCHTIME"] = sched_datetime.strftime("%s")
-                varInfo["HCRON_SCHEDULE_EPOCHTIME_UTC"] = sched_datetime.strftime("%s")
-        else:
-            varInfo["HCRON_EVENT_CHAIN"] = ""
-            varInfo["HCRON_SELF_CHAIN"] = ""
-
-        return varInfo
-
-    def process_lines(self, lines):
-        """Line processing:
-        - non-continuation lines, left-stripped, starting with # are
-          discarded
-        - lines ending in \ are concatenated, unconditionally, with
-          the next line resulting in a replacement line
-        - lines stripped to "" are discarded
-        """
-        l = []
-        while lines:
-            line = lines.pop(0)
-            if line.lstrip().startswith("#"):
-                continue
-            while lines and line.endswith("\\"):
-                line = line[:-1]+lines.pop(0)
-
-            line = line.strip()
-            if line == "":
-                continue
-            l.append(line)
-
-        return l
-        
-    def process_includes(self, caller_name, lines, depth=1):
-        if depth > 3:
-            raise Exception("Reached include depth maximum (%s)." % depth)
-
-        l = []
-        for line in lines:
-            t = line.split()
-            if len(t) == 2 and t[0] == "include":
-                include_name = self.resolve_event_name_to_name(caller_name, t[1])
-                lines2 = globs.hcron_tree_cache.get_include_contents(include_name).split("\n")
-                lines2 = self.process_lines(lines2)
-                lines2 = self.process_includes(include_name, lines2, depth+1)
-                l.extend(lines2)
-            else:
-                l.append(line)
-
-        return l
-
-    def load(self):
-        varInfo = self.get_var_info()
-
-        masks = {
-            WHEN_INDEXES["when_year"]: list_st_to_bitmask("*", WHEN_MIN_MAX["when_year"], WHEN_BITMASKS["when_year"]),
-        }
-
-        try:
-            try:
-                lines = globs.hcron_tree_cache.get_event_contents(self.name).split("\n")
-                lines = self.process_lines(lines)
-            except Exception as detail:
-                self.reason = "cannot load file"
-                raise CannotLoadFileException("Ignored event file (%s)." % self.name)
-
-            try:
-                lines = self.process_includes(self.name, lines)
-            except Exception as detail:
-                self.reason = "cannot process include(s)"
-                raise CannotLoadFileException("Ignored event file (%s)." % self.name)
-
-            try:
-                assignments = load_assignments(lines)
-            except Exception as detail:
-                self.reason = "bad definition"
-                raise BadEventDefinitionException("Ignored event file (%s)." % self.name)
-
-            try:
-                # early substitution
-                eval_assignments(assignments, varInfo)
-            except Exception as detail:
-                self.reason = "bad variable substitution"
-                raise BadVariableSubstitutionException("Ignored event file (%s)." % self.name)
-
-            # for backward compatibility: rejected events may have
-            # invalid when_* settings but assignments otherwise; useful
-            # for non-scheduled events in event chains
-            #
-            # *** keep until alternate solution ***
-            self.assignments = assignments
-
-            # template check (this should preced when_* checks)
-            if varInfo["template_name"] == self.name.split("/")[-1]:
-                self.reason = "template"
-                raise TemplateEventDefinitionException("Ignored event file (%s). Template name (%s)." % (self.name, varInfo["template_name"]))
-    
-            # bad definition check
-            try:
-                for name, value in varInfo.items():
-                    if name.startswith("when_"):
-                        masks[WHEN_INDEXES[name]] = list_st_to_bitmask(value, WHEN_MIN_MAX[name], WHEN_BITMASKS[name])
-    
-            except Exception as detail:
-                self.reason = "bad when_* setting"
-                raise BadEventDefinitionException("Ignored event file (%s)." % self.name)
-
-            self.masks = masks
-
-            # full specification check
-            for name in HCRON_EVENT_DEFINITION_NAMES:
-                if name not in varInfo:
-                    self.reason = "not fully specified, missing field (%s)" % name
-                    raise BadEventDefinitionException("Ignored event file (%s). Missing field (%s)." % \
-                        (self.name, name))
-
-            self.when = "%s %s %s %s %s %s" % \
-                (varInfo.get("when_year"),
-                    varInfo.get("when_month"),
-                    varInfo.get("when_day"),
-                    varInfo.get("when_hour"),
-                    varInfo.get("when_minute"),
-                    varInfo.get("when_dow"))
-
-        except:
-            if self.reason == None:
-                self.reason = "unknown problem"
-
     def __repr__(self):
         return """<Event name (%s) when (%s)>""" % (self.name, self.when)
-
-    def test(self, datemasks):
-        if self.reason != None:
-            return 0
-
-        masks = self.masks
-        for i in range(len(datemasks)):
-            try:
-                if not (datemasks[i] & masks[i]):
-                    return 0
-            except Exception as detail:
-                # should not get here
-                log_message("error", "detail (%s) self.reason (%s) user (%s) name (%s) when (%s)." % \
-                    (detail, self.reason, self.username, self.name, self.when))
-                return 0
-
-        return 1
 
     def activate(self, job):
         """Activate event and return next event in chain.
@@ -491,26 +302,26 @@ class Event:
         eventchainnames = job.eventchainnames.split(":")
         sched_datetime = job.sched_datetime
 
-        varInfo = self.get_var_info(job.triggername, eventchainnames, sched_datetime)
+        varinfo = self.get_varinfo(job.triggername, eventchainnames, sched_datetime)
         nexteventname = None
         nexteventtype = None
 
         # late substitution
-        eval_assignments(self.assignments, varInfo)
-        #open("/tmp/hc", "a").write("self.name (%s) varInfo (%s)\n" % (self.name, str(varInfo)))
+        eval_assignments(self.assignments, varinfo)
+        #open("/tmp/hc", "a").write("self.name (%s) varinfo (%s)\n" % (self.name, str(varinfo)))
 
         # get event file def
-        event_as_user = varInfo.get("as_user")
-        event_command = varInfo.get("command")
+        event_as_user = varinfo.get("as_user")
+        event_command = varinfo.get("command")
         if event_as_user == "":
             event_as_user = self.username
-        event_host = varInfo.get("host")
-        event_notify_email = varInfo.get("notify_email")
-        event_notify_subject = varInfo.get("notify_subject", "").strip()
-        event_notify_message = varInfo.get("notify_message", "")
+        event_host = varinfo.get("host")
+        event_notify_email = varinfo.get("notify_email")
+        event_notify_subject = varinfo.get("notify_subject", "").strip()
+        event_notify_message = varinfo.get("notify_message", "")
         event_notify_message = event_notify_message.replace("\\n", "\n").replace("\\t", "\t")
-        event_next_event = varInfo.get("next_event", "")
-        event_failover_event = varInfo.get("failover_event", "")
+        event_next_event = varinfo.get("next_event", "")
+        event_failover_event = varinfo.get("failover_event", "")
 
         log_activate(job.jobid, job.jobgid, job.triggername, job.username, job.eventname, job.eventchainnames)
 
@@ -566,7 +377,192 @@ class Event:
 
         return nexteventnames, nexteventtype
 
-    def resolve_event_name_to_name(self, caller_name, name):
+    def get_name(self):
+        return self.name
+
+    def get_varinfo(self, triggername=None, eventchainnames=None, sched_datetime=None):
+        """Set variable values.
+
+        Early substitution: at event load time.
+        Late substitution: at event activate time.
+
+        eventchainnames != None means late since every event activate
+        has at least itself in the eventchainnames.
+        """
+
+        # early and late
+        varinfo = {
+            "when_year": "*",
+            "template_name": None,
+            "HCRON_HOST_NAME": socket.getfqdn(),
+            "HCRON_EVENT_NAME": self.name,
+            "HCRON_TRIGGER_NAME": triggername,
+        }
+        
+        if eventchainnames:
+            # late
+            selfeventchainnames = []
+            lasteventchainname = eventchainnames[-1]
+            for eventChainName in reversed(eventchainnames):
+                if eventChainName != lasteventchainname:
+                    break
+                selfeventchainnames.append(eventChainName)
+            varinfo["HCRON_EVENT_CHAIN"] = ":".join(eventchainnames)
+            varinfo["HCRON_SELF_CHAIN"] = ":".join(selfeventchainnames)
+
+            activate_datetime = globs.clock.now()
+            activate_datetime_utc = globs.clock.utcnow()
+            varinfo["HCRON_ACTIVATE_DATETIME"] = activate_datetime.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
+            varinfo["HCRON_ACTIVATE_DATETIME_UTC"] = activate_datetime_utc.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
+            varinfo["HCRON_ACTIVATE_EPOCHTIME"] = activate_datetime.strftime("%s")
+            varinfo["HCRON_ACTIVATE_EPOCHTIME_UTC"] = activate_datetime_utc.strftime("%s")
+
+            if sched_datetime:
+                varinfo["HCRON_SCHEDULE_DATETIME"] = sched_datetime.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
+                varinfo["HCRON_SCHEDULE_DATETIME_UTC"] = sched_datetime.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
+                varinfo["HCRON_SCHEDULE_EPOCHTIME"] = sched_datetime.strftime("%s")
+                varinfo["HCRON_SCHEDULE_EPOCHTIME_UTC"] = sched_datetime.strftime("%s")
+        else:
+            varinfo["HCRON_EVENT_CHAIN"] = ""
+            varinfo["HCRON_SELF_CHAIN"] = ""
+
+        return varinfo
+
+    def load(self):
+        varinfo = self.get_varinfo()
+
+        masks = {
+            WHEN_INDEXES["when_year"]: list_st_to_bitmask("*", WHEN_MIN_MAX["when_year"], WHEN_BITMASKS["when_year"]),
+        }
+
+        try:
+            try:
+                lines = globs.hcron_tree_cache.get_event_contents(self.name).split("\n")
+                lines = self.process_lines(lines)
+            except Exception as detail:
+                self.reason = "cannot load file"
+                raise CannotLoadFileException("Ignored event file (%s)." % self.name)
+
+            try:
+                lines = self.process_includes(self.name, lines)
+            except Exception as detail:
+                self.reason = "cannot process include(s)"
+                raise CannotLoadFileException("Ignored event file (%s)." % self.name)
+
+            try:
+                assignments = load_assignments(lines)
+            except Exception as detail:
+                self.reason = "bad definition"
+                raise BadEventDefinitionException("Ignored event file (%s)." % self.name)
+
+            try:
+                # early substitution
+                eval_assignments(assignments, varinfo)
+            except Exception as detail:
+                self.reason = "bad variable substitution"
+                raise BadVariableSubstitutionException("Ignored event file (%s)." % self.name)
+
+            # for backward compatibility: rejected events may have
+            # invalid when_* settings but assignments otherwise; useful
+            # for non-scheduled events in event chains
+            #
+            # *** keep until alternate solution ***
+            self.assignments = assignments
+
+            # template check (this should preced when_* checks)
+            if varinfo["template_name"] == self.name.split("/")[-1]:
+                self.reason = "template"
+                raise TemplateEventDefinitionException("Ignored event file (%s). Template name (%s)." % (self.name, varinfo["template_name"]))
+    
+            # bad definition check
+            try:
+                for name, value in varinfo.items():
+                    if name.startswith("when_"):
+                        masks[WHEN_INDEXES[name]] = list_st_to_bitmask(value, WHEN_MIN_MAX[name], WHEN_BITMASKS[name])
+    
+            except Exception as detail:
+                self.reason = "bad when_* setting"
+                raise BadEventDefinitionException("Ignored event file (%s)." % self.name)
+
+            self.masks = masks
+
+            # full specification check
+            for name in HCRON_EVENT_DEFINITION_NAMES:
+                if name not in varinfo:
+                    self.reason = "not fully specified, missing field (%s)" % name
+                    raise BadEventDefinitionException("Ignored event file (%s). Missing field (%s)." % \
+                        (self.name, name))
+
+            self.when = "%s %s %s %s %s %s" % \
+                (varinfo.get("when_year"),
+                    varinfo.get("when_month"),
+                    varinfo.get("when_day"),
+                    varinfo.get("when_hour"),
+                    varinfo.get("when_minute"),
+                    varinfo.get("when_dow"))
+        except:
+            if self.reason == None:
+                self.reason = "unknown problem"
+
+    def process_includes(self, callername, lines, depth=1):
+        if depth > 3:
+            raise Exception("Reached include depth maximum (%s)." % depth)
+
+        l = []
+        for line in lines:
+            t = line.split()
+            if len(t) == 2 and t[0] == "include":
+                include_name = self.resolve_event_name_to_name(callername, t[1])
+                lines2 = globs.hcron_tree_cache.get_include_contents(include_name).split("\n")
+                lines2 = self.process_lines(lines2)
+                lines2 = self.process_includes(include_name, lines2, depth+1)
+                l.extend(lines2)
+            else:
+                l.append(line)
+
+        return l
+
+    def process_lines(self, lines):
+        """Line processing:
+        - non-continuation lines, left-stripped, starting with # are
+          discarded
+        - lines ending in \ are concatenated, unconditionally, with
+          the next line resulting in a replacement line
+        - lines stripped to "" are discarded
+        """
+        l = []
+        while lines:
+            line = lines.pop(0)
+            if line.lstrip().startswith("#"):
+                continue
+            while lines and line.endswith("\\"):
+                line = line[:-1]+lines.pop(0)
+
+            line = line.strip()
+            if line == "":
+                continue
+            l.append(line)
+
+        return l
+        
+    def test(self, datemasks):
+        if self.reason != None:
+            return 0
+
+        masks = self.masks
+        for i in range(len(datemasks)):
+            try:
+                if not (datemasks[i] & masks[i]):
+                    return 0
+            except Exception as detail:
+                # should not get here
+                log_message("error", "detail (%s) self.reason (%s) user (%s) name (%s) when (%s)." % \
+                    (detail, self.reason, self.username, self.name, self.when))
+                return 0
+
+        return 1
+
+    def resolve_event_name_to_name(self, callername, name):
         """Resolve event name relative to the caller event.
         
         1) relative to .../events, if starts with "/"
@@ -574,7 +570,7 @@ class Event:
         """
         if not name.startswith("/"):
             # absolutize name
-            name = os.path.join("/", os.path.dirname(caller_name), name)
+            name = os.path.join("/", os.path.dirname(callername), name)
 
         return name
 
@@ -583,42 +579,42 @@ import re
 #SUBST_NAME_RE = "(?P<op>[#$])(?P<name>HCRON_\w*)"
 SUBST_NAME_RE = "(?P<op>[#$])(?P<name>\w+)"
 SUBST_NAME_CRE = re.compile(SUBST_NAME_RE)
-def search_name_select(st, lastPos):
-    """Find startPos and endPos for:
+def search_name_select(st, lastpos):
+    """Find startpos and endpos for:
     1. [#$]<name>[<body>]
     2. [#$]<name>{<body>}
     3. [#$]<name>
     otherwise:
     3. None, None
     """
-    startPos, endPos = None, None
-    s = SUBST_NAME_CRE.search(st, lastPos)
+    startpos, endpos = None, None
+    s = SUBST_NAME_CRE.search(st, lastpos)
     if s:
-        startPos, endPos = s.span()
-        if endPos < len(st):
-            openB = st[endPos]
-            if openB in [ "[", "{" ]:
-                if openB == "[":
-                    closeB = "]"
-                elif openB == "{":
-                    closeB = "}"
+        startpos, endpos = s.span()
+        if endpos < len(st):
+            openb = st[endpos]
+            if openb in [ "[", "{" ]:
+                if openb == "[":
+                    closeb = "]"
+                elif openb == "{":
+                    closeb = "}"
 
                 depth = 0
-                for ch in st[endPos:]:
-                    if ch == openB:
+                for ch in st[endpos:]:
+                    if ch == openb:
                         depth += 1
-                    elif ch == closeB:
+                    elif ch == closeb:
                         depth -= 1
                         if depth == 0:
-                            endPos += 1
+                            endpos += 1
                             break
-                    endPos += 1
+                    endpos += 1
                 else:
                     # no closing bracket
-                    startPos = None
-                    endPos = None
+                    startpos = None
+                    endpos = None
 
-    return startPos, endPos
+    return startpos, endpos
         
 #SUBST_NAME_SELECT_RE = "(?P<op>[#$])(?P<name>HCRON_\w*)(((?P<square_bracket>\[)(?P<square_select>.*)\])|((?P<curly_bracket>\{)(?P<curly_select>.*)\}))?"
 SUBST_NAME_SELECT_RE = "(?P<op>[#$])(?P<name>\w+)(((?P<square_bracket>\[)(?P<square_select>.*)\])|((?P<curly_bracket>\{)(?P<curly_select>.*)\}))?"
@@ -632,39 +628,39 @@ SUBST_SEP_LIST_CRE = re.compile(SUBST_SEP_LIST_RE)
 SUBST_LIST_CRE = re.compile(SUBST_LIST_RE)
 SUBST_SLICE_CRE = re.compile(SUBST_SLICE_RE)
 
-def hcron_variable_substitution(value, varInfo, depth=1):
+def hcron_variable_substitution(value, varinfo, depth=1):
     """Perform variable substitution.
 
     Search for substitutable segments, substitute, repeat. Once a
     substitution is done, that segment is not treated again.
     """
     l = []
-    lastPos = 0
+    lastpos = 0
     while True:
         if 0:
-            s = SUBST_NAME_SELECT_CRE.search(value, lastPos)
+            s = SUBST_NAME_SELECT_CRE.search(value, lastpos)
             if s == None:
                 break
-            startPos, endPos = s.span()
+            startpos, endpos = s.span()
 
-        startPos, endPos = search_name_select(value, lastPos)
+        startpos, endpos = search_name_select(value, lastpos)
 
-        if startPos == None:
+        if startpos == None:
             break
 
-        l.append(value[lastPos:startPos])
-        l.append(hcron_variable_substitution2(value[startPos:endPos], varInfo))
-        lastPos = endPos
+        l.append(value[lastpos:startpos])
+        l.append(hcron_variable_substitution2(value[startpos:endpos], varinfo))
+        lastpos = endpos
 
-    l.append(value[lastPos:])
+    l.append(value[lastpos:])
 
     #open("/tmp/hc", "a").write("value (%s) -> (%s)\n" % (value, "".join(l)))
 
     return "".join(l)
 
-def hcron_variable_substitution2(value, varInfo, depth=1):
+def hcron_variable_substitution2(value, varinfo, depth=1):
     """Recursively resolve all variables in value with settings in
-    varInfo. The mechanism is:
+    varinfo. The mechanism is:
     1) match
     2) resolve
     3) proceed to next match level (name, select, ...)
@@ -678,7 +674,7 @@ def hcron_variable_substitution2(value, varInfo, depth=1):
 
         op = nid.get("op")
         substName = nid.get("name")
-        nameValue = varInfo.get(substName)
+        nameValue = varinfo.get(substName)
         substBracket = nid.get("square_bracket") and "[" or (nid.get("curly_bracket") and "{") or None
         #open("/tmp/hc", "a").write(" **** substBracket *** (%s)\n" % substBracket)
         if substBracket == "[":
@@ -687,7 +683,7 @@ def hcron_variable_substitution2(value, varInfo, depth=1):
             substSelect = nid.get("curly_select", "")
         else:
             substSelect = None
-        substSelect = hcron_variable_substitution2(substSelect, varInfo, depth+1)
+        substSelect = hcron_variable_substitution2(substSelect, varinfo, depth+1)
 
 
         if substSelect == None:
@@ -704,11 +700,11 @@ def hcron_variable_substitution2(value, varInfo, depth=1):
             elif substSplitSep == "":
                 pass
             else:
-                substSplitSep = hcron_variable_substitution2(substSplitSep, varInfo, depth+1)
+                substSplitSep = hcron_variable_substitution2(substSplitSep, varinfo, depth+1)
             if substJoinSep == None:
                 substJoinSep = substSplitSep
             else:
-                substJoinSep = hcron_variable_substitution2(substJoinSep, varInfo, depth+1)
+                substJoinSep = hcron_variable_substitution2(substJoinSep, varinfo, depth+1)
 
             if substSplitSep == "":
                 nameValues = list(nameValue)
@@ -716,7 +712,7 @@ def hcron_variable_substitution2(value, varInfo, depth=1):
                 nameValues = nameValue.split(substSplitSep)
 
             substList = sid["list"]
-            substList = hcron_variable_substitution2(substList, varInfo, depth+1)
+            substList = hcron_variable_substitution2(substList, varinfo, depth+1)
 
             # fix RE to avoid having to check for None for single list value
             ll = substList.split(",")
@@ -725,15 +721,15 @@ def hcron_variable_substitution2(value, varInfo, depth=1):
             if substBracket == "[":
                 # indexing
                 for i in range(len(ll)):
-                    ll[i] = hcron_variable_substitution2(ll[i], varInfo, depth+1)
+                    ll[i] = hcron_variable_substitution2(ll[i], varinfo, depth+1)
                     #open("/tmp/hc", "a").write("---- ll (%s) i (%s) ll[i] (%s)\n" % (str(ll), i, ll[i]))
                     # normalize: empty -> None
                     irl = [ el != "" and el or None for el in SUBST_SLICE_CRE.match(ll[i]).groups() ]
                     #open("/tmp/hc", "a").write("------- irl (%s)\n" % str(irl))
                     start, endColon, end, stepColon, step = irl[0:5]
-                    start = hcron_variable_substitution2(start, varInfo, depth+1)
-                    end = hcron_variable_substitution2(end, varInfo, depth+1)
-                    step = hcron_variable_substitution2(step, varInfo, depth+1)
+                    start = hcron_variable_substitution2(start, varinfo, depth+1)
+                    end = hcron_variable_substitution2(end, varinfo, depth+1)
+                    step = hcron_variable_substitution2(step, varinfo, depth+1)
 
                     if step != None:
                         step = int(step)
@@ -756,7 +752,7 @@ def hcron_variable_substitution2(value, varInfo, depth=1):
                     #open("/tmp/hc", "a").write("------------ ll[i] (%s)\n" % str(ll[i]))
             elif substBracket == "{":
                 # matching: substitute, match, flatten
-                ll = [ hcron_variable_substitution2(x, varInfo, depth+1) for x in ll ]
+                ll = [ hcron_variable_substitution2(x, varinfo, depth+1) for x in ll ]
                 #open("/tmp/hc", "a").write("---- ll (%s) nameValues (%s)\n" % (str(ll), nameValues))
                 ll = [ el for x in ll for el in fnmatch.filter(nameValues, x) ]
                 #open("/tmp/hc", "a").write("------ ll (%s)\n" % str(ll))
@@ -772,6 +768,13 @@ def hcron_variable_substitution2(value, varInfo, depth=1):
 
     return value
 
+def eval_assignments(assignments, varinfo):
+    """Evaluate assignments using the settings in varinfo and storing the
+    results back to varinfo.
+    """
+    for name, value in assignments:
+        varinfo[name] = hcron_variable_substitution(value, varinfo)
+
 def load_assignments(lines):
     """Load lines with the format name=value into a list of
     (name, value) tuples.
@@ -783,12 +786,3 @@ def load_assignments(lines):
         l.append((name.strip(), value.strip()))
 
     return l
-
-def eval_assignments(assignments, varInfo):
-    """Evaluate assignments using the settings in varInfo and storing the
-    results back to varInfo.
-    """
-    for name, value in assignments:
-        varInfo[name] = hcron_variable_substitution(value, varInfo)
-
-

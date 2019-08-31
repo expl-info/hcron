@@ -190,8 +190,8 @@ class JobQueue:
                 return
 
             for nexteventname in nexteventnames:
-                eventList = globs.eventListList.get(event.username)
-                nextevent = eventList and eventList.get(nexteventname)
+                eventlist = globs.eventlistlist.get(event.username)
+                nextevent = eventlist and eventlist.get(nexteventname)
 
                 # problem cases for nextevent
                 if nextevent == None:

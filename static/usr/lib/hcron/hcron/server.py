@@ -107,7 +107,7 @@ class Server:
             if globs.allowedUsers.is_modified():
                 log_message("info", "hcron.allow was modified")
                 globs.allowedUsers.load()
-                globs.eventListList = EventListList(globs.allowedUsers.get())
+                globs.eventlistlist = EventListList(globs.allowedUsers.get())
             if globs.signalHome.is_modified():
                 log_message("info", "signalHome was modified")
                 globs.signalHome.load()
@@ -127,7 +127,7 @@ class Server:
         # hcron: 0=sun - 6=sat; isoweekday: 1=mon = 7=sun
         hcronWeekday = now.isoweekday() % 7
         datemasks = date_to_bitmasks(now.year, now.month, now.day, now.hour, now.minute, hcronWeekday)
-        events = globs.eventListList.test(datemasks)
+        events = globs.eventlistlist.test(datemasks)
         if events:
             for event in events:
                 job = Job()
