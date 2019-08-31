@@ -1,6 +1,6 @@
 #! /usr/bin/env python2
 #
-# hcron-execute.py
+# hcron-activate.py
 
 # GPL--start
 # This file is part of hcron
@@ -21,7 +21,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # GPL--end
 
-"""Front-end to request an event be executed on demand.
+"""Front-end to request an event be activated on demand.
 """
 
 # system imports
@@ -41,7 +41,7 @@ def print_usage():
 usage: %(progname)s <eventname>
        %(progname)s -h|--help
 
-Request for the named event to execute now.""" % d)
+Request for the named event to activate now.""" % d)
 
 if __name__ == "__main__":
     progname = os.path.basename(sys.argv[0])
