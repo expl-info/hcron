@@ -181,40 +181,40 @@ def dir_walk(top, topdown=True, onerror=None, ignoreMatchFn=None):
     if not topdown:
         yield top, dirs, nondirs
 
-def get_events_home(userName):
+def get_events_home(username):
     """Returns the user-specific events/ directory path.
     """
     config = globs.config.get()
     events_base_path = (config.get("events_base_path") or "").strip()
 
     if events_base_path == "":
-        path = os.path.expanduser("~%s/.hcron/%s/events" % (userName, HOST_NAME))
+        path = os.path.expanduser("~%s/.hcron/%s/events" % (username, HOST_NAME))
     else:
-        path = os.path.join(events_base_path, userName, ".hcron/%s/events" % HOST_NAME)
+        path = os.path.join(events_base_path, username, ".hcron/%s/events" % HOST_NAME)
 
     if path.startswith("~"):
         return None
 
     return path
 
-def get_includes_home(userName):
+def get_includes_home(username):
     """Returns the user-specific includes/ directory path.
     """
     config = globs.config.get()
     events_base_path = (config.get("events_base_path") or "").strip()
 
     if events_base_path == "":
-        path = os.path.expanduser("~%s/.hcron/%s/includes" % (userName, HOST_NAME))
+        path = os.path.expanduser("~%s/.hcron/%s/includes" % (username, HOST_NAME))
     else:
-        path = os.path.join(events_base_path, userName, ".hcron/%s/includes" % HOST_NAME)
+        path = os.path.join(events_base_path, username, ".hcron/%s/includes" % HOST_NAME)
 
     if path.startswith("~"):
         return None
 
     return path
     
-def get_events_home_snapshot(userName):
-    path = os.path.join(HCRON_EVENTS_SNAPSHOT_HOME, userName)
+def get_events_home_snapshot(username):
+    path = os.path.join(HCRON_EVENTS_SNAPSHOT_HOME, username)
 
     return path
 

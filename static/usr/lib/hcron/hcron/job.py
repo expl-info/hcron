@@ -177,12 +177,12 @@ class JobQueue:
             # None, next_event, or failover_event is returned
             nexteventnames, nexteventtype = event.activate(job)
         except Exception as detail:
-            log_message("error", "handle_job (%s)" % detail, user_name=event.userName)
+            log_message("error", "handle_job (%s)" % detail, user_name=event.username)
             nexteventnames, nexteventtype = [], None
 
         if nexteventnames:
             if len(eventChainNames) >= max_chain_events:
-                log_message("error", "Event chain limit (%s) reached at (%s)." % (max_chain_events, ":".join(nexteventnames)), user_name=event.userName)
+                log_message("error", "Event chain limit (%s) reached at (%s)." % (max_chain_events, ":".join(nexteventnames)), user_name=event.username)
                 return
 
             if len(nexteventnames) > max_next_events:
@@ -190,14 +190,14 @@ class JobQueue:
                 return
 
             for nexteventname in nexteventnames:
-                eventList = globs.eventListList.get(event.userName)
+                eventList = globs.eventListList.get(event.username)
                 nextevent = eventList and eventList.get(nexteventname)
 
                 # problem cases for nextevent
                 if nextevent == None:
-                    log_message("error", "Chained event (%s) does not exist." % nexteventname, user_name=event.userName)
+                    log_message("error", "Chained event (%s) does not exist." % nexteventname, user_name=event.username)
                 elif nextevent.assignments == None and nextevent.reason not in [ None, "template" ]:
-                    log_message("error", "Chained event (%s) was rejected (%s)." % (nexteventname, nextevent.reason), user_name=event.userName)
+                    log_message("error", "Chained event (%s) was rejected (%s)." % (nexteventname, nextevent.reason), user_name=event.username)
                     nextevent = None
 
                 nextjob = Job(job.jobid)

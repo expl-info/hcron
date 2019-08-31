@@ -68,18 +68,18 @@ def signal_reload(unload=False):
     globs.allowedUsers = AllowedUsersFile(HCRON_ALLOW_PATH)
     config = globs.config.get()
     signalHome = config.get("signalHome") or HCRON_SIGNAL_HOME
-    userName = uid2username(os.getuid())
+    username = uid2username(os.getuid())
 
-    if userName not in globs.allowedUsers.get():
+    if username not in globs.allowedUsers.get():
         raise Exception("Warning: You are not an allowed hcron user.")
 
     try:
-        create_user_hcron_tree_file(userName, HOST_NAME, empty=unload)
+        create_user_hcron_tree_file(username, HOST_NAME, empty=unload)
     except Exception as detail:
         raise Exception("Error: Could not create hcron snapshot file (%s)." % detail)
 
     try:
-        tempfile.mkstemp(prefix=userName, dir=signalHome)
+        tempfile.mkstemp(prefix=username, dir=signalHome)
     except:
         raise Exception("Error: Could not signal for reload.")
 
@@ -88,7 +88,7 @@ def reload_events(signalHomeMtime):
     that of the signal home directory. Any signal files that are
     created subsequently, will be caught in the next pass.
     """
-    userNames = {}  # to ensure reload only once per user
+    usernames = {}  # to ensure reload only once per user
 
     for fileName in os.listdir(HCRON_SIGNAL_HOME):
         path = os.path.join(HCRON_SIGNAL_HOME, fileName)
@@ -97,15 +97,15 @@ def reload_events(signalHomeMtime):
 
         if mtime <= signalHomeMtime:
             ownerId = st[stat.ST_UID]
-            userName = uid2username(ownerId)
+            username = uid2username(ownerId)
 
-            if userName not in userNames:
+            if username not in usernames:
                 try:
-                    install_hcron_tree_file(userName, HOST_NAME)
-                    globs.eventListList.reload(userName)
-                    userNames[userName] = None
+                    install_hcron_tree_file(username, HOST_NAME)
+                    globs.eventListList.reload(username)
+                    usernames[username] = None
                 except Exception as detail:
-                    log_message("warning", "Could not install snapshot file for user (%s)." % userName)
+                    log_message("warning", "Could not install snapshot file for user (%s)." % username)
 
             try:
                 os.remove(path) # remove singles and multiples
@@ -129,55 +129,55 @@ class EventListList:
 
     All event lists are keyed on user name.
     """
-    def __init__(self, userNames):
+    def __init__(self, usernames):
         log_message("info", "Initializing events list.")
-        self.load(userNames)
+        self.load(usernames)
 
-    def get(self, userName):
-        return self.eventLists.get(userName)
+    def get(self, username):
+        return self.eventLists.get(username)
 
-    def load(self, userNames=None):
+    def load(self, usernames=None):
         """Load from scratch.
         """
         log_message("info", "Loading events.")
 
         t0 = time.time()
         self.eventLists = {}
-        self.userNames = userNames
+        self.usernames = usernames
         total = 0 
 
-        for userName in self.userNames:
-            self.reload(userName)
+        for username in self.usernames:
+            self.reload(username)
 
-    def reload(self, userName):
-        if userName not in self.userNames:
+    def reload(self, username):
+        if username not in self.usernames:
             return
 
-        if userName in self.eventLists:
-            self.remove(userName)
+        if username in self.eventLists:
+            self.remove(username)
 
         t0 = time.time()
-        el = EventList(userName)
+        el = EventList(username)
         t1 = time.time()
 
         if el:
-            self.eventLists[userName] = el
+            self.eventLists[username] = el
             count = len(el.events)
-            log_load_events(userName, count, t1-t0)
+            log_load_events(username, count, t1-t0)
 
-    def remove(self, userName):
-        if userName in self.eventLists:
-            count = len(self.eventLists[userName].events)
+    def remove(self, username):
+        if username in self.eventLists:
+            count = len(self.eventLists[username].events)
 
-            log_discard_events(userName, count)
-            del self.eventLists[userName]
+            log_discard_events(username, count)
+            del self.eventLists[username]
 
-    def test(self, datemasks, userNames=None):
+    def test(self, datemasks, usernames=None):
         events = []
-        userNames = userNames or self.userNames
+        usernames = usernames or self.usernames
 
-        for userName in userNames:
-            el = self.eventLists.get(userName)
+        for username in usernames:
+            el = self.eventLists.get(username)
 
             if el:
                 events.extend(el.test(datemasks))
@@ -190,8 +190,8 @@ class EventList:
     ~/.hcron/<hostName>/events).
     """
 
-    def __init__(self, userName):
-        self.userName = userName
+    def __init__(self, username):
+        self.username = username
         self.load()
 
     def get(self, name):
@@ -206,13 +206,13 @@ class EventList:
             ignoreMatchFn = names_to_ignore_cregexp and names_to_ignore_cregexp.match
 
             # global cache assumes single-threaded load!
-            hcron_tree_cache = globs.hcron_tree_cache = HcronTreeCache(self.userName, ignoreMatchFn)
+            hcron_tree_cache = globs.hcron_tree_cache = HcronTreeCache(self.username, ignoreMatchFn)
             for name in hcron_tree_cache.get_event_names():
                 try:
                     if hcron_tree_cache.is_ignored_event(name):
                         continue
 
-                    event = Event(name, self.userName)
+                    event = Event(name, self.username)
                 except Exception as detail:
                     # bad Event definition
                     pass
@@ -234,7 +234,7 @@ class EventList:
         self.dump()
 
     def dump(self):
-        eventListFileName = "%s/%s" % (HCRON_EVENT_LISTS_DUMP_DIR, self.userName)
+        eventListFileName = "%s/%s" % (HCRON_EVENT_LISTS_DUMP_DIR, self.username)
 
         if not eventListFileName.startswith(HCRON_EVENT_LISTS_DUMP_DIR):
             # paranoia?
@@ -249,7 +249,7 @@ class EventList:
 
         try:
             f = None
-            userId = username2uid(self.userName)
+            userId = username2uid(self.username)
             f = open(eventListFileName, "w+")
             os.chown(eventListFileName, userId, 0)
 
@@ -283,8 +283,8 @@ class EventList:
         return events
 
 class Event:
-    def __init__(self, name, userName):
-        self.userName = userName
+    def __init__(self, name, username):
+        self.username = username
         self.name = name
         self.reason = None
         self.assignments = None
@@ -478,7 +478,7 @@ class Event:
             except Exception as detail:
                 # should not get here
                 log_message("error", "detail (%s) self.reason (%s) user (%s) name (%s) when (%s)." % \
-                    (detail, self.reason, self.userName, self.name, self.when))
+                    (detail, self.reason, self.username, self.name, self.when))
                 return 0
 
         return 1
@@ -503,7 +503,7 @@ class Event:
         event_as_user = varInfo.get("as_user")
         event_command = varInfo.get("command")
         if event_as_user == "":
-            event_as_user = self.userName
+            event_as_user = self.username
         event_host = varInfo.get("host")
         event_notify_email = varInfo.get("notify_email")
         event_notify_subject = varInfo.get("notify_subject", "").strip()
@@ -515,7 +515,7 @@ class Event:
         log_activate(job.jobid, job.jobgid, job.triggername, job.username, job.eventname, job.eventchainnames)
 
         if event_command:
-            rv = remote_execute(job, self.name, self.userName, event_as_user, event_host, event_command)
+            rv = remote_execute(job, self.name, self.username, event_as_user, event_host, event_command)
         else:
             error_on_empty_command = globs.config.get().get("error_on_empty_command", CONFIG_ERROR_ON_EMPTY_COMMAND)
             if error_on_empty_command:
@@ -550,7 +550,7 @@ class Event:
                 else:
                     subject = event_notify_subject
                 subject = subject[:1024]
-                send_email_notification(self.name, self.userName, event_notify_email, subject, event_notify_message)
+                send_email_notification(self.name, self.username, event_notify_email, subject, event_notify_message)
 
             nexteventname, nexteventtype = event_next_event, "next"
         else:

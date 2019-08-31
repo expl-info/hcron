@@ -63,14 +63,14 @@ def log_any(*args):
     if logger:
         log_any = log_any2
 
-def log_any2(op, userName="", *args):
+def log_any2(op, username="", *args):
     global logger
 
     if args:
         extra = "|".join([ str(el) for el in args ])
     else:
         extra = ""
-    logger.info("%s|%s|%s|%s" % (globs.clock.now().isoformat(), op, userName, extra))
+    logger.info("%s|%s|%s|%s" % (globs.clock.now().isoformat(), op, username, extra))
 
 # specific logging functions
 def log_activate(jobid, jobgid, triggername, username, eventname, eventchainnames):
@@ -79,14 +79,14 @@ def log_activate(jobid, jobgid, triggername, username, eventname, eventchainname
 def log_alarm(msg=""):
     log_any("alarm", "", msg)
 
-def log_discard_events(userName, count):
-    log_any("discard-events", userName, count)
+def log_discard_events(username, count):
+    log_any("discard-events", username, count)
 
 def log_end():
     log_any("end")
 
-def log_execute(jobid, jobgid, userName, asUser, host, eventName, pid, spawn_elapsed, retVal):
-    log_any("execute", jobid, jobgid, userName, asUser, host, eventName, pid, "%f" % spawn_elapsed, retVal)
+def log_execute(jobid, jobgid, username, asUser, host, eventName, pid, spawn_elapsed, retVal):
+    log_any("execute", jobid, jobgid, username, asUser, host, eventName, pid, "%f" % spawn_elapsed, retVal)
 
 def log_exit():
     log_any("exit")
@@ -97,14 +97,14 @@ def log_load_allow():
 def log_load_config():
     log_any("load-config")
 
-def log_load_events(userName, count, elapsed):
-    log_any("load-events", userName, count, "%f" % elapsed)
+def log_load_events(username, count, elapsed):
+    log_any("load-events", username, count, "%f" % elapsed)
 
 def log_message(typ, msg, user_name=""):
     log_any("message", user_name, typ, msg)
 
-def log_notify_email(userName, addrs, eventName):
-    log_any("notify-email", userName, addrs, eventName)
+def log_notify_email(username, addrs, eventName):
+    log_any("notify-email", username, addrs, eventName)
 
 def log_queue(jobid, jobgid, triggername, username, eventname, eventchainnames, queuetime):
     log_any("queue", jobid, jobgid, triggername, username, eventname, eventchainnames, queuetime)

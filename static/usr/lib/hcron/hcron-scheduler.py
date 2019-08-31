@@ -75,8 +75,8 @@ def dump_signal_handler(num, frame):
 
     # event list
     ell = globs.eventListList
-    for userName in globs.allowedUsers.get():
-        el = ell.eventLists.get(userName)
+    for username in globs.allowedUsers.get():
+        el = ell.eventLists.get(username)
         if el:
             el.dump()
 

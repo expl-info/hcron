@@ -92,9 +92,9 @@ class AllowedUsersFile(TrackableFile):
                 if line.startswith("#") or line == "":
                     continue
 
-                userName = line
-                if userName != "":
-                    allowedUsers.append(userName)
+                username = line
+                if username != "":
+                    allowedUsers.append(username)
 
             log_load_allow()
         except Exception as detail:
@@ -114,9 +114,9 @@ class old_AllowedUsersFile(TrackableFile):
                     line = line.strip()
                     if line.startswith("#") or line == "":
                         continue
-                    userName = line
-                    if userName != "":
-                        allowedUsers.append(userName)
+                    username = line
+                    if username != "":
+                        allowedUsers.append(username)
                 log_load_allow()
             except Exception as detail:
                 log_message("error", "Cannot load hcron.allow file (%s)." % self.path)

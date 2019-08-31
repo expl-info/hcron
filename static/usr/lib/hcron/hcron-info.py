@@ -57,8 +57,8 @@ Where:
 
 def print_allowed():
     try:
-        userName = whoami()
-        userEventListsPath = "%s/%s" % (HCRON_EVENT_LISTS_DUMP_DIR, userName)
+        username = whoami()
+        userEventListsPath = "%s/%s" % (HCRON_EVENT_LISTS_DUMP_DIR, username)
 
         if os.path.exists(userEventListsPath):
             print("yes")
@@ -74,8 +74,8 @@ def print_fqdn():
 
 def print_user_event_status():
     try:
-        userName = whoami()
-        userEventListsPath = "%s/%s" % (HCRON_EVENT_LISTS_DUMP_DIR, userName)
+        username = whoami()
+        userEventListsPath = "%s/%s" % (HCRON_EVENT_LISTS_DUMP_DIR, username)
 
         print(open(userEventListsPath, "r").read(), end="")
     except Exception as detail:
