@@ -483,12 +483,17 @@ class Event:
 
         return 1
 
-    def activate(self, job, triggername, eventChainNames=None, sched_datetime=None):
+    def activate(self, job):
         """Activate event and return next event in chain.
+
+        The job object provides context.
         """
-        varInfo = self.get_var_info(triggername, eventChainNames, sched_datetime)
-        nextEventName = None
-        nextEventType = None
+        eventchainnames = job.eventchainnames.split(":")
+        sched_datetime = job.sched_datetime
+
+        varInfo = self.get_var_info(job.triggername, eventchainnames, sched_datetime)
+        nexteventname = None
+        nexteventtype = None
 
         # late substitution
         eval_assignments(self.assignments, varInfo)
@@ -547,20 +552,19 @@ class Event:
                 subject = subject[:1024]
                 send_email_notification(self.name, self.userName, event_notify_email, subject, event_notify_message)
 
-            nextEventName, nextEventType = event_next_event, "next"
+            nexteventname, nexteventtype = event_next_event, "next"
         else:
             # child, with problem
-            nextEventName, nextEventType = event_failover_event, "failover"
+            nexteventname, nexteventtype = event_failover_event, "failover"
 
         # handle None, "", and valid string
-        if nextEventName:
-            names = []
-            for name in nextEventName.split(":"):
-                names.append(self.resolve_event_name_to_name(self.name, name.strip()))
-            nextEventName = ":".join(names)
-        nextEventType = nextEventName and nextEventType or None
+        nexteventnames = []
+        if nexteventname:
+            for name in nexteventname.split(":"):
+                nexteventnames.append(self.resolve_event_name_to_name(self.name, name.strip()))
+        nexteventtype = nexteventnames and nexteventtype or None
 
-        return nextEventName, nextEventType
+        return nexteventnames, nexteventtype
 
     def resolve_event_name_to_name(self, caller_name, name):
         """Resolve event name relative to the caller event.

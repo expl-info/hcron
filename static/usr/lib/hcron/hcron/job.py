@@ -175,35 +175,34 @@ class JobQueue:
         #log_message("info", "Processing event (%s)." % event.get_name())
         try:
             # None, next_event, or failover_event is returned
-            nextEventName, nextEventType = event.activate(job, job.triggername, eventChainNames, sched_datetime=job.sched_datetime)
+            nexteventnames, nexteventtype = event.activate(job)
         except Exception as detail:
             log_message("error", "handle_job (%s)" % detail, user_name=event.userName)
-            nextEventName, nextEventType = None, None
+            nexteventnames, nexteventtype = [], None
 
-        if nextEventName:
+        if nexteventnames:
             if len(eventChainNames) >= max_chain_events:
-                log_message("error", "Event chain limit (%s) reached at (%s)." % (max_chain_events, nextEventName), user_name=event.userName)
+                log_message("error", "Event chain limit (%s) reached at (%s)." % (max_chain_events, ":".join(nexteventnames)), user_name=event.userName)
                 return
 
-            nexteventnames = nextEventName.split(":")
             if len(nexteventnames) > max_next_events:
-                log_message("error", "Next event limit (%s) reached at (%s)." % (max_next_events, nextEventName))
+                log_message("error", "Next event limit (%s) reached at (%s)." % (max_next_events, ":".join(nexteventnames)))
                 return
 
-            for _nexteventname in nexteventnames:
+            for nexteventname in nexteventnames:
                 eventList = globs.eventListList.get(event.userName)
-                nextEvent = eventList and eventList.get(_nexteventname)
+                nextevent = eventList and eventList.get(nexteventname)
 
-                # problem cases for nextEvent
-                if nextEvent == None:
-                    log_message("error", "Chained event (%s) does not exist." % _nexteventname, user_name=event.userName)
-                elif nextEvent.assignments == None and nextEvent.reason not in [ None, "template" ]:
-                    log_message("error", "Chained event (%s) was rejected (%s)." % (_nexteventname, nextEvent.reason), user_name=event.userName)
-                    nextEvent = None
+                # problem cases for nextevent
+                if nextevent == None:
+                    log_message("error", "Chained event (%s) does not exist." % nexteventname, user_name=event.userName)
+                elif nextevent.assignments == None and nextevent.reason not in [ None, "template" ]:
+                    log_message("error", "Chained event (%s) was rejected (%s)." % (nexteventname, nextevent.reason), user_name=event.userName)
+                    nextevent = None
 
                 nextjob = Job(job.jobid)
-                nextjob.triggername = nextEventType
-                nextjob.eventname = nextEvent.name
+                nextjob.triggername = nexteventtype
+                nextjob.eventname = nextevent.name
                 nextjob.eventchainnames = "%s:%s" % (job.eventchainnames, nextjob.eventname)
                 nextjob.sched_datetime = globs.clock.now()
                 nextjob.username = job.username
