@@ -107,6 +107,9 @@ if __name__ == "__main__":
 
         if None in [enddatetime, eventsdir, startdatetime]:
             raise Exception()
+        if not os.path.isdir(eventsdir):
+            stderr.write("error: events directory (%s) not valid\n" % eventsdir)
+            sys.exit(1)
     except SystemExit:
         raise
     except:
