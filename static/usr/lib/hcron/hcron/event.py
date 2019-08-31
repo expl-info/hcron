@@ -279,7 +279,7 @@ class EventList:
         return events
 
 class Event:
-    def __init__(self, name, username):
+    def __init__(self, name, username, autoload=True):
         self.name = name
         self.username = username
         self.assignments = None
@@ -288,7 +288,8 @@ class Event:
         self.reason = None
         self.when = None
 
-        self.load()
+        if autoload:
+            self.load()
 
     def __repr__(self):
         return """<Event name (%s) when (%s)>""" % (self.name, self.when)
@@ -427,7 +428,7 @@ class Event:
 
         return varinfo
 
-    def load(self):
+    def load(self, path=None):
         varinfo = self.get_varinfo()
 
         masks = {
@@ -436,7 +437,10 @@ class Event:
 
         try:
             try:
-                lines = globs.hcron_tree_cache.get_event_contents(self.name).split("\n")
+                if path:
+                    lines = open(path).read().split("\n")
+                else:
+                    lines = globs.hcron_tree_cache.get_event_contents(self.name).split("\n")
                 lines = self.process_lines(lines)
             except Exception as detail:
                 self.reason = "cannot load file"
