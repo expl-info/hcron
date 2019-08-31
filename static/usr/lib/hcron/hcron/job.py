@@ -141,7 +141,7 @@ class JobQueue:
                     job.triggername = "ondemand"
                     job.event = event
                     job.eventname = event.name
-                    job.eventchainnames = None
+                    job.eventchainnames = event.name
                     job.sched_datetime = clock.now()
                     self.q.put(job)
                     log_queue(job.jobid, job.jobgid, job.triggername, job.event.userName, job.eventname, job.eventchainnames, job.sched_datetime)
@@ -167,7 +167,7 @@ class JobQueue:
             eventChainNames = job.eventchainnames.split(":")
         else:
             eventChainNames = []
-        eventChainNames.append(event.get_name())
+        #eventChainNames.append(event.get_name())
 
         #log_message("info", "Processing event (%s)." % event.get_name())
         try:
@@ -199,7 +199,7 @@ class JobQueue:
                 nextjob.triggername = nextEventType
                 nextjob.event = nextEvent
                 nextjob.eventname = _nexteventname
-                nextjob.eventchainnames = ":".join(eventChainNames)
+                nextjob.eventchainnames = "%s:%s" % (job.eventchainnames, nextjob.eventname)
                 nextjob.sched_datetime = globs.clock.now()
                 self.q.put(nextjob)
                 log_queue(nextjob.jobid, nextjob.jobgid, nextjob.triggername, nextjob.event.userName, nextjob.eventname, nextjob.eventchainnames, nextjob.sched_datetime)
