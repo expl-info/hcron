@@ -162,6 +162,7 @@ class JobQueue:
         event = job.event
 
         max_chain_events = max(globs.config.get().get("max_chain_events", CONFIG_MAX_CHAIN_EVENTS), 1)
+        max_next_events = max(globs.config.get().get("max_next_events", CONFIG_MAX_NEXT_EVENTS), 1)
 
         if job.eventchainnames:
             eventChainNames = job.eventchainnames.split(":")
@@ -182,7 +183,12 @@ class JobQueue:
                 log_message("error", "Event chain limit (%s) reached at (%s)." % (max_chain_events, nextEventName), user_name=event.userName)
                 return
 
-            for _nexteventname in nextEventName.split(":"):
+            nexteventnames = nextEventName.split(":")
+            if len(nexteventnames) > max_next_events:
+                log_message("error", "Next event limit (%s) reached at (%s)." % (max_next_events, nextEventName))
+                return
+
+            for _nexteventname in nexteventnames:
                 eventList = globs.eventListList.get(event.userName)
                 nextEvent = eventList and eventList.get(_nexteventname)
 
