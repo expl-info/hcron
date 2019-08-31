@@ -35,6 +35,7 @@ import traceback
 from hcron import globs
 from hcron.clock import Clock
 from hcron.constants import *
+from hcron.event import get_event
 from hcron.library import uid2username
 from hcron.logger import *
 from hcron.threadpool import ThreadPool
@@ -90,6 +91,7 @@ class Job:
         self.eventname = None
         self.sched_datetime = None
         self.triggername = None
+        self.username = None
 
 class JobQueue:
 
@@ -127,24 +129,20 @@ class JobQueue:
                         continue
 
                     eventname = eventname.strip()
-                    eventlist = globs.eventListList.get(username)
-                    if not eventlist:
-                        log_message("error", "Cannot find eventlist for user (%s)" % username)
-                        raise Exception()
-
-                    event = eventlist.get(eventname)
-                    if not event:
-                        log_message("error", "Cannot find event by name (%s)" % eventname)
-                        raise Exception()
+                    try:
+                        event = get_event(username, eventname)
+                    except:
+                        log_message("error", "Cannot get event (%s) for user (%s)" % (eventname, username))
+                        continue
 
                     job = Job()
                     job.triggername = "ondemand"
-                    job.event = event
                     job.eventname = event.name
                     job.eventchainnames = event.name
                     job.sched_datetime = clock.now()
+                    job.username = username
                     self.q.put(job)
-                    log_queue(job.jobid, job.jobgid, job.triggername, job.event.userName, job.eventname, job.eventchainnames, job.sched_datetime)
+                    log_queue(job.jobid, job.jobgid, job.triggername, job.username, job.eventname, job.eventchainnames, job.sched_datetime)
                 except:
                     log_message("warning", "Failed to queue ondemand event (%s)" % eventname)
                 finally:
@@ -159,7 +157,11 @@ class JobQueue:
         """Handle a single job and queue related/followon chain jobs
         according to the event(s) defined.
         """
-        event = job.event
+        try:
+            event = get_event(job.username, job.eventname)
+        except:
+            log_message("error", "Cannot get event (%s) for user (%s)" % (job.eventname, job.username))
+            return
 
         max_chain_events = max(globs.config.get().get("max_chain_events", CONFIG_MAX_CHAIN_EVENTS), 1)
         max_next_events = max(globs.config.get().get("max_next_events", CONFIG_MAX_NEXT_EVENTS), 1)
@@ -201,12 +203,12 @@ class JobQueue:
 
                 nextjob = Job(job.jobid)
                 nextjob.triggername = nextEventType
-                nextjob.event = nextEvent
-                nextjob.eventname = _nexteventname
+                nextjob.eventname = nextEvent.name
                 nextjob.eventchainnames = "%s:%s" % (job.eventchainnames, nextjob.eventname)
                 nextjob.sched_datetime = globs.clock.now()
+                nextjob.username = job.username
                 self.q.put(nextjob)
-                log_queue(nextjob.jobid, nextjob.jobgid, nextjob.triggername, nextjob.event.userName, nextjob.eventname, nextjob.eventchainnames, nextjob.sched_datetime)
+                log_queue(nextjob.jobid, nextjob.jobgid, nextjob.triggername, nextjob.username, nextjob.eventname, nextjob.eventchainnames, nextjob.sched_datetime)
 
     def handle_jobs(self):
         max_activated_events = max(globs.config.get().get("max_activated_events", CONFIG_MAX_ACTIVATED_EVENTS), 1)

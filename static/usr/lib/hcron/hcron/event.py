@@ -41,7 +41,6 @@ from hcron import globs
 from hcron.constants import *
 from hcron.execute import remote_execute
 from hcron.hcrontree import HcronTreeCache, create_user_hcron_tree_file, install_hcron_tree_file
-from hcron.job import Job
 from hcron.library import WHEN_BITMASKS, WHEN_INDEXES, WHEN_MIN_MAX, list_st_to_bitmask, uid2username, username2uid
 from hcron.logger import *
 from hcron.notify import send_email_notification
@@ -50,6 +49,14 @@ tw = textwrap.TextWrapper()
 tw.initial_indent = "    "
 tw.subsequent_indent = "    "
 tw.width = 128
+
+def get_event(username, eventname):
+    """Return event object.
+    """
+    try:
+        return globs.eventListList.get(username).get(eventname)
+    except:
+        raise Exception("cannot find event (%s) for user (%s)" % (eventname, username))
 
 def signal_reload(unload=False):
     """Signal to reload.
@@ -500,7 +507,7 @@ class Event:
         event_next_event = varInfo.get("next_event", "")
         event_failover_event = varInfo.get("failover_event", "")
 
-        log_activate(job.jobid, job.jobgid, triggername, self.userName, self.name, job.eventchainnames)
+        log_activate(job.jobid, job.jobgid, job.triggername, job.username, job.eventname, job.eventchainnames)
 
         if event_command:
             rv = remote_execute(job, self.name, self.userName, event_as_user, event_host, event_command)
