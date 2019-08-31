@@ -183,8 +183,6 @@ class JobQueue:
                 return
 
             for _nexteventname in nextEventName.split(":"):
-                log_chain_events(event.userName, event.get_name(), _nexteventname, nextEventType, eventChainNames, cycleDetected=(_nexteventname in eventChainNames))
-
                 eventList = globs.eventListList.get(event.userName)
                 nextEvent = eventList and eventList.get(_nexteventname)
 

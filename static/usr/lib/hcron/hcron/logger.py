@@ -79,10 +79,6 @@ def log_activate(jobid, jobgid, triggername, username, eventname, eventchainname
 def log_alarm(msg=""):
     log_any("alarm", "", msg)
 
-def log_chain_events(userName, eventName, nextEventName, nextEventType, eventChainNames, cycleDetected=False):
-    cycleMsg = cycleDetected and "cycle" or ""
-    log_any("chain-events", userName, eventName, nextEventName, nextEventType, ":".join(eventChainNames), cycleMsg)
-
 def log_discard_events(userName, count):
     log_any("discard-events", userName, count)
 
