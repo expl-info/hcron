@@ -28,6 +28,7 @@ import os.path
 import subprocess
 import sys
 from sys import stderr
+import traceback
 
 # app import
 from hcron.constants import *
@@ -54,8 +55,8 @@ Where:
 if __name__ == "__main__":
     try:
         createonly = False
-        reloadevents = False
         paths = None
+        reloadevents = False
 
         args = sys.argv[1:]
         while args:
@@ -78,7 +79,7 @@ if __name__ == "__main__":
     except SystemExit:
         raise
     except:
-        stderr.write("error: bad/missing arguments\n")
+        stderr.write("error: bad/missing argument\n")
         sys.exit(1)
 
     for path in paths:
@@ -96,7 +97,7 @@ if __name__ == "__main__":
             sys.exit(1)
 
     try:
-        if reloadevents or raw_input("reload events (y/n)? ") == "y":
+        if reloadevents or raw_input("Reload events (y/n)? ") == "y":
             signal_reload()
             now = datetime.datetime.now()
             next_interval = (now+datetime.timedelta(seconds=60)).replace(second=0,microsecond=0)
@@ -104,6 +105,8 @@ if __name__ == "__main__":
         else:
             print("Reload deferred.")
     except Exception as detail:
+        #traceback.print_exc()
         stderr.write("error: could not reload\n")
-        #print(detail)
         sys.exit(1)
+
+    sys.exit(0)
