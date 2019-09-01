@@ -37,7 +37,7 @@ import traceback
 # app imports
 from hcron.constants import *
 from hcron.event import signal_reload
-from hcron.file import ConfigFile
+from hcron.trackablefile import ConfigFile
 
 def print_usage():
     d = {

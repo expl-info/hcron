@@ -89,7 +89,7 @@ def signal_reload(unload=False):
     """Signal to reload.
     """
     import tempfile
-    from hcron.file import AllowedUsersFile, ConfigFile
+    from hcron.trackablefile import AllowedUsersFile, ConfigFile
 
     globs.config = ConfigFile(HCRON_CONFIG_PATH)
     globs.allowedUsers = AllowedUsersFile(HCRON_ALLOW_PATH)

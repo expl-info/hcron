@@ -33,10 +33,10 @@ from hcron import constants
 from hcron import globs
 from hcron import hcrontree
 from hcron.event import EventListList
-from hcron.file import ConfigFile
 from hcron.library import date_to_bitmasks, whoami
 from hcron.logger import *
 from hcron.server import Server
+from hcron.trackablefile import ConfigFile
 
 # override
 def get_hcron_tree_filename(username, hostname):

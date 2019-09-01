@@ -44,9 +44,10 @@ from hcron import globs
 from hcron import library
 from hcron.constants import *
 from hcron.event import EventListList
-from hcron.file import AllowedUsersFile, ConfigFile, PidFile, SignalHome
+from hcron.file import PidFile
 from hcron.logger import *
 from hcron.server import Server
+from hcron.trackablefile import AllowedUsersFile, ConfigFile, SignalHome
 
 def dump_signal_handler(num, frame):
     log_message("info", "Received signal to dump.")
