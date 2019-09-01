@@ -37,6 +37,7 @@ import traceback
 # app imports
 from hcron.constants import *
 from hcron.event import signal_reload
+from hcron.server import setup
 from hcron.trackablefile import ConfigFile
 
 def print_usage():
@@ -74,6 +75,8 @@ if __name__ == "__main__":
     # work
     #
     try:
+        setup()
+
         signal_reload(unload)
         now = datetime.datetime.now()
         next_interval = (now+datetime.timedelta(seconds=60)).replace(second=0,microsecond=0)

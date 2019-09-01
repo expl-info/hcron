@@ -30,7 +30,6 @@ import textwrap
 
 # app imports
 from hcron import globs
-from hcron.constants import *
 from hcron.logger import *
 
 tw = textwrap.TextWrapper()
@@ -43,7 +42,7 @@ def send_email_notification(eventName, fromUserName, toAddr, subject, content):
     config = globs.config.get()
     smtp_server = config.get("smtp_server", "localhost")
 
-    fromAddr = "%s@%s" % (fromUserName, HOST_NAME)
+    fromAddr = "%s@%s" % (fromUserName, globs.fqdn)
     message = """From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\n%s""" % \
         (fromAddr, toAddr, subject, content)
     try:

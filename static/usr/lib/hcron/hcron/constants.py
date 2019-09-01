@@ -65,11 +65,9 @@ __all__ = [
     "HCRON_VAR_PATH",
     "HOST_NAME",
     "JOBQ_SIZE",
-    "LOCAL_HOST_NAMES",
     "MINUTE_DELTA",
     "MONTH_NAMES_MAP",
     "PROG_NAME",
-    "SHORT_HOST_NAME",
     "USER_ID",
     "USER_NAME",
 ]
@@ -185,12 +183,6 @@ CRONTAB_ALIASES_MAP = {
 USER_ID = os.getuid()
 USER_NAME = pwd.getpwuid(USER_ID).pw_name
 HOST_NAME = socket.getfqdn()
-SHORT_HOST_NAME = socket.gethostname()
-LOCAL_HOST_NAMES = {
-    "localhost": None,
-    HOST_NAME: None,
-    SHORT_HOST_NAME: None,
-}
 
 MINUTE_DELTA = datetime.timedelta(minutes=1)
 

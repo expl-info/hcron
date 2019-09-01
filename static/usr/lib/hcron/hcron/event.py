@@ -28,7 +28,6 @@
 from datetime import datetime
 import os
 import os.path
-import socket
 import stat
 import textwrap
 import time
@@ -74,7 +73,7 @@ def reload_events(signalHomeMtime):
 
             if username not in usernames:
                 try:
-                    install_hcron_tree_file(username, HOST_NAME)
+                    install_hcron_tree_file(username, globs.fqdn)
                     globs.eventlistlist.reload(username)
                     usernames[username] = None
                 except Exception as detail:
@@ -101,7 +100,7 @@ def signal_reload(unload=False):
         raise Exception("Warning: You are not an allowed hcron user.")
 
     try:
-        create_user_hcron_tree_file(username, HOST_NAME, empty=unload)
+        create_user_hcron_tree_file(username, globs.fqdn, empty=unload)
     except Exception as detail:
         raise Exception("Error: Could not create hcron snapshot file (%s)." % detail)
 
@@ -357,7 +356,7 @@ class Event:
             # notify
             if event_notify_email:
                 if event_notify_subject == "":
-                    subject = """hcron (%s): "%s" executed at %s@%s""" % (HOST_NAME, self.name, event_as_user, event_host)
+                    subject = """hcron (%s): "%s" executed at %s@%s""" % (globs.fqdn, self.name, event_as_user, event_host)
                 else:
                     subject = event_notify_subject
                 subject = subject[:1024]
@@ -396,7 +395,7 @@ class Event:
             "template_name": None,
             "HCRON_EVENT_CHAIN": "",
             "HCRON_EVENT_NAME": self.name,
-            "HCRON_HOST_NAME": socket.getfqdn(),
+            "HCRON_HOST_NAME": globs.fqdn,
             "HCRON_SELF_CHAIN": "",
         }
         

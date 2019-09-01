@@ -143,3 +143,15 @@ class Server:
                 log_queue(job.jobid, job.jobgid, job.triggername, job.triggerorigin, job.username, job.eventname, job.eventchainnames, job.sched_datetime)
                 self.jobq.put(job)
         log_work(len(events), (time()-t0))
+
+def setup():
+    """Do general/common setup.
+
+    Must be called by hcron-run and hcron-scheduler.
+    """
+    import socket
+    from hcron.clock import Clock
+
+    globs.clock = Clock()
+    globs.fqdn = socket.getfqdn()
+    globs.localhostname = [globs.fqdn, socket.gethostname(), "localhost"]

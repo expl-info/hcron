@@ -65,7 +65,7 @@ def remote_execute(job, eventname, localusername, remoteusername, remotehostname
         rv = 0
     else:
         # validate
-        if remotehostname in LOCAL_HOST_NAMES and not allow_localhost:
+        if remotehostname in globs.localhostname and not allow_localhost:
             raise RemoteExecuteException("Execution on local host is not allowed.")
         if remotehostname == "":
             raise RemoteExecuteException("Missing host name for event (%s)." % eventname)

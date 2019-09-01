@@ -24,8 +24,7 @@
 """Globals. Should be imported as "from hcron import globs".
 """
 
-from hcron.clock import Clock
-
+clock = None
 config = None
 allowedUsers = None
 signalHome = None
@@ -37,9 +36,9 @@ hcron_tree_cache = None
 simulate = False
 simulate_show_event = False
 simulate_show_email = False
-clock = Clock()
 
 remote_execute_enabled = False
 email_notify_enabled = False
 
-del Clock
+fqdn = None
+localhostnames = []

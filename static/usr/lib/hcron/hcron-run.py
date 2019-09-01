@@ -35,7 +35,7 @@ from hcron import hcrontree
 from hcron.event import EventListList
 from hcron.library import date_to_bitmasks, whoami
 from hcron.logger import *
-from hcron.server import Server
+from hcron.server import Server, setup
 from hcron.trackablefile import ConfigFile
 
 # override
@@ -123,6 +123,8 @@ if __name__ == "__main__":
         sys.exit(1)
 
     try:
+        setup()
+
         globs.remote_execute_enabled = False
         globs.email_notify_enabled = False
 
@@ -138,7 +140,7 @@ if __name__ == "__main__":
         else:
             etcdir = os.path.realpath("%s/../../etc" % os.path.dirname(sys.argv[0]))
             constants.HCRON_CONFIG_PATH = os.path.join(etcdir, "hcron/hcron-run.conf")
-        constants.HOST_NAME = eventsdir.split("/")[-2]
+        globs.fqdn = eventsdir.split("/")[-2]
 
         globs.config = ConfigFile(constants.HCRON_CONFIG_PATH)
         globs.config.get()["log_path"] = None

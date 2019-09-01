@@ -46,7 +46,7 @@ from hcron.constants import *
 from hcron.event import EventListList
 from hcron.file import PidFile
 from hcron.logger import *
-from hcron.server import Server
+from hcron.server import Server, setup
 from hcron.trackablefile import AllowedUsersFile, ConfigFile, SignalHome
 
 def dump_signal_handler(num, frame):
@@ -132,6 +132,8 @@ if __name__ == "__main__":
     #
     # setup
     #
+    setup()
+
     globs.remote_execute_enabled = True
     globs.email_notify_enabled = True
 

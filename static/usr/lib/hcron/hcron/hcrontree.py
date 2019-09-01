@@ -55,7 +55,7 @@ class HcronTreeCache:
 
         self.username = username
         self.ignore_match_fn = ignore_match_fn or false_match
-        self.path = os.path.realpath(get_hcron_tree_filename(username, HOST_NAME))
+        self.path = os.path.realpath(get_hcron_tree_filename(username, globs.fqdn))
         self.ignored = {}
         self.cache = {}
         self.load()
