@@ -38,9 +38,9 @@ from hcron.logger import *
 class RemoteExecuteException(Exception):
     pass
 
-def remote_execute(job, eventName, localUserName, remoteUserName, remoteHostName, command, timeout=None):
-    """Securely execute a command at remoteUserName@remoteHostName from
-    localUserName@localhost within timeout time.
+def remote_execute(job, eventname, localusername, remoteusername, remotehostname, command, timeout=None):
+    """Securely execute a command at remoteusername@remotehostname from
+    localusername@localhost within timeout time.
 
     A poll+sleep approach is used.
 
@@ -52,7 +52,7 @@ def remote_execute(job, eventName, localUserName, remoteUserName, remoteHostName
     config = globs.config.get()
     allow_localhost = config.get("allow_localhost", CONFIG_ALLOW_LOCALHOST) 
     allow_root_events = config.get("allow_root_events", CONFIG_ALLOW_ROOT_EVENTS)
-    localUid = username2uid(localUserName)
+    localuid = username2uid(localusername)
     remote_shell_type = config.get("remote_shell_type", CONFIG_REMOTE_SHELL_TYPE)
     remote_shell_exec = config.get("remote_shell_exec", CONFIG_REMOTE_SHELL_EXEC)
     timeout = timeout or globs.config.get().get("command_spawn_timeout", CONFIG_COMMAND_SPAWN_TIMEOUT)
@@ -65,11 +65,11 @@ def remote_execute(job, eventName, localUserName, remoteUserName, remoteHostName
         rv = 0
     else:
         # validate
-        if remoteHostName in LOCAL_HOST_NAMES and not allow_localhost:
+        if remotehostname in LOCAL_HOST_NAMES and not allow_localhost:
             raise RemoteExecuteException("Execution on local host is not allowed.")
-        if remoteHostName == "":
-            raise RemoteExecuteException("Missing host name for event (%s)." % eventName)
-        if not allow_root_events and localUid == 0:
+        if remotehostname == "":
+            raise RemoteExecuteException("Missing host name for event (%s)." % eventname)
+        if not allow_root_events and localuid == 0:
             raise RemoteExecuteException("Root user not allowed to execute.")
         if remote_shell_type != "ssh":
             raise RemoteExecuteException("Unknown remote shell type (%s)." % remote_shell_type)
@@ -78,13 +78,13 @@ def remote_execute(job, eventName, localUserName, remoteUserName, remoteHostName
         pid = 0
         rv = -1
         try:
-            args = [remote_shell_exec, "-f", "-n", "-t", "-l", remoteUserName, remoteHostName, command]
+            args = [remote_shell_exec, "-f", "-n", "-t", "-l", remoteusername, remotehostname, command]
             pid = os.fork()
 
             if pid == 0:
                 ### child
                 try:
-                    os.setuid(localUid)
+                    os.setuid(localuid)
                     os.setsid()
                     os.execv(args[0], args)
                 except (OSError, Exception) as detail:
@@ -96,8 +96,8 @@ def remote_execute(job, eventName, localUserName, remoteUserName, remoteHostName
             ### parent
             # poll and wait
             while timeout > 0:
-                waitPid, waitStatus = os.waitpid(pid, os.WNOHANG)
-                if waitPid != 0:
+                waitpid, waitst = os.waitpid(pid, os.WNOHANG)
+                if waitpid != 0:
                     break
 
                 time.sleep(0.01)
@@ -105,14 +105,14 @@ def remote_execute(job, eventName, localUserName, remoteUserName, remoteHostName
             else:
                 os.kill(pid, signal.SIGKILL)
 
-            if os.WIFSIGNALED(waitStatus):
+            if os.WIFSIGNALED(waitst):
                 rv = -2
-            elif os.WIFEXITED(waitStatus):
-                rv = (os.WEXITSTATUS(waitStatus) == 255) and -1 or 0
+            elif os.WIFEXITED(waitst):
+                rv = (os.WEXITSTATUS(waitst) == 255) and -1 or 0
         except Exception as detail:
             log_message("error", "Execute failed (%s)." % detail)
 
         spawn_endtime = time.time()
-        log_execute(job.jobid, job.jobgid, localUserName, remoteUserName, remoteHostName, eventName, pid, spawn_endtime-spawn_starttime, rv)
+        log_execute(job.jobid, job.jobgid, localusername, remoteusername, remotehostname, eventname, pid, spawn_endtime-spawn_starttime, rv)
 
     return rv
