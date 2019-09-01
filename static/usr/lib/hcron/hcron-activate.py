@@ -29,6 +29,7 @@ import os
 import os.path
 import sys
 import tempfile
+import traceback
 
 # app imports
 from hcron.constants import *
@@ -73,8 +74,8 @@ if __name__ == "__main__":
         os.write(fd, "%s\n" % eventname)
         os.close(fd)
     except Exception as detail:
+        #traceback.print_exc()
         stderr.write("error: unexpected situation\n")
-        #print(detail)
         sys.exit(1)
 
     sys.exit(0)
