@@ -150,7 +150,7 @@ if __name__ == "__main__":
         log_start()
 
         while now < enddatetime:
-            globs.server.run_now("clock", now)
+            globs.server.run_now("clock", "hcron-run", now)
             while globs.server.jobq.q.qsize():
                 job = globs.server.jobq.get()
                 globs.server.jobq.handle_job(job)

@@ -115,6 +115,9 @@ def log_sleep(seconds):
 def log_start():
     log_any("start")
 
+def log_trigger(triggername, triggerorigin):
+    log_any("trigger", triggername, triggerorigin)
+
 def log_work(count, elapsed):
     log_any("work", "", count, "%f" % elapsed)
 

@@ -65,11 +65,13 @@ class Server:
         """
         now = globs.clock.now()
         next = now # special case
+        triggerorigin = "hcron-scheduler"
 
         if immediate:
             # special case: run with the current "now" time instead of
             # waiting for the next interval
-            self.run_now(now)
+            log_trigger("immediate", triggerorigin)
+            self.run_now("immediate", triggerorigin, now)
 
         while True:
             #
@@ -113,11 +115,12 @@ class Server:
                 globs.signalHome.load()
                 reload_events(globs.signalHome.get_modified_time())
 
-            self.run_now("clock", next)
+            log_trigger("clock", triggerorigin)
+            self.run_now("clock", triggerorigin, next)
 
     # TODO: should run_now fork so that the child handled the "now"
     # events and the parent returns to wait for the next "now"?
-    def run_now(self, triggername, now):
+    def run_now(self, triggername, triggerorigin, now):
         """Run using the "now" time value.
         """
         #

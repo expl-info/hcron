@@ -28,6 +28,7 @@ try:
     import Queue as queue
 except:
     import queue
+import socket
 import stat
 import time
 import traceback
@@ -114,6 +115,8 @@ class JobQueue:
                     st = os.stat(path)
                     uid = st[stat.ST_UID]
                     username = uid2username(uid)
+                    triggerorigin = "%s@%s" % (username, socket.getfqdn())
+                    log_trigger("ondemand", triggerorigin)
                     log_message("debug", "filename (%s) user (%s) path (%s)" % (filename, username, path))
 
                     if st.st_size > 4096:
