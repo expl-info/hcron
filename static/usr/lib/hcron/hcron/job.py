@@ -92,6 +92,7 @@ class Job:
         self.eventname = None
         self.sched_datetime = None
         self.triggername = None
+        self.triggerorigin = None
         self.username = None
 
 class JobQueue:
@@ -140,12 +141,13 @@ class JobQueue:
 
                     job = Job()
                     job.triggername = "ondemand"
+                    job.triggerorigin = triggerorigin
                     job.eventname = event.name
                     job.eventchainnames = event.name
                     job.sched_datetime = clock.now()
                     job.username = username
                     self.q.put(job)
-                    log_queue(job.jobid, job.jobgid, job.triggername, job.username, job.eventname, job.eventchainnames, job.sched_datetime)
+                    log_queue(job.jobid, job.jobgid, job.triggername, job.triggerorigin, job.username, job.eventname, job.eventchainnames, job.sched_datetime)
                 except:
                     log_message("warning", "Failed to queue ondemand event (%s)" % eventname)
                 finally:
@@ -205,12 +207,13 @@ class JobQueue:
 
                 nextjob = Job(job.jobid)
                 nextjob.triggername = nexteventtype
+                nextjob.triggerorigin = nextevent.name
                 nextjob.eventname = nextevent.name
                 nextjob.eventchainnames = "%s:%s" % (job.eventchainnames, nextjob.eventname)
                 nextjob.sched_datetime = globs.clock.now()
                 nextjob.username = job.username
                 self.q.put(nextjob)
-                log_queue(nextjob.jobid, nextjob.jobgid, nextjob.triggername, nextjob.username, nextjob.eventname, nextjob.eventchainnames, nextjob.sched_datetime)
+                log_queue(nextjob.jobid, nextjob.jobgid, nextjob.triggername, nextjob.triggerorigin, nextjob.username, nextjob.eventname, nextjob.eventchainnames, nextjob.sched_datetime)
 
     def handle_jobs(self):
         max_activated_events = max(globs.config.get().get("max_activated_events", CONFIG_MAX_ACTIVATED_EVENTS), 1)

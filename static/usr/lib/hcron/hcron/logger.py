@@ -73,8 +73,8 @@ def log_any2(op, username="", *args):
     logger.info("%s|%s|%s|%s" % (globs.clock.now().isoformat(), op, username, extra))
 
 # specific logging functions
-def log_activate(jobid, jobgid, triggername, username, eventname, eventchainnames):
-    log_any("activate", jobid, jobgid, triggername, username, eventname, eventchainnames)
+def log_activate(jobid, jobgid, triggername, triggerorigin, username, eventname, eventchainnames):
+    log_any("activate", jobid, jobgid, triggername, triggerorigin, username, eventname, eventchainnames)
 
 def log_alarm(msg=""):
     log_any("alarm", "", msg)
@@ -106,8 +106,8 @@ def log_message(typ, msg, user_name=""):
 def log_notify_email(username, addrs, eventName):
     log_any("notify-email", username, addrs, eventName)
 
-def log_queue(jobid, jobgid, triggername, username, eventname, eventchainnames, queuetime):
-    log_any("queue", jobid, jobgid, triggername, username, eventname, eventchainnames, queuetime)
+def log_queue(jobid, jobgid, triggername, triggerorigin, username, eventname, eventchainnames, queuetime):
+    log_any("queue", jobid, jobgid, triggername, triggerorigin, username, eventname, eventchainnames, queuetime)
 
 def log_sleep(seconds):
     log_any("sleep", "", seconds)

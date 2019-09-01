@@ -302,7 +302,7 @@ class Event:
         eventchainnames = job.eventchainnames.split(":")
         sched_datetime = job.sched_datetime
 
-        varinfo = self.get_varinfo(job.triggername, eventchainnames, sched_datetime)
+        varinfo = self.get_varinfo(job.triggername, job.triggerorigin, eventchainnames, sched_datetime)
         nexteventname = None
         nexteventtype = None
 
@@ -323,7 +323,7 @@ class Event:
         event_next_event = varinfo.get("next_event", "")
         event_failover_event = varinfo.get("failover_event", "")
 
-        log_activate(job.jobid, job.jobgid, job.triggername, job.username, job.eventname, job.eventchainnames)
+        log_activate(job.jobid, job.jobgid, job.triggername, job.triggerorigin, job.username, job.eventname, job.eventchainnames)
 
         if event_command:
             rv = remote_execute(job, self.name, self.username, event_as_user, event_host, event_command)
@@ -380,7 +380,7 @@ class Event:
     def get_name(self):
         return self.name
 
-    def get_varinfo(self, triggername=None, eventchainnames=None, sched_datetime=None):
+    def get_varinfo(self, triggername=None, triggerorigin=None, eventchainnames=None, sched_datetime=None):
         """Set variable values.
 
         Early substitution: at event load time.
@@ -397,6 +397,7 @@ class Event:
             "HCRON_HOST_NAME": socket.getfqdn(),
             "HCRON_EVENT_NAME": self.name,
             "HCRON_TRIGGER_NAME": triggername,
+            "HCRON_TRIGGER_ORIGIN": triggerorigin,
         }
         
         if eventchainnames:
