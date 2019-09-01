@@ -31,7 +31,7 @@ because of server problem.
 import pwd
 import time
 
-#
+# app imports
 from hcron import globs
 from hcron.constants import *
 
@@ -49,19 +49,6 @@ def get_test_net_retry():
         test_net_retry = CONFIG_TEST_NET_RETRY
     return test_net_retry
 
-def test_service():
-    # check if network service is really answering
-    test_net_username = globs.config.get().get("test_net_username")
-    test_net_delay = get_test_net_delay()
-    if test_net_username:
-        # test with know username until success
-        while True:
-            try:
-                test_pw = pwd.getpwnam(test_net_username)
-                break
-            except Exception as detail:
-                time.sleep(test_net_delay)
-
 def getpwnam(name):
     """Wrapper for pwd.getpwnam().
 
@@ -78,27 +65,31 @@ def getpwnam(name):
     test_net_retry = get_test_net_retry()
     for try_count in range(test_net_retry):
         try:
-            pw = pwd.getpwnam(name)
-            break
+            return pwd.getpwnam(name)
         except:
             test_service()
-    else:
-        raise Exception("Error getting user information with getpwnam() for username (%s)." % name)
 
-    return pw
+    raise Exception("Error getting user information with getpwnam() for username (%s)." % name)
 
 def getpwuid(uid):
     test_net_retry = get_test_net_retry()
     for try_count in range(test_net_retry):
         try:
-            pw = pwd.getpwuid(uid)
-            break
+            return pwd.getpwuid(uid)
         except:
             test_service()
-    else:
-        raise Exception("Error getting user information with getpwuid() for uid (%s)." % uid)
 
-    return pw
+    raise Exception("Error getting user information with getpwuid() for uid (%s)." % uid)
 
-
-
+def test_service():
+    # check if network service is really answering
+    test_net_username = globs.config.get().get("test_net_username")
+    test_net_delay = get_test_net_delay()
+    if test_net_username:
+        # test with known username until success
+        while True:
+            try:
+                pwd.getpwnam(test_net_username)
+                break
+            except Exception as detail:
+                time.sleep(test_net_delay)
