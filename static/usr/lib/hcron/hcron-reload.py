@@ -32,6 +32,7 @@ import os.path
 import shutil
 import sys
 from sys import stderr
+import traceback
 
 # app imports
 from hcron.constants import *
@@ -78,8 +79,8 @@ if __name__ == "__main__":
         next_interval = (now+datetime.timedelta(seconds=60)).replace(second=0,microsecond=0)
         print("Reload signalled for machine (%s) at next interval (%s; in %ss)." % (HOST_NAME, next_interval, (next_interval-now).seconds))
     except Exception as detail:
+        #traceback.print_exc()
         stderr.write("error: failed to reload/unload events\n")
-        #print(detail)
         sys.exit(1)
 
     sys.exit(0)
