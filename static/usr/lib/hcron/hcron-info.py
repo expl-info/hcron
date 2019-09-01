@@ -33,6 +33,7 @@ import os.path
 import socket
 import sys
 from sys import stderr
+import traceback
 
 # hcron imports
 from hcron.constants import *
@@ -58,28 +59,31 @@ Where:
 def print_allowed():
     try:
         username = whoami()
-        userEventListsPath = "%s/%s" % (HCRON_EVENT_LISTS_DUMP_DIR, username)
+        usereventlistspath = "%s/%s" % (HCRON_EVENT_LISTS_DUMP_DIR, username)
 
-        if os.path.exists(userEventListsPath):
+        if os.path.exists(usereventlistspath):
             print("yes")
 
     except Exception as detail:
+        #traceback.print_exc()
         pass
 
 def print_fqdn():
     try:
         print(socket.getfqdn())
     except Exception as detail:
-        print("Error: Could not determine the fully qualified host name.")
+        #traceback.print_exc()
+        stderr.write("error: could not determine the fully qualified host name\n")
 
 def print_user_event_status():
     try:
         username = whoami()
-        userEventListsPath = "%s/%s" % (HCRON_EVENT_LISTS_DUMP_DIR, username)
+        usereventlistspath = "%s/%s" % (HCRON_EVENT_LISTS_DUMP_DIR, username)
 
-        print(open(userEventListsPath, "r").read(), end="")
+        print(open(usereventlistspath, "r").read(), end="")
     except Exception as detail:
-        print("Error: Could not read event status information.")
+        #traceback.print_exc()
+        stderr.write("error: Could not read event status information\n")
 
 if __name__ == "__main__":
     try:
@@ -104,3 +108,5 @@ if __name__ == "__main__":
     except:
         stderr.write("error: bad/missing argument\n")
         sys.exit(1)
+
+    sys.exit(0)
