@@ -299,10 +299,8 @@ class Event:
 
         The job object provides context.
         """
-        eventchainnames = job.eventchainnames.split(":")
-        sched_datetime = job.sched_datetime
 
-        varinfo = self.get_varinfo(job.triggername, job.triggerorigin, eventchainnames, sched_datetime)
+        varinfo = self.get_varinfo(job)
         nexteventname = None
         nexteventtype = None
 
@@ -336,6 +334,8 @@ class Event:
 
         if globs.simulate:
             if globs.simulate_show_event:
+                sched_datetime = job.sched_datetime
+
                 fmt = "%s=%s"
                 print(tw.fill(fmt % ("as_user", event_as_user)))
                 print(tw.fill(fmt % ("host", event_host)))
@@ -380,35 +380,39 @@ class Event:
     def get_name(self):
         return self.name
 
-    def get_varinfo(self, triggername=None, triggerorigin=None, eventchainnames=None, sched_datetime=None):
+    def get_varinfo(self, job=None):
         """Set variable values.
 
         Early substitution: at event load time.
         Late substitution: at event activate time.
 
-        eventchainnames != None means late since every event activate
-        has at least itself in the eventchainnames.
+        job != None means late since every event activate has at
+        least itself in the eventchainnames.
         """
 
         # early and late
         varinfo = {
             "when_year": "*",
             "template_name": None,
-            "HCRON_HOST_NAME": socket.getfqdn(),
+            "HCRON_EVENT_CHAIN": "",
             "HCRON_EVENT_NAME": self.name,
-            "HCRON_TRIGGER_NAME": triggername,
-            "HCRON_TRIGGER_ORIGIN": triggerorigin,
+            "HCRON_HOST_NAME": socket.getfqdn(),
+            "HCRON_SELF_CHAIN": "",
         }
         
-        if eventchainnames:
+        if job:
             # late
+            varinfo["HCRON_TRIGGER_NAME"] = job.triggername
+            varinfo["HCRON_TRIGGER_ORIGIN"] = job.triggerorigin
+
+            eventchainnames = job.eventchainnames.split(":")
             selfeventchainnames = []
             lasteventchainname = eventchainnames[-1]
-            for eventChainName in reversed(eventchainnames):
-                if eventChainName != lasteventchainname:
+            for eventchainname in reversed(eventchainnames):
+                if eventchainname != lasteventchainname:
                     break
-                selfeventchainnames.append(eventChainName)
-            varinfo["HCRON_EVENT_CHAIN"] = ":".join(eventchainnames)
+                selfeventchainnames.append(eventchainname)
+            varinfo["HCRON_EVENT_CHAIN"] = job.eventchainnames
             varinfo["HCRON_SELF_CHAIN"] = ":".join(selfeventchainnames)
 
             activate_datetime = globs.clock.now()
@@ -418,14 +422,11 @@ class Event:
             varinfo["HCRON_ACTIVATE_EPOCHTIME"] = activate_datetime.strftime("%s")
             varinfo["HCRON_ACTIVATE_EPOCHTIME_UTC"] = activate_datetime_utc.strftime("%s")
 
-            if sched_datetime:
-                varinfo["HCRON_SCHEDULE_DATETIME"] = sched_datetime.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
-                varinfo["HCRON_SCHEDULE_DATETIME_UTC"] = sched_datetime.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
-                varinfo["HCRON_SCHEDULE_EPOCHTIME"] = sched_datetime.strftime("%s")
-                varinfo["HCRON_SCHEDULE_EPOCHTIME_UTC"] = sched_datetime.strftime("%s")
-        else:
-            varinfo["HCRON_EVENT_CHAIN"] = ""
-            varinfo["HCRON_SELF_CHAIN"] = ""
+            if job.sched_datetime:
+                varinfo["HCRON_SCHEDULE_DATETIME"] = job.sched_datetime.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
+                varinfo["HCRON_SCHEDULE_DATETIME_UTC"] = job.sched_datetime.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
+                varinfo["HCRON_SCHEDULE_EPOCHTIME"] = job.sched_datetime.strftime("%s")
+                varinfo["HCRON_SCHEDULE_EPOCHTIME_UTC"] = job.sched_datetime.strftime("%s")
 
         return varinfo
 
