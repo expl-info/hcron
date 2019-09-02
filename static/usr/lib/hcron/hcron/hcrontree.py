@@ -48,17 +48,49 @@ class HcronTreeCache:
     a directory path, rooted at "events/".
     """
 
-    #def __init__(self, path, ignore_match_fn=None):
-    def __init__(self, username, ignore_match_fn=None):
+    #def __init__(self, path, ignorematchfn=None):
+    def __init__(self, username, ignorematchfn=None):
         def false_match(*args):
             return False
 
         self.username = username
-        self.ignore_match_fn = ignore_match_fn or false_match
-        self.path = os.path.realpath(get_hcron_tree_filename(username, globs.fqdn))
-        self.ignored = {}
+        self.ignorematchfn = ignorematchfn or false_match
         self.cache = {}
+        self.ignored = {}
+        self.path = os.path.realpath(get_hcron_tree_filename(username, globs.fqdn))
         self.load()
+
+    def get_contents(self, tree_path):
+        return self.cache.get(tree_path)
+
+    def get_event_contents(self, name):
+        if name.startswith("/"):
+            return self.get_contents(os.path.normpath("events/"+name))
+        return None
+
+    def get_event_names(self):
+        names = []
+        for name in self.cache.keys():
+            if name.startswith("events/"):
+                names.append(name[6:])
+        return names
+
+    def get_include_contents(self, name):
+        """Kept for backward compatibility with v0.14. Discard for v0.16.
+        """
+        if name.startswith("/"):
+            st = self.get_contents(os.path.normpath("includes/"+name))
+            if st == None:
+                st = self.get_contents(os.path.normpath("events/"+name))
+            return st
+        else:
+            return None
+
+    def get_names(self):
+        return list(self.cache.keys())
+
+    def is_ignored_event(self, name):
+        return os.path.normpath("events/"+name) in self.ignored
 
     def load(self):
         """Load events from hcron tree file:
@@ -80,9 +112,9 @@ class HcronTreeCache:
         else:
             f = tarfile.open(self.path)
 
+        cache = {}
         ignored = {}
         link_cache = {}
-        cache = {}
 
         for m in f.getmembers():
             if m.name.startswith("events/"):
@@ -90,7 +122,7 @@ class HcronTreeCache:
                 basename = os.path.basename(name)
                 dirname = os.path.dirname(name)
 
-                if self.ignore_match_fn(basename) or dirname in ignored:
+                if self.ignorematchfn(basename) or dirname in ignored:
                     ignored[name] = None
                 else:
                     if m.issym():
@@ -114,11 +146,6 @@ class HcronTreeCache:
                     # not found; drop
                     break
 
-        # discard ignored
-        #for name in ignored.keys():
-            #if name in cache:
-                #del cache[name]
-
         # discard non-files
         for name in list(cache.keys()):
             if cache[name] == None:
@@ -130,86 +157,32 @@ class HcronTreeCache:
     def resolve_symlink(self, name, linkname):
         if linkname.startswith("/"):
             return None
-        else:
-            return os.path.normpath(os.path.dirname(name)+"/"+linkname)
+        return os.path.normpath(os.path.dirname(name)+"/"+linkname)
 
-    def get_event_contents(self, name):
-        if name.startswith("/"):
-            return self.get_contents(os.path.normpath("events/"+name))
-        else:
-            return None
-
-    def get_include_contents(self, name):
-        """Kept for backward compatibility with v0.14. Discard for v0.16.
-        """
-        if name.startswith("/"):
-            st = self.get_contents(os.path.normpath("includes/"+name))
-            if st == None:
-                st = self.get_contents(os.path.normpath("events/"+name))
-            return st
-        else:
-            return None
-
-    def is_ignored_event(self, name):
-        return os.path.normpath("events/"+name) in self.ignored
-
-    def get_event_names(self):
-        names = []
-        for name in self.cache.keys():
-            if name.startswith("events/"):
-                names.append(name[6:])
-        return names
-
-    def get_names(self):
-        return list(self.cache.keys())
-
-    def get_contents(self, tree_path):
-        return self.cache.get(tree_path)
-
-def get_user_hcron_tree_home(username, hostname):
-    """Hcron tree directory under user home.
+def create_user_hcron_tree_file(username, hostname, dstpath=None, empty=False):
+    """Create an hcron tree file at dstpath with select members from
+    srcpath.
     """
-    return os.path.expanduser("~%s/.hcron/%s" % (username, hostname))
-
-def get_user_hcron_tree_filename(username, hostname):
-    """Hcron tree file under user home.
-    """
-    return os.path.normpath("%s/snapshot" % get_user_hcron_tree_home(username, hostname))
-
-def get_hcron_tree_home(username, hostname):
-    """Home of saved user hcron trees.
-    """
-    return os.path.normpath(HCRON_TREES_HOME)
-
-def get_hcron_tree_filename(username, hostname):
-    """Saved hcron tree file for user.
-    """
-    return os.path.normpath("%s/%s" % (get_hcron_tree_home(username, hostname), username))
-
-def create_user_hcron_tree_file(username, hostname, dst_path=None, empty=False):
-    """Create an hcron tree file at dst_path with select members from
-    src_path.
-    """
-    if dst_path == None:
-        dst_path = get_user_hcron_tree_filename(username, hostname)
+    if dstpath == None:
+        dstpath = get_user_hcron_tree_filename(username, hostname)
 
     if empty:
         # truncate
-        open(dst_path, "w")
+        open(dstpath, "w")
         return
 
-    names = [ "events" ]
     cwd = os.getcwd()
     f = None
+    names = ["events"]
 
     try:
         # temp file
         user_hcron_tree_home = get_user_hcron_tree_home(username, hostname)
-        _, tmp_path = tempfile.mkstemp(prefix="snapshot-", dir=user_hcron_tree_home)
+        _, tmppath = tempfile.mkstemp(prefix="snapshot-", dir=user_hcron_tree_home)
 
         # create tar
         os.chdir(user_hcron_tree_home)
-        f = tarfile.open(tmp_path, mode="w:gz")
+        f = tarfile.open(tmppath, mode="w:gz")
         for name in names:
             try:
                 f.add(name)
@@ -218,46 +191,65 @@ def create_user_hcron_tree_file(username, hostname, dst_path=None, empty=False):
         f.close()
 
         # move into place
-        if os.path.exists(dst_path):
+        if os.path.exists(dstpath):
             # in case following move() is not atomic
-            os.remove(dst_path)
-        shutil.move(tmp_path, dst_path)
+            os.remove(dstpath)
+        shutil.move(tmppath, dstpath)
     except:
         if f:
             f.close()
     os.chdir(cwd)
 
     max_hcron_tree_snapshot_size = globs.config.get().get("max_hcron_tree_snapshot_size", CONFIG_MAX_HCRON_TREE_SNAPSHOT_SIZE)
-    if os.path.getsize(dst_path) > max_hcron_tree_snapshot_size:
+    if os.path.getsize(dstpath) > max_hcron_tree_snapshot_size:
         raise Exception("snapshot file too big (>%s)" % max_hcron_tree_snapshot_size)
+
+def get_hcron_tree_filename(username, hostname):
+    """Saved hcron tree file for user.
+    """
+    return os.path.normpath("%s/%s" % (get_hcron_tree_home(username, hostname), username))
+
+def get_hcron_tree_home(username, hostname):
+    """Home of saved user hcron trees.
+    """
+    return os.path.normpath(HCRON_TREES_HOME)
+
+def get_user_hcron_tree_filename(username, hostname):
+    """Hcron tree file under user home.
+    """
+    return os.path.normpath("%s/snapshot" % get_user_hcron_tree_home(username, hostname))
+
+def get_user_hcron_tree_home(username, hostname):
+    """Hcron tree directory under user home.
+    """
+    return os.path.expanduser("~%s/.hcron/%s" % (username, hostname))
 
 def install_hcron_tree_file(username, hostname):
     """Install/replace an hcron file for use by hcron-scheduler.
 
     SECURITY: src must be read as user, dst written as "root".
     """
-    system_ht_home = get_hcron_tree_home(username, hostname)
-    src_path = get_user_hcron_tree_filename(username, hostname)
-    dst_path = get_hcron_tree_filename(username, hostname)
+    systemhthome = get_hcron_tree_home(username, hostname)
+    srcpath = get_user_hcron_tree_filename(username, hostname)
+    dstpath = get_hcron_tree_filename(username, hostname)
 
-    if not os.path.exists(system_ht_home):
-        os.makedirs(system_ht_home)
+    if not os.path.exists(systemhthome):
+        os.makedirs(systemhthome)
 
     try:
         uid = username2uid(username)
         os.seteuid(uid)
-        src = open(src_path, "r")
+        src = open(srcpath, "r")
     except:
         os.seteuid(0)
         raise
 
     os.seteuid(0)
     try:
-        os.remove(dst_path)
+        os.remove(dstpath)
     except:
         pass
 
-    if os.path.getsize(src_path) > 0:
+    if os.path.getsize(srcpath) > 0:
         max_hcron_tree_snapshot_size = globs.config.get().get("max_hcron_tree_snapshot_size", CONFIG_MAX_HCRON_TREE_SNAPSHOT_SIZE)
-        copyfile(src, dst_path, max_hcron_tree_snapshot_size)
-
+        copyfile(src, dstpath, max_hcron_tree_snapshot_size)
