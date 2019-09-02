@@ -101,19 +101,19 @@ class Server:
                 ### this is a problem if we are behind schedule!!!
                 log_message("info", "hcron.conf was modified")
                 # restart
-                globs.pidFile.remove()
+                globs.pidfile.remove()
                 if "--immediate" not in sys.argv:
                     # do not miss current "now" time
                     sys.argv.append("--immediate")
                 os.execv(sys.argv[0], sys.argv)
-            if globs.allowedUsers.is_modified():
+            if globs.allowfile.is_modified():
                 log_message("info", "hcron.allow was modified")
-                globs.allowedUsers.load()
-                globs.eventlistlist = EventListList(globs.allowedUsers.get())
-            if globs.signalHome.is_modified():
+                globs.allowfile.load()
+                globs.eventlistlist = EventListList(globs.allowfile.get())
+            if globs.signaldir.is_modified():
                 log_message("info", "signalHome was modified")
-                globs.signalHome.load()
-                reload_events(globs.signalHome.get_modified_time())
+                globs.signaldir.load()
+                reload_events(globs.signaldir.get_modified_time())
 
             log_trigger("clock", triggerorigin)
             self.run_now("clock", triggerorigin, next)

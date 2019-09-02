@@ -47,7 +47,7 @@ from hcron.event import EventListList
 from hcron.file import PidFile
 from hcron.logger import *
 from hcron.server import Server, setup
-from hcron.trackablefile import AllowedUsersFile, ConfigFile, SignalHome
+from hcron.trackablefile import AllowFile, ConfigFile, SignalDir
 
 def dump_signal_handler(num, frame):
     log_message("info", "Received signal to dump.")
@@ -66,7 +66,7 @@ def dump_signal_handler(num, frame):
 
     # allowed users
     try:
-        allowedUsers = globs.allowedUsers.get()
+        allowedUsers = globs.allowfile.get()
         f = open(HCRON_ALLOWED_USERS_DUMP_PATH, "w+")
         f.write("\n".join(allowedUsers))
         f.close()
@@ -76,7 +76,7 @@ def dump_signal_handler(num, frame):
 
     # event list
     ell = globs.eventlistlist
-    for username in globs.allowedUsers.get():
+    for username in globs.allowfile.get():
         el = ell.eventlists.get(username)
         if el:
             el.dump()
@@ -84,11 +84,11 @@ def dump_signal_handler(num, frame):
 def reload_signal_handler(num, frame):
     log_message("info", "Received signal to reload.")
     signal.signal(num, reload_signal_handler)
-    globs.eventlistlist.load(globs.allowedUsers.get())
+    globs.eventlistlist.load(globs.allowfile.get())
 
 def quit_signal_handler(num, frame):
     log_message("info", "Received signal to exit.")
-    globs.pidFile.remove()
+    globs.pidfile.remove()
     sys.exit(0)
 
 def print_usage():
@@ -139,9 +139,9 @@ if __name__ == "__main__":
 
     globs.config = ConfigFile(HCRON_CONFIG_PATH)
     setup_logger()
-    globs.allowedUsers = AllowedUsersFile(HCRON_ALLOW_PATH)
-    globs.signalHome = SignalHome(HCRON_SIGNAL_HOME)
-    globs.eventlistlist = EventListList(globs.allowedUsers.get())
+    globs.allowfile = AllowFile(HCRON_ALLOW_PATH)
+    globs.signaldir = SignalDir(HCRON_SIGNAL_DIR)
+    globs.eventlistlist = EventListList(globs.allowfile.get())
 
     signal.signal(signal.SIGHUP, reload_signal_handler)
     #signal.signal(signal.SIGUSR1, dump_signal_handler)
@@ -152,8 +152,8 @@ if __name__ == "__main__":
     library.serverize()  # don't catch SystemExit
 
     globs.server = Server()
-    globs.pidFile = PidFile(HCRON_PID_FILE_PATH)
-    globs.pidFile.create()
+    globs.pidfile = PidFile(HCRON_PID_FILE_PATH)
+    globs.pidfile.create()
 
     try:
         log_start()
@@ -165,6 +165,6 @@ if __name__ == "__main__":
         #print(detail)
         pass
 
-    globs.pidFile.remove()
+    globs.pidfile.remove()
     log_exit()
     sys.exit(-1)

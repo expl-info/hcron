@@ -24,21 +24,18 @@
 """Globals. Should be imported as "from hcron import globs".
 """
 
+allowfile = None
 clock = None
 config = None
-allowedUsers = None
-signalHome = None
-
-server = None
-pidFile = None
-eventlistlist = None
-hcron_tree_cache = None
-simulate = False
-simulate_show_event = False
-simulate_show_email = False
-
-remote_execute_enabled = False
 email_notify_enabled = False
-
+eventlistlist = None
 fqdn = None
+hcron_tree_cache = None
 localhostnames = []
+pidfile = None
+remote_execute_enabled = False
+server = None
+signaldir = None
+simulate = False
+simulate_show_email = False
+simulate_show_event = False

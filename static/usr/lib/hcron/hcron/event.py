@@ -63,8 +63,8 @@ def reload_events(signalHomeMtime):
     """
     usernames = {}  # to ensure reload only once per user
 
-    for filename in os.listdir(HCRON_SIGNAL_HOME):
-        path = os.path.join(HCRON_SIGNAL_HOME, filename)
+    for filename in os.listdir(HCRON_SIGNAL_DIR):
+        path = os.path.join(HCRON_SIGNAL_DIR, filename)
         st = os.stat(path)
         mtime = st[stat.ST_MTIME]
 
@@ -88,15 +88,15 @@ def signal_reload(unload=False):
     """Signal to reload.
     """
     import tempfile
-    from hcron.trackablefile import AllowedUsersFile, ConfigFile
+    from hcron.trackablefile import AllowFile, ConfigFile
 
     globs.config = ConfigFile(HCRON_CONFIG_PATH)
-    globs.allowedUsers = AllowedUsersFile(HCRON_ALLOW_PATH)
+    globs.allowfile = AllowFile(HCRON_ALLOW_PATH)
     config = globs.config.get()
-    signalHome = config.get("signalHome") or HCRON_SIGNAL_HOME
+    signalHome = config.get("signalHome") or HCRON_SIGNAL_DIR
     username = uid2username(os.getuid())
 
-    if username not in globs.allowedUsers.get():
+    if username not in globs.allowfile.get():
         raise Exception("Warning: You are not an allowed hcron user.")
 
     try:

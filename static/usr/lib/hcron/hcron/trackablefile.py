@@ -79,7 +79,7 @@ class ConfigFile(TrackableFile):
         self.contents = d
         self.mtime = mtime
 
-class AllowedUsersFile(TrackableFile):
+class AllowFile(TrackableFile):
     def load(self):
         allowedusers = []
         try:
@@ -102,7 +102,7 @@ class AllowedUsersFile(TrackableFile):
         self.contents = list(set(allowedusers))
         self.mtime = mtime
 
-class SignalHome(TrackableFile):
+class SignalDir(TrackableFile):
     def load(self):
         try:
             self.mtime = os.stat(self.path)[stat.ST_MTIME]
