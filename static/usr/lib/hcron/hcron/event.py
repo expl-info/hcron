@@ -404,6 +404,9 @@ class Event:
             varinfo["HCRON_TRIGGER_NAME"] = job.triggername
             varinfo["HCRON_TRIGGER_ORIGIN"] = job.triggerorigin
 
+            varinfo["HCRON_JOBID"] = str(job.jobid)
+            varinfo["HCRON_JOBGID"] = str(job.jobgid)
+
             eventchainnames = job.eventchainnames.split(":")
             selfeventchainnames = []
             lasteventchainname = eventchainnames[-1]
