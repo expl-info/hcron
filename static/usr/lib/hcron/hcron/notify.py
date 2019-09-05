@@ -34,26 +34,26 @@ from hcron.logger import *
 
 tw = textwrap.TextWrapper()
 tw.initial_indent = "    "
+tw.replace_whitespace = False
 tw.subsequent_indent = "    "
 tw.width = 1024
-tw.replace_whitespace = False
 
-def send_email_notification(eventName, fromUserName, toAddr, subject, content):
+def send_email_notification(eventname, fromusername, toaddr, subject, content):
     config = globs.config.get()
     smtp_server = config.get("smtp_server", "localhost")
 
-    fromAddr = "%s@%s" % (fromUserName, globs.fqdn)
+    fromaddr = "%s@%s" % (fromusername, globs.fqdn)
     message = """From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\n%s""" % \
-        (fromAddr, toAddr, subject, content)
+        (fromaddr, toaddr, subject, content)
     try:
         if globs.email_notify_enabled:
             m = smtplib.SMTP(smtp_server)
-            m.sendmail(fromAddr, toAddr, message)
+            m.sendmail(fromaddr, toaddr, message)
             m.quit()
-        log_notify_email(fromUserName, toAddr, eventName)
+        log_notify_email(fromusername, toaddr, eventname)
         if globs.simulate:
             if globs.simulate_show_email:
                 for line in message.split("\n"):
                     print(tw.fill(line))
     except Exception as detail:
-        log_message("error", "Failed to send email (%s) for event (%s)." % (detail, eventName))
+        log_message("error", "Failed to send email (%s) for event (%s)." % (detail, eventname))
