@@ -352,15 +352,22 @@ class Event:
                 print(tw.fill(fmt % ("failover_event", event_failover_event)))
 
         if rv == 0:
-            # success
-            # notify
+            # success; notify
             if event_notify_email:
+                config = globs.config.get()
+                max_email_notifications = config.get("max_email_notifications", CONFIG_MAX_EMAIL_NOTIFICATIONS)
+                toaddrs = [toaddr.strip() for toaddr in event_notify_email.split(",")]
+                if len(toaddrs) > max_email_notifications:
+                    log_message("error", "Limited user (%s) event (%s) email notification recipients from (%s) to (%s)" % (self.username, self.name, len(toaddrs), max_email_notifications))
+                    toaddrs = toaddrs[:max_email_notifications]
+
                 if event_notify_subject == "":
                     subject = """hcron (%s): "%s" executed at %s@%s""" % (globs.fqdn, self.name, event_as_user, event_host)
                 else:
                     subject = event_notify_subject
                 subject = subject[:1024]
-                send_email_notification(self.name, self.username, event_notify_email, subject, event_notify_message)
+                for toaddr in toaddrs:
+                    send_email_notification(self.name, self.username, toaddr, subject, event_notify_message)
 
             nexteventname, nexteventtype = event_next_event, "next"
         else:

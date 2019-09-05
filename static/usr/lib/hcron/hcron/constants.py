@@ -32,6 +32,7 @@ __all__ = [
     "CONFIG_LOG_PATH",
     "CONFIG_MAX_ACTIVATED_EVENTS",
     "CONFIG_MAX_CHAIN_EVENTS",
+    "CONFIG_MAX_EMAIL_NOTIFICATIONS",
     "CONFIG_MAX_EVENT_FILE_SIZE",
     "CONFIG_MAX_EVENTS_PER_USER",
     "CONFIG_MAX_HCRON_TREE_SNAPSHOT_SIZE",
@@ -134,6 +135,7 @@ CONFIG_ERROR_ON_EMPTY_COMMAND = False       # error_on_empty_command
 CONFIG_LOG_PATH = os.path.join(HCRON_LOG_HOME, "hcron.log") # log_path
 CONFIG_MAX_ACTIVATED_EVENTS = 20            # max_activated_events
 CONFIG_MAX_CHAIN_EVENTS = 5                 # max_chain_events
+CONFIG_MAX_EMAIL_NOTIFICATIONS = 16         # max_email_notifications
 CONFIG_MAX_EVENT_FILE_SIZE = 5000           # max_event_file_size
 CONFIG_MAX_EVENTS_PER_USER = 25             # max_events_per_user
 CONFIG_MAX_NEXT_EVENTS = 8                  # max_next_events
