@@ -97,7 +97,7 @@ class Server:
             #
             # check and update as necessary
             #
-            if globs.config.is_modified():
+            if globs.configfile.is_modified():
                 ### this is a problem if we are behind schedule!!!
                 log_message("info", "hcron.conf was modified")
                 # restart

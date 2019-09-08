@@ -26,7 +26,7 @@
 
 allowfile = None
 clock = None
-config = None
+configfile = None
 email_notify_enabled = False
 eventlistlist = None
 fqdn = None

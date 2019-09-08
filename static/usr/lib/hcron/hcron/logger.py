@@ -39,7 +39,7 @@ logger = None
 def setup_logger():
     global logger
 
-    config = globs.config.get()
+    config = globs.configfile.get()
     if config.get("use_syslog", CONFIG_USE_SYSLOG):
         handler = logging.SysLogHandler()
     else:

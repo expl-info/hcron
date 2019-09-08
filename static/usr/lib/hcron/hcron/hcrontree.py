@@ -200,7 +200,7 @@ def create_user_hcron_tree_file(username, hostname, dstpath=None, empty=False):
             f.close()
     os.chdir(cwd)
 
-    max_hcron_tree_snapshot_size = globs.config.get().get("max_hcron_tree_snapshot_size", CONFIG_MAX_HCRON_TREE_SNAPSHOT_SIZE)
+    max_hcron_tree_snapshot_size = globs.configfile.get().get("max_hcron_tree_snapshot_size", CONFIG_MAX_HCRON_TREE_SNAPSHOT_SIZE)
     if os.path.getsize(dstpath) > max_hcron_tree_snapshot_size:
         raise Exception("snapshot file too big (>%s)" % max_hcron_tree_snapshot_size)
 
@@ -251,5 +251,5 @@ def install_hcron_tree_file(username, hostname):
         pass
 
     if os.path.getsize(srcpath) > 0:
-        max_hcron_tree_snapshot_size = globs.config.get().get("max_hcron_tree_snapshot_size", CONFIG_MAX_HCRON_TREE_SNAPSHOT_SIZE)
+        max_hcron_tree_snapshot_size = globs.configfile.get().get("max_hcron_tree_snapshot_size", CONFIG_MAX_HCRON_TREE_SNAPSHOT_SIZE)
         copyfile(src, dstpath, max_hcron_tree_snapshot_size)

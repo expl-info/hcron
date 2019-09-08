@@ -184,7 +184,7 @@ def dir_walk(top, topdown=True, onerror=None, ignoreMatchFn=None):
 def get_events_home(username):
     """Returns the user-specific events/ directory path.
     """
-    config = globs.config.get()
+    config = globs.configfile.get()
     events_base_path = (config.get("events_base_path") or "").strip()
 
     if events_base_path == "":
@@ -200,7 +200,7 @@ def get_events_home(username):
 def get_includes_home(username):
     """Returns the user-specific includes/ directory path.
     """
-    config = globs.config.get()
+    config = globs.configfile.get()
     events_base_path = (config.get("events_base_path") or "").strip()
 
     if events_base_path == "":

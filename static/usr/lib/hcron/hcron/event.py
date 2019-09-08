@@ -90,9 +90,9 @@ def signal_reload(unload=False):
     import tempfile
     from hcron.trackablefile import AllowFile, ConfigFile
 
-    globs.config = ConfigFile(HCRON_CONFIG_PATH)
+    globs.configfile = ConfigFile(HCRON_CONFIG_PATH)
     globs.allowfile = AllowFile(HCRON_ALLOW_PATH)
-    config = globs.config.get()
+    config = globs.configfile.get()
     signalHome = config.get("signalHome") or HCRON_SIGNAL_DIR
     username = uid2username(os.getuid())
 
@@ -234,8 +234,8 @@ class EventList:
         self.events = {}
 
         try:
-            max_events_per_user = globs.config.get().get("max_events_per_user", CONFIG_MAX_EVENTS_PER_USER)
-            names_to_ignore_cregexp = globs.config.get().get("names_to_ignore_cregexp")
+            max_events_per_user = globs.configfile.get().get("max_events_per_user", CONFIG_MAX_EVENTS_PER_USER)
+            names_to_ignore_cregexp = globs.configfile.get().get("names_to_ignore_cregexp")
             ignoreMatchFn = names_to_ignore_cregexp and names_to_ignore_cregexp.match
 
             # global cache assumes single-threaded load!
@@ -325,7 +325,7 @@ class Event:
         if event_command:
             rv = remote_execute(job, self.name, self.username, event_as_user, event_host, event_command)
         else:
-            error_on_empty_command = globs.config.get().get("error_on_empty_command", CONFIG_ERROR_ON_EMPTY_COMMAND)
+            error_on_empty_command = globs.configfile.get().get("error_on_empty_command", CONFIG_ERROR_ON_EMPTY_COMMAND)
             if error_on_empty_command:
                 rv = -1
             else:
@@ -354,7 +354,7 @@ class Event:
         if rv == 0:
             # success; notify
             if event_notify_email:
-                config = globs.config.get()
+                config = globs.configfile.get()
                 max_email_notifications = config.get("max_email_notifications", CONFIG_MAX_EMAIL_NOTIFICATIONS)
                 toaddrs = [toaddr.strip() for toaddr in event_notify_email.split(",")]
                 if len(toaddrs) > max_email_notifications:

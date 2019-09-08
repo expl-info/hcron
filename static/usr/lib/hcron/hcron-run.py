@@ -142,8 +142,8 @@ if __name__ == "__main__":
             constants.HCRON_CONFIG_PATH = os.path.join(etcdir, "hcron/hcron-run.conf")
         globs.fqdn = eventsdir.split("/")[-2]
 
-        globs.config = ConfigFile(constants.HCRON_CONFIG_PATH)
-        globs.config.get()["log_path"] = None
+        globs.configfile = ConfigFile(constants.HCRON_CONFIG_PATH)
+        globs.configfile.get()["log_path"] = None
         setup_logger()
 
         globs.eventlistlist = EventListList(allowedUsers)

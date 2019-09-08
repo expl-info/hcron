@@ -56,7 +56,7 @@ def dump_signal_handler(num, frame):
 
     # config
     try:
-        config = globs.config.get()
+        config = globs.configfile.get()
         f = open(HCRON_CONFIG_DUMP_PATH, "w+")
         f.write(pp.pformat(config))
         f.close()
@@ -137,7 +137,7 @@ if __name__ == "__main__":
     globs.remote_execute_enabled = True
     globs.email_notify_enabled = True
 
-    globs.config = ConfigFile(HCRON_CONFIG_PATH)
+    globs.configfile = ConfigFile(HCRON_CONFIG_PATH)
     setup_logger()
     globs.allowfile = AllowFile(HCRON_ALLOW_PATH)
     globs.signaldir = SignalDir(HCRON_SIGNAL_DIR)
