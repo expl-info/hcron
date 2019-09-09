@@ -351,6 +351,11 @@ class Event:
                 print(tw.fill(fmt % ("next_event", event_next_event)))
                 print(tw.fill(fmt % ("failover_event", event_failover_event)))
 
+            if self.name in globs.simulate_fail_events:
+                rv = -1
+            else:
+                rv = 0
+
         if rv == 0:
             # success; notify
             if event_notify_email:

@@ -66,6 +66,8 @@ Options:
 -d <delay>          Delay (in seconds) to use between subsequent simulated
                     datetimes for which there are events being executed.
                     Default is 0s (no delay).
+--fail-events <eventname>[:...]
+                    Names of events that will fail.
 --show-all
 --show-email
 --show-event
@@ -88,6 +90,8 @@ if __name__ == "__main__":
                 confpath = args.pop(0)
             elif arg == "-d" and args:
                 delay = max(0, float(args.pop(0)))
+            elif arg == "--fail-events" and args:
+                globs.simulate_fail_events = args.pop(0).split(":")
             elif arg == "--show-all":
                 globs.simulate_show_email = True
                 globs.simulate_show_event = True

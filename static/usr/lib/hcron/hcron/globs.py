@@ -37,5 +37,6 @@ remote_execute_enabled = False
 server = None
 signaldir = None
 simulate = False
+simulate_fail_events = []
 simulate_show_email = False
 simulate_show_event = False
