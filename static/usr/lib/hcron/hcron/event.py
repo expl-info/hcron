@@ -320,7 +320,7 @@ class Event:
         event_next_event = varinfo.get("next_event", "")
         event_failover_event = varinfo.get("failover_event", "")
 
-        log_activate(job.jobid, job.jobgid, job.triggername, job.triggerorigin, job.username, job.eventname, job.eventchainnames)
+        log_activate(job.jobid, job.jobgid, job.pjobid, job.triggername, job.triggerorigin, job.username, job.eventname, job.eventchainnames)
 
         if event_command:
             rv = remote_execute(job, self.name, self.username, event_as_user, event_host, event_command)
@@ -418,6 +418,7 @@ class Event:
 
             varinfo["HCRON_JOBID"] = str(job.jobid)
             varinfo["HCRON_JOBGID"] = str(job.jobgid)
+            varinfo["HCRON_PJOBID"] = str(job.pjobid)
 
             eventchainnames = job.eventchainnames.split(":")
             selfeventchainnames = []

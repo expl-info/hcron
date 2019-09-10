@@ -113,6 +113,6 @@ def remote_execute(job, eventname, localusername, remoteusername, remotehostname
             log_message("error", "Execute failed (%s)." % detail)
 
         spawn_endtime = time.time()
-        log_execute(job.jobid, job.jobgid, localusername, remoteusername, remotehostname, eventname, pid, spawn_endtime-spawn_starttime, rv)
+        log_execute(job.jobid, job.jobgid, job.pjobid, localusername, remoteusername, remotehostname, eventname, pid, spawn_endtime-spawn_starttime, rv)
 
     return rv

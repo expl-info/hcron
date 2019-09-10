@@ -83,9 +83,10 @@ class Job:
     jobs that have the same parentage (via failover or next events).
     """
 
-    def __init__(self, jobgid=None):
+    def __init__(self, jobgid=None, pjobid=None):
         self.jobid = jobidgen.next()
         self.jobgid = jobgid or self.jobid
+        self.pjobid = pjobid or self.jobid
         self.event = None
         self.eventchainnames = None
         self.eventname = None
@@ -146,7 +147,7 @@ class JobQueue:
                     job.sched_datetime = clock.now()
                     job.username = username
                     self.q.put(job)
-                    log_queue(job.jobid, job.jobgid, job.triggername, job.triggerorigin, job.username, job.eventname, job.eventchainnames, job.sched_datetime)
+                    log_queue(job.jobid, job.jobgid, job.pjobid, job.triggername, job.triggerorigin, job.username, job.eventname, job.eventchainnames, job.sched_datetime)
                 except:
                     log_message("warning", "Failed to queue ondemand event (%s)" % eventname)
                 finally:
@@ -204,7 +205,7 @@ class JobQueue:
                     log_message("error", "Chained event (%s) was rejected (%s)." % (nexteventname, nextevent.reason), user_name=event.username)
                     nextevent = None
 
-                nextjob = Job(job.jobgid)
+                nextjob = Job(job.jobgid, job.jobid)
                 nextjob.triggername = nexteventtype
                 nextjob.triggerorigin = nextevent.name
                 nextjob.eventname = nextevent.name
@@ -212,7 +213,7 @@ class JobQueue:
                 nextjob.sched_datetime = globs.clock.now()
                 nextjob.username = job.username
                 self.q.put(nextjob)
-                log_queue(nextjob.jobid, nextjob.jobgid, nextjob.triggername, nextjob.triggerorigin, nextjob.username, nextjob.eventname, nextjob.eventchainnames, nextjob.sched_datetime)
+                log_queue(nextjob.jobid, nextjob.jobgid, nextjob.pjobid, nextjob.triggername, nextjob.triggerorigin, nextjob.username, nextjob.eventname, nextjob.eventchainnames, nextjob.sched_datetime)
 
     def handle_jobs(self):
         max_activated_events = max(globs.configfile.get().get("max_activated_events", CONFIG_MAX_ACTIVATED_EVENTS), 1)
