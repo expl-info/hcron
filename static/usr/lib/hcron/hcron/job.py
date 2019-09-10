@@ -147,7 +147,7 @@ class JobQueue:
                     job.sched_datetime = clock.now()
                     job.username = username
                     self.q.put(job)
-                    log_queue(job.jobid, job.jobgid, job.pjobid, job.triggername, job.triggerorigin, job.username, job.eventname, job.eventchainnames, job.sched_datetime)
+                    log_queue(job.username, job.jobid, job.jobgid, job.pjobid, job.triggername, job.triggerorigin, job.eventname, job.eventchainnames, job.sched_datetime)
                 except:
                     log_message("warning", "Failed to queue ondemand event (%s)" % eventname)
                 finally:
@@ -213,7 +213,7 @@ class JobQueue:
                 nextjob.sched_datetime = globs.clock.now()
                 nextjob.username = job.username
                 self.q.put(nextjob)
-                log_queue(nextjob.jobid, nextjob.jobgid, nextjob.pjobid, nextjob.triggername, nextjob.triggerorigin, nextjob.username, nextjob.eventname, nextjob.eventchainnames, nextjob.sched_datetime)
+                log_queue(nextjob.username, nextjob.jobid, nextjob.jobgid, nextjob.pjobid, nextjob.triggername, nextjob.triggerorigin, nextjob.eventname, nextjob.eventchainnames, nextjob.sched_datetime)
 
     def handle_jobs(self):
         max_activated_events = max(globs.configfile.get().get("max_activated_events", CONFIG_MAX_ACTIVATED_EVENTS), 1)
