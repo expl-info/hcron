@@ -204,7 +204,7 @@ class JobQueue:
                     log_message("error", "Chained event (%s) was rejected (%s)." % (nexteventname, nextevent.reason), user_name=event.username)
                     nextevent = None
 
-                nextjob = Job(job.jobid)
+                nextjob = Job(job.jobgid)
                 nextjob.triggername = nexteventtype
                 nextjob.triggerorigin = nextevent.name
                 nextjob.eventname = nextevent.name
