@@ -28,6 +28,7 @@
 import logging
 import os.path
 import sys
+import traceback
 
 # app imports
 from hcron import globs
@@ -53,72 +54,88 @@ def setup_logger():
     logger = logging.getLogger("")
     logger.addHandler(handler)
     logger.setLevel(logging.INFO)
-    log_any("start-logging")
+    log("start-logging")
 
-def log_any(*args):
-    """Get around chicken and egg problem with logger.
+def log(logtype, **kwargs):
+    """Add log entry with all fields tagged with the field name.
+
+    All calls should include in kwargs values for type, username is
+    optional but always output. All other kwargs settings are provided
+    in alphabetical order.
     """
-    global logger, log_any
-
-    if logger:
-        log_any = log_any2
-
-def log_any2(op, username="", *args):
-    global logger
-
-    if args:
-        extra = "|".join([ str(el) for el in args ])
-    else:
-        extra = ""
-    logger.info("%s|%s|%s|%s" % (globs.clock.now().isoformat(), op, username, extra))
+    try:
+        d = kwargs.copy()
+        l = [
+                globs.clock.now().isoformat(),
+                logtype,
+                d.pop("username", "")
+        ]
+        l.extend(["%s=%s" % t for t in sorted(d.items())])
+        logger.info("|".join(l))
+    except:
+        try:
+            l = [
+                globs.clock.now().isoformat(),
+                "error",
+                "",
+                "message=failed to log entry",
+                "values=%s" % str(kwargs),
+            ]
+            logger.info("|".join(l))
+        except:
+            pass
 
 # specific logging functions
 def log_activate(username, jobid, jobgid, pjobid, triggername, triggerorigin, eventname, eventchainnames):
-    log_any("activate", username, jobid, jobgid, pjobid, triggername, triggerorigin, eventname, eventchainnames)
+    log("activate", username=username, jobid=jobid, jobgid=jobgid, pjobid=pjobid,
+        triggername=triggername, triggerorigin=triggerorigin,
+        eventname=eventname, eventchain=eventchainnames)
 
 def log_alarm(msg=""):
-    log_any("alarm", "", msg)
+    log("alarm", message=msg)
 
 def log_discard_events(username, count):
-    log_any("discard-events", username, count)
+    log("discard-events", username=username, count=count)
 
 def log_end():
-    log_any("end")
+    log("end")
 
-def log_execute(username, jobid, jobgid, pjobid, asUser, host, eventName, pid, spawn_elapsed, retVal):
-    log_any("execute", username, jobid, jobgid, pjobid, asUser, host, eventName, pid, "%f" % spawn_elapsed, retVal)
+def log_execute(username, jobid, jobgid, pjobid, asuser, host, eventname, pid, spawn_elapsed, retVal):
+    log("execute", username=username, jobid=jobid, jobgid=jobgid, pjobid=pjobid,
+        asuser=asuser, host=host, eventname=eventname, pid=pid, elapsed="%f" % spawn_elapsed, rv=retVal)
 
 def log_exit():
-    log_any("exit")
+    log("exit")
 
 def log_load_allow():
-    log_any("load-allow")
+    log("load-allow")
 
 def log_load_config():
-    log_any("load-config")
+    log("load-config")
 
 def log_load_events(username, count, elapsed):
-    log_any("load-events", username, count, "%f" % elapsed)
+    log("load-events", username=username, count=count, elapsed="%f" % elapsed)
 
 def log_message(typ, msg, username=""):
-    log_any("message", username, typ, msg)
+    log("message", username=username, message=msg)
 
 def log_notify_email(username, addrs, eventName):
-    log_any("notify-email", username, addrs, eventName)
+    log("notify-email", username=username, addrs=addrs, eventname=eventName)
 
 def log_queue(username, jobid, jobgid, pjobid, triggername, triggerorigin, eventname, eventchainnames, queuetime):
-    log_any("queue", username, jobid, jobgid, pjobid, triggername, triggerorigin, eventname, eventchainnames, queuetime)
+    log("queue", username=username, jobid=jobid, jobgid=jobgid, pjobid=pjobid,
+        triggername=triggername, triggerorigin=triggerorigin,
+        eventname=eventname, eventchain=eventchainnames,
+        queuetime=queuetime)
 
 def log_sleep(seconds):
-    log_any("sleep", "", seconds)
+    log("sleep", sleeptime=seconds)
 
 def log_start():
-    log_any("start")
+    log("start")
 
 def log_trigger(triggername, triggerorigin):
-    log_any("trigger", "", triggername, triggerorigin)
+    log("trigger", triggername=triggername, triggerorigin=triggerorigin)
 
 def log_work(count, elapsed):
-    log_any("work", "", count, "%f" % elapsed)
-
-
+    log("work", count=count, elapsed="%f" % elapsed)
