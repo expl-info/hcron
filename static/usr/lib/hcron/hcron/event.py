@@ -39,7 +39,7 @@ from hcron.assign import eval_assignments, load_assignments
 from hcron.constants import *
 from hcron.execute import remote_execute
 from hcron.hcrontree import HcronTreeCache, create_user_hcron_tree_file, install_hcron_tree_file
-from hcron.library import WHEN_BITMASKS, WHEN_INDEXES, WHEN_MIN_MAX, list_st_to_bitmask, uid2username, username2uid
+from hcron.library import WHEN_BITMASKS, WHEN_INDEXES, WHEN_MIN_MAX, list_st_to_bitmask, time2seconds, uid2username, username2uid
 from hcron.logger import *
 from hcron.notify import send_email_notification
 
@@ -319,17 +319,25 @@ class Event:
         event_notify_message = event_notify_message.replace("\\n", "\n").replace("\\t", "\t")
         event_next_event = varinfo.get("next_event", "")
         event_failover_event = varinfo.get("failover_event", "")
+        event_when_expire = varinfo.get("when_expire", None)
+        if event_when_expire:
+            event_when_expire = time2seconds(event_when_expire)
 
-        log_activate(job.username, job.jobid, job.jobgid, job.pjobid, job.triggername, job.triggerorigin, job.eventname, job.eventchainnames)
-
-        if event_command:
-            rv = remote_execute(job, self.name, self.username, event_as_user, event_host, event_command)
+        elapsed = int((datetime.now()-job.sched_datetime).total_seconds())
+        if event_when_expire and elapsed > event_when_expire:
+            log_expire(job.username, job.jobid, job.jobgid, job.pjobid, job.triggername, job.triggerorigin, job.eventname, job.eventchainnames)
+            rv = -1
         else:
-            error_on_empty_command = globs.configfile.get().get("error_on_empty_command", CONFIG_ERROR_ON_EMPTY_COMMAND)
-            if error_on_empty_command:
-                rv = -1
+            log_activate(job.username, job.jobid, job.jobgid, job.pjobid, job.triggername, job.triggerorigin, job.eventname, job.eventchainnames)
+
+            if event_command:
+                rv = remote_execute(job, self.name, self.username, event_as_user, event_host, event_command)
             else:
-                rv = 0
+                error_on_empty_command = globs.configfile.get().get("error_on_empty_command", CONFIG_ERROR_ON_EMPTY_COMMAND)
+                if error_on_empty_command:
+                    rv = -1
+                else:
+                    rv = 0
 
         if globs.simulate:
             if globs.simulate_show_event:
@@ -348,6 +356,8 @@ class Event:
                 print(tw.fill(fmt % ("when_hour", sched_datetime and sched_datetime.hour)))
                 print(tw.fill(fmt % ("when_minute", sched_datetime and sched_datetime.minute)))
                 print(tw.fill(fmt % ("when_dow", sched_datetime and sched_datetime.weekday())))
+                if event_when_expire:
+                    print(tw.fill(fmt % ("when_expire", event_when_expire)))
                 print(tw.fill(fmt % ("next_event", event_next_event)))
                 print(tw.fill(fmt % ("failover_event", event_failover_event)))
 
@@ -497,7 +507,7 @@ class Event:
             # bad definition check
             try:
                 for name, value in varinfo.items():
-                    if name.startswith("when_"):
+                    if name.startswith("when_") and name != "when_expire":
                         masks[WHEN_INDEXES[name]] = list_st_to_bitmask(value, WHEN_MIN_MAX[name], WHEN_BITMASKS[name])
     
             except Exception as detail:

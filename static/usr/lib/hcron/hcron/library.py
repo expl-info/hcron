@@ -27,8 +27,9 @@
 # system imports
 import os
 import os.path
-import types
 import sys
+import types
+import traceback
 
 # app imports
 from hcron import globs
@@ -234,6 +235,23 @@ def serverize():
     # misc
     os.chdir("/")   # / is always available
     os.umask(0o022)
+
+def time2seconds(s):
+    """Convert time format (HH:MM:SS) to seconds.
+
+    Error in time string returns None.
+    """
+    try:
+        t = s.split(":", 2)
+        total = 0
+        total += int(t[-1])
+        if len(t) > 1:
+            total += int(t[-2])*60
+        if len(t) > 2:
+            total += int(t[-3])*3600
+        return total
+    except:
+        return None
 
 def uid2username(uid):
     return getpwuid(uid).pw_name

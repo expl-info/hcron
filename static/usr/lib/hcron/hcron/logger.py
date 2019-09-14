@@ -107,6 +107,11 @@ def log_execute(username, jobid, jobgid, pjobid, asuser, host, eventname, pid, s
 def log_exit():
     log("exit")
 
+def log_expire(username, jobid, jobgid, pjobid, triggername, triggerorigin, eventname, eventchainnames):
+    log("expire", username=username, jobid=jobid, jobgid=jobgid, pjobid=pjobid,
+        triggername=triggername, triggerorigin=triggerorigin,
+        eventname=eventname, eventchain=eventchainnames)
+
 def log_load_allow():
     log("load-allow")
 
