@@ -1,6 +1,6 @@
-.TH HCRON "7" "November 2018" "hcron 0.22" ""
+.TH HCRON "1" "2019" "hcron 1.0" ""
 .SH NAME
-hcron \- Set of programs for scheduling command execution
+hcron \- Front-end tool to run subcommands
 
 .SH DESCRIPTION
 .PP
@@ -24,27 +24,38 @@ on the configuration, the executing on the local host may restricted
 an optional email notification can be sent upon event command execution
 
 .PP
-A converter tool (hcron-conv) is provided to help move from cron to
-hcron.
+hcron is front-end tool used to run subcommands:
+.IP \[bu] 2
+activate - Activate event.
+.IP \[bu] 2
+event - Create/edit event file.
+.IP \[bu] 2
+info - Get hcron information (deprecated).
+.IP \[bu] 2
+list - List events.
+.IP \[bu] 2
+reload - Reload/unload events.
+.IP \[bu] 2
+run - Simulate events.
+.IP \[bu] 2
+show-fqdn - Show hcron server hostname.
+.IP \[bu] 2
+show-log - Show log.
 
 .PP
-A simulator tool (hcron-run) is provided to help test schedule settings
-and variable substitutions.
-
-.PP
-Refer to the individual manual pages for more information.
+Refer to the repository for more: https://bitbucket.org/hcron/hcron/ .
 
 .SH NOTES
-The hcron programs are written in Python and need only a basic install.
+hcron is written in Python 3.x and needs only a basic install.
 
 .SH SEE ALSO
-hcron-conv(1), hcron-event(1), hcron-info(1), hcron-run(1), hcron-scheduler(8)
+hcron-scheduler(8)
 
 .SH AUTHOR
 Written by John Marshall.
 
 .SH COPYRIGHT
-Copyright \(co 2008-2016 Environment Canada.
+Copyright \(co 2008-2019 Environment Canada.
 .br
 This is free software.  You may redistribute copies of it under the terms of
 the GNU General Public License <http://www.gnu.org/licenses/gpl.html>.

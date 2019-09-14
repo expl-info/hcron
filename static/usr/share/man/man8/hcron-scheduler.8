@@ -1,4 +1,4 @@
-.TH HCRON-SCHEDULER "8" "November 2018" "hcron 0.22" ""
+.TH HCRON-SCHEDULER "8" "2019" "hcron 1.0" ""
 .SH NAME
 hcron-scheduler \- Server which schedules and executes hcron events
 .SH SYNOPSIS
@@ -54,6 +54,11 @@ This restriction applies to any address which resolves to the local
 host.
 
 .TP
+.B allow_root_events
+Boolean indicating whether events belonging to root will be run.
+Default is False.
+
+.TP
 .B command_spawn_timeout
 Maximum time allowed for a command to be spawned. This does not limit
 the time allowed for a command to execute, but serves to limit spawned
@@ -83,6 +88,10 @@ as 1.
 .TP
 .B max_events_per_user
 Maximum number of events allowed per user.
+
+.TP
+.B max_hcron_tree_snapshot_size
+Maximum size of the hcron event tree snapshot created with "hcron reload".
 
 .TP
 .B names_to_ignore_regexp
@@ -171,10 +180,10 @@ See HCRON.ALLOW above.
 See HCRON.CONF above.
 
 .IP /var/lib/hcron/event_lists/<username>
-See hcron-reload.
+See hcron (hcron reload).
  
 .IP /var/lib/hcron/trees/<username>
-See hcron-reload.
+See hcron (hcron reload).
  
 .IP /var/log/hcron/hcron.log
 Default location of the log file (when use_syslog is False).
@@ -184,13 +193,13 @@ Pid file for the currently running hcron-scheduler. This is managed by
 hcron-scheduler itself.
 
 .SH SEE ALSO
-hcron(7), hcron-event(1), hcron-reload(1)
+hcron(1)
 
 .SH AUTHOR
 Written by John Marshall.
 
 .SH COPYRIGHT
-Copyright \(co 2008-2016 Environment Canada.
+Copyright \(co 2008-2019 Environment Canada.
 .br
 This is free software.  You may redistribute copies of it under the terms of
 the GNU General Public License <http://www.gnu.org/licenses/gpl.html>.
