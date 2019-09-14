@@ -1,6 +1,6 @@
 #! /usr/bin/env python2
 #
-# hcron-conv.py
+# hcron_conv.py
 
 # GPL--start
 # This file is part of hcron
@@ -218,14 +218,10 @@ def convert_to_crontab(crontabpath, dirpath, remoteshell):
     crontabfile.close()
 
 def print_usage():
-    d = {
-        "progname": os.path.basename(sys.argv[0])
-    }
-
     print("""\
-usage: %(progname)s --to-events [<options>] <host> <crontabpath> <dirpath>
-       %(progname)s --to-crontab [<options>] <crontabpath> <dirpath>
-       %(progname)s -h|--help
+usage: hcron conv --to-events [<options>] <host> <crontabpath> <dirpath>
+       hcron conv --to-crontab [<options>] <crontabpath> <dirpath>
+       hcron conv -h|--help
 
 Convert between crontab and hcron event file formats.
 
@@ -244,12 +240,10 @@ Options for --to-events:
 Options for --to-crontab:
 --remoteshell <shell>
                     Remote shell to prepend to each crontab command when
-                    the "host" setting is not empty. Default is ssh.""" % d)
+                    the "host" setting is not empty. Default is ssh.""")
 
-if __name__ == "__main__":
+def main(args):
     try:
-        args = sys.argv[1:]
-
         arg = args.pop(0)
         if arg == "--to-events":
             convert_to_events_main(args)

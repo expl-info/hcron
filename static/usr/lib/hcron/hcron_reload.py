@@ -1,6 +1,6 @@
 #! /usr/bin/env python2
 #
-# hcron-activate.py
+# hcron_reload.py
 
 # GPL--start
 # This file is part of hcron
@@ -21,62 +21,64 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # GPL--end
 
-"""Front-end to request an event be activated on demand.
+"""Signal to the hcron-scheduler to reload/unload a user's event
+files.
 """
 
 # system imports
+import datetime
 import os
-import os.path
+import shutil
 import sys
 from sys import stderr
-import tempfile
 import traceback
 
 # app imports
 from hcron.constants import *
+from hcron.event import signal_reload
+from hcron.server import setup
+from hcron.trackablefile import ConfigFile
 
 def print_usage():
-    d = {
-        "progname": os.path.basename(sys.argv[0])
-    }
     print("""\
-usage: %(progname)s <eventname>
-       %(progname)s -h|--help
+usage: hcron reload [--unload]
+       hcron reload -h|--help
 
-Request for the named event to activate now.""" % d)
+Signal the hcron scheduler running on the local machine to reload one's
+event files. Use --unload to unload all one's events at the scheduler.""")
 
-if __name__ == "__main__":
-    progname = os.path.basename(sys.argv[0])
-
+def main(args):
     try:
-        eventname = None
+        unload = False
 
-        args = sys.argv[1:]
         while args:
             arg = args.pop(0)
-            if arg in [ "-h", "--help" ]:
+            if arg == "--unload":
+                unload = True
+            elif arg in ["-h", "--help"]:
                 print_usage()
                 sys.exit(0)
-            elif not args:
-                eventname = arg
             else:
                 raise Exception()
-
-        if eventname == None:
-            raise Exception()
     except SystemExit:
         raise
     except:
         stderr.write("error: bad/missing argument\n")
         sys.exit(1)
 
+    #
+    # work
+    #
     try:
-        fd, path = tempfile.mkstemp(dir=HCRON_ONDEMAND_HOME)
-        os.write(fd, "%s\n" % eventname)
-        os.close(fd)
+        setup()
+
+        signal_reload(unload)
+        now = datetime.datetime.now()
+        next_interval = (now+datetime.timedelta(seconds=60)).replace(second=0,microsecond=0)
+        print("Reload signalled for machine (%s) at next interval (%s; in %ss)." % (HOST_NAME, next_interval, (next_interval-now).seconds))
     except Exception as detail:
         #traceback.print_exc()
-        stderr.write("error: unexpected situation\n")
+        stderr.write("error: failed to reload/unload events\n")
         sys.exit(1)
 
     sys.exit(0)

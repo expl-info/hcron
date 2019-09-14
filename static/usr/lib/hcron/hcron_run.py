@@ -1,6 +1,6 @@
 #! /usr/bin/env python2
 #
-# hcron-run.py
+# hcron_run.py
 
 # GPL--start
 # This file is part of hcron
@@ -46,12 +46,9 @@ def get_hcron_tree_filename(username, hostname):
 hcrontree.get_hcron_tree_filename = get_hcron_tree_filename
 
 def print_usage():
-    d = {
-        "progname": os.path.basename(sys.argv[0])
-    }
     print("""\
-usage: %(progname)s [<options>] <eventsdir> <startdatetime> <enddatetime>
-       %(progname)s -h|--help
+usage: hcron run [<options>] <eventsdir> <startdatetime> <enddatetime>
+       hcron run -h|--help
 
 Simulate events that would execute. Events are taken from the <eventsdir>
 directory and run over the period <startdatetime> to <enddatetime>
@@ -73,17 +70,18 @@ Options:
 --show-event
                     Show email and/or event information as it would be
                     when an event executes. Early and late variable
-                    substitutions are applied.""" % d)
+                    substitutions are applied.""")
 
-if __name__ == "__main__":
+def main(args):
     try:
+        global eventsdir
+
         confpath = None
         delay = 0
         enddatetime = None
         eventsdir = None
         startdatetime = None
 
-        args = sys.argv[1:]
         while args:
             arg = args.pop(0)
             if arg == "-c" and args:

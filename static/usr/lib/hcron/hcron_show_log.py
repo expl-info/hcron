@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 #
-# hcron-show-log.py
+# hcron_show_log.py
 
 # GPL--start
 # This file is part of hcron
@@ -22,7 +22,6 @@
 # GPL--end
 
 from collections import namedtuple
-import os.path
 import sys
 from sys import stderr
 import traceback
@@ -113,11 +112,9 @@ def show_logs(showtypes, showjobtree):
                 show_job(jobid)
 
 def print_usage():
-    d = {
-        "progname": os.path.basename(sys.argv[0])
-    }
     print("""\
-usage: %(progname)s [<options>] <startdatetime> <enddatetime>
+usage: hcron show-log [<options>] <startdatetime> <enddatetime>
+       hcron show-log -h|--help
 
 Show log entries between <startdatetime> and <enddatetime> (specified
 as YYYYMMDD[hhmm]).
@@ -131,17 +128,15 @@ Options:
                     job group.
 --show-types <type>[,...]
                     Show entries for given types. Default is all types.
--u <username>[,...] Filter for users.""" % d)
+-u <username>[,...] Filter for users.""")
 
-if __name__ == "__main__":
+def main(args):
     try:
         enddatetime = None
         showjobtree = False
         showtypes = None
         startdatetime = None
         usernames = None
-
-        args = sys.argv[1:]
 
         while args:
             arg = args.pop(0)

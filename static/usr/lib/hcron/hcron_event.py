@@ -1,6 +1,6 @@
 #! /usr/bin/env python2
 #
-# hcron-event.py
+# hcron_event.py
 
 # GPL--start
 # This file is part of hcron
@@ -38,27 +38,23 @@ from hcron.event import signal_reload
 EDITOR = os.environ.get("EDITOR", "vi")
 
 def print_usage():
-    d = {
-        "progname": os.path.basename(sys.argv[0])
-    }
     print("""\
-usage: %(progname)s [-c] [-y] <path> [...]
-       %(progname)s -h|--help
+usage: hcron event [-c] [-y] <path> [...]
+       hcron event -h|--help
 
 Create/edit an hcron event file at the given path(s). Start editor
 unless -c is specified.
 
 Where:
 -c                  Create event file. Do not start editor.
--y                  Reload after create/edit.""" % d)
+-y                  Reload after create/edit.""")
 
-if __name__ == "__main__":
+def main(args):
     try:
         createonly = False
         paths = None
         reloadevents = False
 
-        args = sys.argv[1:]
         while args:
             arg = args.pop(0)
 

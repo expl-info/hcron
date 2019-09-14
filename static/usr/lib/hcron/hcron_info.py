@@ -1,6 +1,6 @@
 #! /usr/bin/env python2
 #
-# hcron-info.py
+# hcron_info.py
 
 # GPL--start
 # This file is part of hcron
@@ -40,21 +40,18 @@ from hcron.constants import *
 from hcron.library import whoami
 
 def print_usage():
-    d = {
-        "progname": os.path.basename(sys.argv[0])
-    }
     print("""\
-usage: %(progname)s --allowed
-       %(progname)s -es
-       %(progname)s --fqdn
-       %(progname)s -h|--help
+usage: hcron info --allowed
+       hcron info -es
+       hcron info --fqdn
+       hcron info -h|--help
 
 Print hcron related information.
 
 Where:
 --allowed           Output "yes" if permitted to use hcron.
 -es                 Event statuses.
---fqdn              Fully qualified hostname.""" % d)
+--fqdn              Fully qualified hostname.""")
 
 def print_allowed():
     try:
@@ -85,10 +82,8 @@ def print_user_event_status():
         #traceback.print_exc()
         stderr.write("error: Could not read event status information\n")
 
-if __name__ == "__main__":
+def main(args):
     try:
-        args = sys.argv[1:]
-
         # expect at least 1 arg
         arg = args.pop(0)
         if arg == "--allowed":
