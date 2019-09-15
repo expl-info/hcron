@@ -443,7 +443,7 @@ class Event:
             utcoffset = get_utcoffset()
 
             activate_datetime = globs.clock.now()
-            activate_datetime_utc = globs.clock.utcnow()
+            activate_datetime_utc = activate_datetime+utcoffset
             varinfo["HCRON_ACTIVATE_DATETIME"] = activate_datetime.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
             varinfo["HCRON_ACTIVATE_DATETIME_UTC"] = activate_datetime_utc.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
             varinfo["HCRON_ACTIVATE_EPOCHTIME"] = activate_datetime.strftime("%s")
