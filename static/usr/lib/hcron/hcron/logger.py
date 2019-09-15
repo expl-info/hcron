@@ -118,8 +118,8 @@ def log_load_allow():
 def log_load_config():
     log("load-config")
 
-def log_load_events(username, count, elapsed):
-    log("load-events", username=username, count=count, elapsed="%f" % elapsed)
+def log_load_events(username, nevents, naccepted, nrejected, ntemplates, elapsed):
+    log("load-events", username=username, nevents=nevents, naccepted=naccepted, nrejected=nrejected, ntemplates=ntemplates, elapsed="%f" % elapsed)
 
 def log_message(typ, msg, username=""):
     log("message", username=username, message=msg)

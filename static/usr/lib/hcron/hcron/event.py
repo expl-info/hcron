@@ -159,8 +159,19 @@ class EventListList:
 
         if el:
             self.eventlists[username] = el
-            count = len(el.events)
-            log_load_events(username, count, t1-t0)
+            naccepted = 0
+            nrejected = 0
+            ntemplates = 0
+            nevents = len(el.events)
+            for event in el.events.values():
+                if event.reason == None:
+                    naccepted += 1
+                else:
+                    nrejected += 1
+                    if event.reason == "template":
+                        ntemplates += 1
+
+            log_load_events(username, nevents, naccepted, nrejected, ntemplates, t1-t0)
 
     def remove(self, username):
         if username in self.eventlists:
