@@ -21,6 +21,7 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 # GPL--end
 
+from datetime import datetime
 import errno
 import os
 import os.path
@@ -90,6 +91,7 @@ class Job:
         self.event = None
         self.eventchainnames = None
         self.eventname = None
+        self.queue_datetime = None
         self.sched_datetime = None
         self.triggername = None
         self.triggerorigin = None
@@ -144,10 +146,13 @@ class JobQueue:
                     job.triggerorigin = triggerorigin
                     job.eventname = event.name
                     job.eventchainnames = event.name
+                    job.queue_datetime = datetime.now()
                     job.sched_datetime = clock.now()
                     job.username = username
                     self.q.put(job)
-                    log_queue(job.username, job.jobid, job.jobgid, job.pjobid, job.triggername, job.triggerorigin, job.eventname, job.eventchainnames, job.sched_datetime)
+                    log_queue(job.username, job.jobid, job.jobgid, job.pjobid,
+                        job.triggername, job.triggerorigin, job.eventname,
+                        job.eventchainnames, job.sched_datetime, job.queue_datetime)
                 except:
                     log_message("warning", "Failed to queue ondemand event (%s)" % eventname)
                 finally:
@@ -210,10 +215,13 @@ class JobQueue:
                 nextjob.triggerorigin = nextevent.name
                 nextjob.eventname = nextevent.name
                 nextjob.eventchainnames = "%s:%s" % (job.eventchainnames, nextjob.eventname)
+                nextjob.queue_datetime = datetime.now()
                 nextjob.sched_datetime = globs.clock.now()
                 nextjob.username = job.username
                 self.q.put(nextjob)
-                log_queue(nextjob.username, nextjob.jobid, nextjob.jobgid, nextjob.pjobid, nextjob.triggername, nextjob.triggerorigin, nextjob.eventname, nextjob.eventchainnames, nextjob.sched_datetime)
+                log_queue(nextjob.username, nextjob.jobid, nextjob.jobgid, nextjob.pjobid,
+                    nextjob.triggername, nextjob.triggerorigin, nextjob.eventname,
+                    nextjob.eventchainnames, nextjob.sched_datetime, nextjob.queue_datetime)
 
     def handle_jobs(self):
         max_activated_events = max(globs.configfile.get().get("max_activated_events", CONFIG_MAX_ACTIVATED_EVENTS), 1)

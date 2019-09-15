@@ -127,11 +127,11 @@ def log_message(typ, msg, username=""):
 def log_notify_email(username, addrs, eventName):
     log("notify-email", username=username, addrs=addrs, eventname=eventName)
 
-def log_queue(username, jobid, jobgid, pjobid, triggername, triggerorigin, eventname, eventchainnames, schedtime):
+def log_queue(username, jobid, jobgid, pjobid, triggername, triggerorigin, eventname, eventchainnames, schedtime, queuetime):
     log("queue", username=username, jobid=jobid, jobgid=jobgid, pjobid=pjobid,
         triggername=triggername, triggerorigin=triggerorigin,
         eventname=eventname, eventchain=eventchainnames,
-        schedtime=schedtime)
+        schedtime=schedtime, queuetime=queuetime)
 
 def log_sleep(seconds):
     log("sleep", sleeptime=seconds)

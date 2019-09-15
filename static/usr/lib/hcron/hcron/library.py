@@ -25,6 +25,7 @@
 """
 
 # system imports
+from datetime import datetime
 import os
 import os.path
 import sys
@@ -218,6 +219,18 @@ def get_events_home_snapshot(username):
     path = os.path.join(HCRON_EVENTS_SNAPSHOT_HOME, username)
 
     return path
+
+def get_utcoffset():
+    """Return UTC offset at the time of the call.
+
+    TODO: Ugly. Fix to do it properly.
+    """
+    while True:
+        now = datetime.now()
+        utcnow = datetime.utcnow()
+        if now.minute == utcnow.minute:
+            break
+    return utcnow.replace(second=0, microsecond=0)-now.replace(second=0, microsecond=0)
 
 def serverize():
     if os.fork() != 0:

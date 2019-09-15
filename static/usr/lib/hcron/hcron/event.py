@@ -39,7 +39,7 @@ from hcron.assign import eval_assignments, load_assignments
 from hcron.constants import *
 from hcron.execute import remote_execute
 from hcron.hcrontree import HcronTreeCache, create_user_hcron_tree_file, install_hcron_tree_file
-from hcron.library import WHEN_BITMASKS, WHEN_INDEXES, WHEN_MIN_MAX, list_st_to_bitmask, time2seconds, uid2username, username2uid
+from hcron.library import WHEN_BITMASKS, WHEN_INDEXES, WHEN_MIN_MAX, get_utcoffset, list_st_to_bitmask, time2seconds, uid2username, username2uid
 from hcron.logger import *
 from hcron.notify import send_email_notification
 
@@ -440,6 +440,8 @@ class Event:
             varinfo["HCRON_EVENT_CHAIN"] = job.eventchainnames
             varinfo["HCRON_SELF_CHAIN"] = ":".join(selfeventchainnames)
 
+            utcoffset = get_utcoffset()
+
             activate_datetime = globs.clock.now()
             activate_datetime_utc = globs.clock.utcnow()
             varinfo["HCRON_ACTIVATE_DATETIME"] = activate_datetime.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
@@ -452,6 +454,14 @@ class Event:
                 varinfo["HCRON_SCHEDULE_DATETIME_UTC"] = job.sched_datetime.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
                 varinfo["HCRON_SCHEDULE_EPOCHTIME"] = job.sched_datetime.strftime("%s")
                 varinfo["HCRON_SCHEDULE_EPOCHTIME_UTC"] = job.sched_datetime.strftime("%s")
+
+            if job.queue_datetime:
+                queue_datetime = job.queue_datetime
+                queue_datetime_utc = queue_datetime+utcoffset
+                varinfo["HCRON_QUEUE_DATETIME"] = queue_datetime.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
+                varinfo["HCRON_QUEUE_DATETIME_UTC"] = queue_datetime_utc.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
+                varinfo["HCRON_QUEUE_EPOCHTIME"] = queue_datetime.strftime("%s")
+                varinfo["HCRON_QUEUE_EPOCHTIME_UTC"] = queue_datetime_utc.strftime("%s")
 
         return varinfo
 
