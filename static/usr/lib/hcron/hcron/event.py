@@ -450,10 +450,12 @@ class Event:
             varinfo["HCRON_ACTIVATE_EPOCHTIME_UTC"] = activate_datetime_utc.strftime("%s")
 
             if job.sched_datetime:
-                varinfo["HCRON_SCHEDULE_DATETIME"] = job.sched_datetime.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
-                varinfo["HCRON_SCHEDULE_DATETIME_UTC"] = job.sched_datetime.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
-                varinfo["HCRON_SCHEDULE_EPOCHTIME"] = job.sched_datetime.strftime("%s")
-                varinfo["HCRON_SCHEDULE_EPOCHTIME_UTC"] = job.sched_datetime.strftime("%s")
+                sched_datetime = job.sched_datetime
+                sched_datetime_utc = sched_datetime+utcoffset
+                varinfo["HCRON_SCHEDULE_DATETIME"] = sched_datetime.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
+                varinfo["HCRON_SCHEDULE_DATETIME_UTC"] = sched_datetime_utc.strftime("%Y:%m:%d:%H:%M:%S:%W:%w")
+                varinfo["HCRON_SCHEDULE_EPOCHTIME"] = sched_datetime.strftime("%s")
+                varinfo["HCRON_SCHEDULE_EPOCHTIME_UTC"] = sched_datetime_utc.strftime("%s")
 
             if job.queue_datetime:
                 queue_datetime = job.queue_datetime
