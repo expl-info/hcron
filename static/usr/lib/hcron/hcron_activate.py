@@ -65,7 +65,7 @@ def main(args):
 
     try:
         fd, path = tempfile.mkstemp(dir=HCRON_ONDEMAND_HOME)
-        os.write(fd, "%s\n" % eventname)
+        os.write(fd, str.encode("%s\n" % eventname))
         os.close(fd)
     except Exception as detail:
         #traceback.print_exc()
