@@ -164,11 +164,11 @@ class EventListList:
             ntemplates = 0
             nevents = len(el.events)
             for event in el.events.values():
-                if event.reason == None:
+                if event.type == "normal":
                     naccepted += 1
                 else:
                     nrejected += 1
-                    if event.reason == "template":
+                    if event.type == "template":
                         ntemplates += 1
 
             log_load_events(username, nevents, naccepted, nrejected, ntemplates, t1-t0)
@@ -223,13 +223,11 @@ class EventList:
             f = open(path, "w+")
             os.chown(path, username2uid(self.username), 0)
 
-            events = self.events
-            for name in sorted(events.keys()):
-                reason = events[name].reason
-                if reason == None:
-                    f.write("accepted::%s\n" % name)
+            for event in self.events.values():
+                if event.type == "normal":
+                    f.write("accepted::%s\n" % event.name)
                 else:
-                    f.write("rejected:%s:%s\n" % (reason, name))
+                    f.write("rejected:%s:%s\n" % (event.reason, event.name))
         except Exception as detail:
             pass
         finally:
@@ -296,6 +294,7 @@ class Event:
         self.deleted = False
         self.masks = None
         self.reason = None
+        self.type = None
         self.when = None
 
         if autoload:
@@ -524,6 +523,7 @@ class Event:
 
             # template check (this should preced when_* checks)
             if varinfo["template_name"] == self.name.split("/")[-1]:
+                self.type = "template"
                 self.reason = "template"
                 raise TemplateEventDefinitionException("Ignored event file (%s). Template name (%s)." % (self.name, varinfo["template_name"]))
     
@@ -542,6 +542,7 @@ class Event:
             # full specification check
             for name in HCRON_EVENT_DEFINITION_NAMES:
                 if name not in varinfo:
+                    self.type = "partial"
                     self.reason = "not fully specified, missing field (%s)" % name
                     raise BadEventDefinitionException("Ignored event file (%s). Missing field (%s)." % \
                         (self.name, name))
@@ -553,6 +554,7 @@ class Event:
                     varinfo.get("when_hour"),
                     varinfo.get("when_minute"),
                     varinfo.get("when_dow"))
+            self.type = "normal"
         except:
             if self.reason == None:
                 self.reason = "unknown problem"
