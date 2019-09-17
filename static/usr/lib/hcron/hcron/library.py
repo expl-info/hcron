@@ -129,14 +129,14 @@ def copyfile(src, dst, max_size):
     different users (i.e., via seteuid as required by NFS with
     root_squash).
     """
-    if type(src) in types.StringTypes:
-        src = open(src, "r")
-    if type(dst) in types.StringTypes:
-        dst = open(dst, "w")
+    if type(src) in StringTypes:
+        src = open(src, "rb")
+    if type(dst) in StringTypes:
+        dst = open(dst, "wb")
 
     try:
         buf = None
-        while max_size > 0 and buf != "":
+        while max_size > 0 and buf != b"":
             buf = src.read(2**16)
             max_size -= len(buf)
             if max_size < 0:

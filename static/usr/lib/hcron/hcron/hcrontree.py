@@ -239,7 +239,7 @@ def install_hcron_tree_file(username, hostname):
     try:
         uid = username2uid(username)
         os.seteuid(uid)
-        src = open(srcpath, "r")
+        src = open(srcpath, "rb")
     except:
         os.seteuid(0)
         raise
