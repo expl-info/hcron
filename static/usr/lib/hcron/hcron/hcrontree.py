@@ -241,10 +241,10 @@ def install_hcron_tree_file(username, hostname):
         os.seteuid(uid)
         src = open(srcpath, "rb")
     except:
-        os.seteuid(0)
         raise
+    finally:
+        os.seteuid(0)
 
-    os.seteuid(0)
     try:
         os.remove(dstpath)
     except:
