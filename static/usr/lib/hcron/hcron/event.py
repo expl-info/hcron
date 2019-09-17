@@ -225,9 +225,12 @@ class EventList:
 
             for event in self.events.values():
                 if event.type == "normal":
-                    f.write("accepted::%s\n" % event.name)
+                    status = "accepted"
+                    reason = ""
                 else:
-                    f.write("rejected:%s:%s\n" % (event.reason, event.name))
+                    status = "rejected"
+                    reason = event.reason
+                f.write("%s:%s:%s:%s\n" % (status, event.type, reason, event.name))
         except Exception as detail:
             pass
         finally:
