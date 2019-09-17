@@ -65,7 +65,7 @@ class ConfigFile(TrackableFile):
             st = open(self.path, "r").read()
             d = ast.literal_eval(st)
             log_load_config()
-        except Exception as detail:
+        except Exception:
             log_message("error", "Cannot load hcron.config file (%s)." % self.path)
             sys.exit(1)
 
@@ -96,7 +96,7 @@ class AllowFile(TrackableFile):
                     allowedusers.append(username)
 
             log_load_allow()
-        except Exception as detail:
+        except Exception:
                 log_message("error", "Cannot load hcron.allow file (%s)." % self.path)
 
         self.contents = list(set(allowedusers))
@@ -106,6 +106,6 @@ class SignalDir(TrackableFile):
     def load(self):
         try:
             self.mtime = os.stat(self.path)[stat.ST_MTIME]
-        except Exception as detail:
+        except Exception:
             log_message("error", "Cannot stat signal directory (%s)." % self.path)
             raise

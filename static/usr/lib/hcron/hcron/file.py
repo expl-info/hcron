@@ -38,7 +38,7 @@ class PidFile:
         try:
             pid = open(self.path, "r").read()
             log_message("error", "Cannot create pid file (%s)." % self.path)
-        except Exception as detail:
+        except Exception:
             log_message("info", "Creating pid file (%s)." % self.path)
             pid = os.getpid()
             open(self.path, "w").write("%s" % pid)
@@ -48,5 +48,5 @@ class PidFile:
         try:
             log_message("info", "Removing pid file (%s)." % self.path)
             os.remove(self.path)
-        except Exception as detail:
+        except Exception:
             log_message("error", "Cannot remove pid file (%s)." % self.path)

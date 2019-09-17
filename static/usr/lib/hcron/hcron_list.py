@@ -82,7 +82,7 @@ def print_eventnames(pattern, showthings):
                 eventinfo[eventname] = line
         for eventname, line in sorted(eventinfo.items()):
             print(line)
-    except Exception as detail:
+    except Exception:
         #traceback.print_exc()
         stderr.write("error: Could not read event status information\n")
 

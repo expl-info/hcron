@@ -64,7 +64,7 @@ def main(args):
         now = datetime.datetime.now()
         next_interval = (now+datetime.timedelta(seconds=60)).replace(second=0,microsecond=0)
         print("Reload signalled for machine (%s) at next interval (%s; in %ss)." % (HOST_NAME, next_interval, (next_interval-now).seconds))
-    except Exception as detail:
+    except Exception:
         #traceback.print_exc()
         stderr.write("error: failed to signal to reload events\n")
         sys.exit(1)

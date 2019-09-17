@@ -142,7 +142,7 @@ def copyfile(src, dst, max_size):
             if max_size < 0:
                 buf = buf[:max_size]
             dst.write(buf)
-    except Exception as detail:
+    except Exception:
         pass
 
     if src:

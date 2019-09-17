@@ -87,7 +87,7 @@ def remote_execute(job, eventname, localusername, remoteusername, remotehostname
                     os.setuid(localuid)
                     os.setsid()
                     os.execv(args[0], args)
-                except (OSError, Exception) as detail:
+                except (OSError, Exception):
                     rv = 256
                 os._exit(rv)
 

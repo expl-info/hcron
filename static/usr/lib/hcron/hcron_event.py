@@ -88,7 +88,7 @@ def main(args):
             if not createonly:
                 subprocess.call([EDITOR, path])
 
-        except Exception as detail:
+        except Exception:
             stderr.write("error: problem creating/opening event file (%s)\n" % path)
             sys.exit(1)
 
@@ -100,7 +100,7 @@ def main(args):
             print("Reload signalled for machine (%s) at next interval (%s; in %ss)." % (HOST_NAME, next_interval, (next_interval-now).seconds))
         else:
             print("Reload deferred.")
-    except Exception as detail:
+    except Exception:
         #traceback.print_exc()
         stderr.write("error: could not reload\n")
         sys.exit(1)

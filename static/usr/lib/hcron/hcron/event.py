@@ -76,12 +76,12 @@ def reload_events(signalHomeMtime):
                     install_hcron_tree_file(username, globs.fqdn)
                     globs.eventlistlist.reload(username)
                     usernames[username] = None
-                except Exception as detail:
+                except Exception:
                     log_message("warning", "Could not install snapshot file for user (%s)." % username)
 
             try:
                 os.remove(path) # remove singles and multiples
-            except Exception as detail:
+            except Exception:
                 log_message("warning", "Could not remove signal file (%s)." % path)
 
 def signal_reload(unload=False):
@@ -231,7 +231,7 @@ class EventList:
                     status = "rejected"
                     reason = event.reason
                 f.write("%s:%s:%s:%s\n" % (status, event.type, reason, event.name))
-        except Exception as detail:
+        except Exception:
             pass
         finally:
             if f != None:
@@ -258,7 +258,7 @@ class EventList:
                         continue
 
                     event = Event(name, self.username)
-                except Exception as detail:
+                except Exception:
                     # bad Event definition
                     pass
                     #continue
@@ -269,7 +269,7 @@ class EventList:
                     event.reason = "maximum events reached"
                     log_message("warning", "Reached maximum events allowed (%s)." % max_events_per_user)
 
-        except Exception as detail:
+        except Exception:
             log_message("error", "Could not load events.")
 
         # delete any caches (and references) before moving on with or
@@ -494,26 +494,26 @@ class Event:
                 else:
                     lines = globs.hcron_tree_cache.get_event_contents(self.name).split("\n")
                 lines = self.process_lines(lines)
-            except Exception as detail:
+            except Exception:
                 self.reason = "cannot load file"
                 raise CannotLoadFileException("Ignored event file (%s)." % self.name)
 
             try:
                 lines = self.process_includes(self.name, lines)
-            except Exception as detail:
+            except Exception:
                 self.reason = "cannot process include(s)"
                 raise CannotLoadFileException("Ignored event file (%s)." % self.name)
 
             try:
                 assignments = load_assignments(lines)
-            except Exception as detail:
+            except Exception:
                 self.reason = "bad definition"
                 raise BadEventDefinitionException("Ignored event file (%s)." % self.name)
 
             try:
                 # early substitution
                 eval_assignments(assignments, varinfo)
-            except Exception as detail:
+            except Exception:
                 self.reason = "bad variable substitution"
                 raise BadVariableSubstitutionException("Ignored event file (%s)." % self.name)
 
@@ -536,7 +536,7 @@ class Event:
                     if name.startswith("when_") and name != "when_expire":
                         masks[WHEN_INDEXES[name]] = list_st_to_bitmask(value, WHEN_MIN_MAX[name], WHEN_BITMASKS[name])
     
-            except Exception as detail:
+            except Exception:
                 self.reason = "bad when_* setting"
                 raise BadEventDefinitionException("Ignored event file (%s)." % self.name)
 

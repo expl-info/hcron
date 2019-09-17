@@ -91,5 +91,5 @@ def test_service():
             try:
                 pwd.getpwnam(test_net_username)
                 break
-            except Exception as detail:
+            except Exception:
                 time.sleep(test_net_delay)
