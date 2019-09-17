@@ -1,6 +1,6 @@
 #! /usr/bin/env python2
 #
-# hcron_reload.py
+# hcron_unload.py
 
 # GPL--start
 # This file is part of hcron
@@ -36,10 +36,10 @@ from hcron.server import setup
 
 def print_usage():
     print("""\
-usage: hcron reload
-       hcron reload -h|--help
+usage: hcron unload
+       hcron unload -h|--help
 
-Signal the hcron scheduler running on the local machine to reload one's
+Signal the hcron scheduler running on the local machine to unload one's
 event files.""")
 
 def main(args):
@@ -60,13 +60,13 @@ def main(args):
     try:
         setup()
 
-        signal_reload()
+        signal_reload(unload)
         now = datetime.datetime.now()
         next_interval = (now+datetime.timedelta(seconds=60)).replace(second=0,microsecond=0)
-        print("Reload signalled for machine (%s) at next interval (%s; in %ss)." % (HOST_NAME, next_interval, (next_interval-now).seconds))
+        print("Unload signalled for machine (%s) at next interval (%s; in %ss)." % (HOST_NAME, next_interval, (next_interval-now).seconds))
     except Exception as detail:
         #traceback.print_exc()
-        stderr.write("error: failed to signal to reload events\n")
+        stderr.write("error: failed to signal to unload events\n")
         sys.exit(1)
 
     sys.exit(0)

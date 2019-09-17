@@ -39,10 +39,11 @@ activate        Activate event.
 event           Create/edit event.
 info            Get hcron information.
 list            List events.
-reload          Reload/unload events.
+reload          Reload events.
 run             Simulate events.
 show-fqdn       Show hcron server hostname.
-show-log        Show log.""")
+show-log        Show log.
+unload          Unload events.""")
 
 if __name__ == "__main__":
     try:
@@ -68,6 +69,8 @@ if __name__ == "__main__":
             from hcron_show_fqdn import main
         elif subcommand == "show-log":
             from hcron_show_log import main
+        elif subcommand == "unload":
+            from hcron_unload import main
         else:
             raise Exception()
     except SystemExit:
