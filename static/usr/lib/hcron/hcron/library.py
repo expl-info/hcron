@@ -29,7 +29,10 @@ from datetime import datetime
 import os
 import os.path
 import sys
-import types
+try:
+    from types import StringTypes
+except:
+    StringTypes = [str]
 import traceback
 
 # app imports
