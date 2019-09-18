@@ -130,42 +130,39 @@ if __name__ == "__main__":
         stderr.write("error: bad/missing argument\n")
         sys.exit(1)
 
-    #
-    # setup
-    #
-    setup()
-
-    globs.remote_execute_enabled = True
-    globs.email_notify_enabled = True
-
-    globs.configfile = ConfigFile(HCRON_CONFIG_PATH)
-    setup_logger()
-    globs.allowfile = AllowFile(HCRON_ALLOW_PATH)
-    globs.signaldir = SignalDir(HCRON_SIGNAL_DIR)
-    globs.eventlistlist = EventListList(globs.allowfile.get())
-
-    signal.signal(signal.SIGHUP, reload_signal_handler)
-    #signal.signal(signal.SIGUSR1, dump_signal_handler)
-    signal.signal(signal.SIGTERM, quit_signal_handler)
-    signal.signal(signal.SIGQUIT, quit_signal_handler)
-    ###signal.signal(signal.SIGCHLD, signal.SIG_IGN)   # we don't care about children/zombies
-
-    library.serverize()  # don't catch SystemExit
-
-    globs.server = Server()
-    globs.pidfile = PidFile(HCRON_PID_FILE_PATH)
-    globs.pidfile.create()
-
     try:
+        setup()
+
+        globs.remote_execute_enabled = True
+        globs.email_notify_enabled = True
+
+        globs.configfile = ConfigFile(HCRON_CONFIG_PATH)
+        setup_logger()
+        globs.allowfile = AllowFile(HCRON_ALLOW_PATH)
+        globs.signaldir = SignalDir(HCRON_SIGNAL_DIR)
+        globs.eventlistlist = EventListList(globs.allowfile.get())
+
+        signal.signal(signal.SIGHUP, reload_signal_handler)
+        #signal.signal(signal.SIGUSR1, dump_signal_handler)
+        signal.signal(signal.SIGTERM, quit_signal_handler)
+        signal.signal(signal.SIGQUIT, quit_signal_handler)
+        ###signal.signal(signal.SIGCHLD, signal.SIG_IGN)   # we don't care about children/zombies
+
+        library.serverize()  # don't catch SystemExit
+
+        globs.server = Server()
+        globs.pidfile = PidFile(HCRON_PID_FILE_PATH)
+        globs.pidfile.create()
+
         log_start()
         globs.server.run(immediate=immediate)
     except Exception as detail:
-        log_message("warning", "unexpected exception (%s)." % detail)
-        #import traceback
-        #log_message("warning", "trace (%s)." % traceback.format_exc())
-        #print(detail)
+        log_message("error", "unexpected error (%s)." % detail)
+
+    try:
+        globs.pidfile.remove()
+        log_exit()
+    except:
         pass
 
-    globs.pidfile.remove()
-    log_exit()
-    sys.exit(-1)
+    sys.exit(1)
