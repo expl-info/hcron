@@ -1,5 +1,4 @@
 #! /bin/bash
 
-echo 'warning: this program name is deprecated in favor of "hcron info"' 1>&2
-
-exec hcron info "$@"
+echo 'error: this program name is deprecated in favor of "hcron get" or "hcron show-log"' 1>&2
+exit 1
