@@ -39,6 +39,7 @@ import traceback
 from hcron import globs
 from hcron.constants import *
 from hcron.fspwd import getpwnam, getpwuid
+from hcron.logger import log_message
 
 #
 # bitmasks makes for easy comparisons (bitwise-and), where each value
@@ -240,17 +241,24 @@ def serverize():
         # exit original/parent process
         sys.exit(0)
 
-    # close streams - the Python way
-    sys.stdin.close(); os.close(0); os.open("/dev/null", os.O_RDONLY)
-    sys.stdout.close(); os.close(1); os.open("/dev/null", os.O_RDWR)
-    sys.stderr.close(); os.close(2); os.open("/dev/null", os.O_RDWR)
+    try:
+        # close streams - the Python way
+        if sys.stdin:
+            sys.stdin.close(); os.close(0); os.open("/dev/null", os.O_RDONLY)
+        if sys.stdout:
+            sys.stdout.close(); os.close(1); os.open("/dev/null", os.O_RDWR)
+        if sys.stderr:
+            sys.stderr.close(); os.close(2); os.open("/dev/null", os.O_RDWR)
 
-    # detach from controlling terminal
-    os.setsid()
+        # detach from controlling terminal
+        os.setsid()
 
-    # misc
-    os.chdir("/")   # / is always available
-    os.umask(0o022)
+        # misc
+        os.chdir("/")   # / is always available
+        os.umask(0o022)
+    except:
+        log_message("error", "failed to serverize (%s)" % (traceback.format_exc(),))
+        sys.exit(1)
 
 def time2seconds(s):
     """Convert time format (HH:MM:SS) to seconds.
