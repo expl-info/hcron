@@ -25,15 +25,10 @@
 """
 
 # system imports
+from io import BytesIO
 import os
 import os.path
 import shutil
-try:
-    # try this first since python-2.7 has io.StringIO
-    # which we do not want for python2
-    from StringIO import StringIO
-except:
-    from io import StringIO
 import tarfile
 import tempfile
 
@@ -104,10 +99,10 @@ class HcronTreeCache:
 
         if os.path.isdir(self.path) \
             and os.path.basename(self.path) == "events":
-            _f = StringIO()
+            _f = BytesIO()
             f = tarfile.open(mode="w", fileobj=_f)
             f.add(self.path, "events")
-            _f = StringIO(_f.getvalue())
+            _f = BytesIO(_f.getvalue())
             f = tarfile.open(fileobj=_f)
         else:
             f = tarfile.open(self.path)
