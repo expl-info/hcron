@@ -35,14 +35,16 @@ usage: hcron <subcommand> ...
              -h|--help
 
 Subcommands:
-activate        Activate event.
-event           Create/edit event.
-get             Get hcron information.
-list            List events.
-reload          Reload events.
-run             Simulate events.
-show-log        Show log.
-unload          Unload events.""")
+activate            Activate event.
+event               Create/edit event.
+get                 Get hcron information.
+list                List events.
+reload              Reload events.
+run                 Simulate events.
+show-log            Show log.
+unload              Unload events.
+
+Each subcommand supports -h and --help to get help.""")
 
 if __name__ == "__main__":
     try:
