@@ -77,12 +77,12 @@ def reload_events(signalHomeMtime):
                     globs.eventlistlist.reload(username)
                     usernames[username] = None
                 except Exception:
-                    log_message("warning", "Could not install snapshot file for user (%s)." % username)
+                    log_message("warning", "could not install snapshot file for user (%s)." % username)
 
             try:
                 os.remove(path) # remove singles and multiples
             except Exception:
-                log_message("warning", "Could not remove signal file (%s)." % path)
+                log_message("warning", "could not remove signal file (%s)." % path)
 
 def signal_reload(unload=False):
     """Signal to reload.
@@ -97,17 +97,17 @@ def signal_reload(unload=False):
     username = uid2username(os.getuid())
 
     if username not in globs.allowfile.get():
-        raise Exception("Warning: You are not an allowed hcron user.")
+        raise Exception("you are not an allowed hcron user.")
 
     try:
         create_user_hcron_tree_file(username, globs.fqdn, empty=unload)
     except Exception as detail:
-        raise Exception("Error: Could not create hcron snapshot file (%s)." % detail)
+        raise Exception("could not create hcron snapshot file (%s)." % detail)
 
     try:
         tempfile.mkstemp(prefix=username, dir=signalHome)
     except:
-        raise Exception("Error: Could not signal for reload.")
+        raise Exception("could not signal for reload.")
 
 class CannotLoadFileException(Exception):
     pass
@@ -127,7 +127,7 @@ class EventListList:
     All event lists are keyed on user name.
     """
     def __init__(self, usernames):
-        log_message("info", "Initializing events list.")
+        log_message("info", "initializing events list.")
         self.load(usernames)
 
     def get(self, username):
@@ -136,7 +136,7 @@ class EventListList:
     def load(self, usernames=None):
         """Load from scratch.
         """
-        log_message("info", "Loading events.")
+        log_message("info", "loading events.")
 
         t0 = time.time()
         self.eventlists = {}
@@ -267,10 +267,10 @@ class EventList:
 
                 if len(self.events) >= max_events_per_user:
                     event.reason = "maximum events reached"
-                    log_message("warning", "Reached maximum events allowed (%s)." % max_events_per_user)
+                    log_message("warning", "reached maximum events allowed (%s)." % max_events_per_user)
 
         except Exception:
-            log_message("error", "Could not load events.")
+            log_message("error", "could not load events.")
 
         # delete any caches (and references) before moving on with or
         # without an prior exception!
@@ -386,7 +386,7 @@ class Event:
                 max_email_notifications = config.get("max_email_notifications", CONFIG_MAX_EMAIL_NOTIFICATIONS)
                 toaddrs = [toaddr.strip() for toaddr in event_notify_email.split(",")]
                 if len(toaddrs) > max_email_notifications:
-                    log_message("error", "Limited user (%s) event (%s) email notification recipients from (%s) to (%s)" % (self.username, self.name, len(toaddrs), max_email_notifications))
+                    log_message("error", "limited user (%s) event (%s) email notification recipients from (%s) to (%s)" % (self.username, self.name, len(toaddrs), max_email_notifications))
                     toaddrs = toaddrs[:max_email_notifications]
 
                 if event_notify_subject == "":

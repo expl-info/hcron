@@ -80,7 +80,7 @@ def print_user_event_status():
         print(open(usereventlistspath, "r").read(), end="")
     except Exception:
         #traceback.print_exc()
-        stderr.write("error: Could not read event status information\n")
+        stderr.write("error: could not read event status information\n")
 
 def main(args):
     try:

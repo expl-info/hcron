@@ -37,16 +37,16 @@ class PidFile:
     def create(self):
         try:
             pid = open(self.path, "r").read()
-            log_message("error", "Cannot create pid file (%s)." % self.path)
+            log_message("error", "cannot create pid file (%s)." % self.path)
         except Exception:
-            log_message("info", "Creating pid file (%s)." % self.path)
+            log_message("info", "creating pid file (%s)." % self.path)
             pid = os.getpid()
             open(self.path, "w").write("%s" % pid)
         return int(pid)
 
     def remove(self):
         try:
-            log_message("info", "Removing pid file (%s)." % self.path)
+            log_message("info", "removing pid file (%s)." % self.path)
             os.remove(self.path)
         except Exception:
-            log_message("error", "Cannot remove pid file (%s)." % self.path)
+            log_message("error", "cannot remove pid file (%s)." % self.path)

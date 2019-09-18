@@ -138,7 +138,7 @@ class JobQueue:
                     try:
                         event = get_event(username, eventname)
                     except:
-                        log_message("error", "Cannot get event (%s) for user (%s)" % (eventname, username))
+                        log_message("error", "cannot get event (%s) for user (%s)" % (eventname, username))
                         continue
 
                     job = Job()
@@ -154,7 +154,7 @@ class JobQueue:
                         job.triggername, job.triggerorigin, job.eventname,
                         job.eventchainnames, job.sched_datetime, job.queue_datetime)
                 except:
-                    log_message("warning", "Failed to queue ondemand event (%s)" % eventname)
+                    log_message("warning", "failed to queue ondemand event (%s)" % eventname)
                 finally:
                     if path:
                         os.remove(path)
@@ -170,7 +170,7 @@ class JobQueue:
         try:
             event = get_event(job.username, job.eventname)
         except:
-            log_message("error", "Cannot get event (%s) for user (%s)" % (job.eventname, job.username))
+            log_message("error", "cannot get event (%s) for user (%s)" % (job.eventname, job.username))
             return
 
         max_chain_events = max(globs.configfile.get().get("max_chain_events", CONFIG_MAX_CHAIN_EVENTS), 1)
@@ -182,7 +182,7 @@ class JobQueue:
             eventChainNames = []
         #eventChainNames.append(event.get_name())
 
-        #log_message("info", "Processing event (%s)." % event.get_name())
+        #log_message("info", "processing event (%s)." % event.get_name())
         try:
             # None, next_event, or failover_event is returned
             nexteventnames, nexteventtype = event.activate(job)
@@ -192,11 +192,11 @@ class JobQueue:
 
         if nexteventnames:
             if len(eventChainNames) >= max_chain_events:
-                log_message("error", "Event chain limit (%s) reached at (%s)." % (max_chain_events, ":".join(nexteventnames)), user_name=event.username)
+                log_message("error", "event chain limit (%s) reached at (%s)." % (max_chain_events, ":".join(nexteventnames)), user_name=event.username)
                 return
 
             if len(nexteventnames) > max_next_events:
-                log_message("error", "Next event limit (%s) reached at (%s)." % (max_next_events, ":".join(nexteventnames)))
+                log_message("error", "next event limit (%s) reached at (%s)." % (max_next_events, ":".join(nexteventnames)))
                 return
 
             for nexteventname in nexteventnames:
@@ -205,9 +205,9 @@ class JobQueue:
 
                 # problem cases for nextevent
                 if nextevent == None:
-                    log_message("error", "Chained event (%s) does not exist." % nexteventname, user_name=event.username)
+                    log_message("error", "chained event (%s) does not exist." % nexteventname, user_name=event.username)
                 elif nextevent.assignments == None and nextevent.reason not in [ None, "template" ]:
-                    log_message("error", "Chained event (%s) was rejected (%s)." % (nexteventname, nextevent.reason), user_name=event.username)
+                    log_message("error", "chained event (%s) was rejected (%s)." % (nexteventname, nextevent.reason), user_name=event.username)
                     nextevent = None
 
                 nextjob = Job(job.jobgid, job.jobid)
@@ -238,7 +238,7 @@ class JobQueue:
                 pass
             except Exception as detail:
                 if self.q != None:
-                    log_message("error", "Unexpected exception (%s)." % str(detail))
+                    log_message("error", "unexpected exception (%s)." % str(detail))
                 return
 
     def put(self, *args, **kwargs):

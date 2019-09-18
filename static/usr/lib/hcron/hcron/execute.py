@@ -110,7 +110,7 @@ def remote_execute(job, eventname, localusername, remoteusername, remotehostname
             elif os.WIFEXITED(waitst):
                 rv = (os.WEXITSTATUS(waitst) == 255) and -1 or 0
         except Exception as detail:
-            log_message("error", "Execute failed (%s)." % detail)
+            log_message("error", "execute failed (%s)." % detail)
 
         spawn_endtime = time.time()
         log_execute(localusername, job.jobid, job.jobgid, job.pjobid, remoteusername, remotehostname, eventname, pid, spawn_endtime-spawn_starttime, rv)

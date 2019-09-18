@@ -51,7 +51,7 @@ from hcron.server import Server, setup
 from hcron.trackablefile import AllowFile, ConfigFile, SignalDir
 
 def dump_signal_handler(num, frame):
-    log_message("info", "Received signal to dump.")
+    log_message("info", "received signal to dump.")
     signal.signal(num, dump_signal_handler)
     pp = pprint.PrettyPrinter(indent=4)
 
@@ -83,12 +83,12 @@ def dump_signal_handler(num, frame):
             el.dump()
 
 def reload_signal_handler(num, frame):
-    log_message("info", "Received signal to reload.")
+    log_message("info", "received signal to reload.")
     signal.signal(num, reload_signal_handler)
     globs.eventlistlist.load(globs.allowfile.get())
 
 def quit_signal_handler(num, frame):
-    log_message("info", "Received signal to exit.")
+    log_message("info", "received signal to exit.")
     globs.pidfile.remove()
     sys.exit(0)
 
@@ -160,7 +160,7 @@ if __name__ == "__main__":
         log_start()
         globs.server.run(immediate=immediate)
     except Exception as detail:
-        log_message("warning", "Unexpected exception (%s)." % detail)
+        log_message("warning", "unexpected exception (%s)." % detail)
         #import traceback
         #log_message("warning", "trace (%s)." % traceback.format_exc())
         #print(detail)

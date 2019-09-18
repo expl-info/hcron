@@ -84,7 +84,7 @@ def print_eventnames(pattern, showthings):
             print(line)
     except Exception:
         #traceback.print_exc()
-        stderr.write("error: Could not read event status information\n")
+        stderr.write("error: could not read event status information\n")
 
 def main(args):
     try:
@@ -116,7 +116,7 @@ def main(args):
     try:
         print_eventnames(pattern, showthings)
     except:
-        stderr.write("error: unexpected situation\n")
+        stderr.write("error: unexpected error\n")
         sys.exit(1)
 
     sys.exit(0)

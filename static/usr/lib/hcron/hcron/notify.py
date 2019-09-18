@@ -56,4 +56,4 @@ def send_email_notification(eventname, fromusername, toaddr, subject, content):
                 for line in message.split("\n"):
                     print(tw.fill(line))
     except Exception as detail:
-        log_message("error", "Failed to send email (%s) for event (%s)." % (detail, eventname))
+        log_message("error", "failed to send email (%s) for event (%s)." % (detail, eventname))

@@ -162,7 +162,7 @@ def main(args):
             now += minute
             globs.clock.set(now)
     except:
-        stderr.write("error: unexpected situation\n")
+        stderr.write("error: unexpected error\n")
         sys.exit(1)
 
     sys.exit(0)
