@@ -240,6 +240,7 @@ def install_hcron_tree_file(username, hostname):
         uid = username2uid(username)
         os.seteuid(uid)
         src = open(srcpath, "rb")
+        srcsize = os.path.getsize(srcpath)
     except:
         raise
     finally:
@@ -250,6 +251,6 @@ def install_hcron_tree_file(username, hostname):
     except:
         pass
 
-    if os.path.getsize(srcpath) > 0:
+    if srcsize > 0:
         max_hcron_tree_snapshot_size = globs.configfile.get().get("max_hcron_tree_snapshot_size", CONFIG_MAX_HCRON_TREE_SNAPSHOT_SIZE)
         copyfile(src, dstpath, max_hcron_tree_snapshot_size)
