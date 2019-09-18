@@ -1,6 +1,6 @@
 #! /usr/bin/env python2
 #
-# hcron_show_fqdn.py
+# hcron_get.py
 
 # GPL--start
 # This file is part of hcron
@@ -32,22 +32,43 @@ import sys
 from sys import stderr
 import traceback
 
+def print_fqdn(args):
+    try:
+        print(socket.getfqdn())
+    except:
+        stderr.write("error: could not determine the fully qualified host name\n")
+        sys.exit(1)
+    sys.exit(0)
+
 def print_usage():
     print("""\
-usage: hcron show-fqdn
-       hcron show-fqdn -h|--help
+usage: hcron get <name>
+       hcron get -h|--help
 
-Print fully qualified hostname.""")
+Get and print hcron information.
+
+Where <name> is:
+fqdn                Fully qualified host name.""")
 
 def main(args):
     try:
+        name = None
+
         while args:
             arg = args.pop(0)
             if arg in ["-h", "--help"]:
                 print_usage()
                 sys.exit(0)
+            elif arg == "fqdn" and not args:
+                name = "fqdn"
+                if args:
+                    raise Exception()
+                break
             else:
                 raise Exception()
+
+        if name == None:
+            raise Exception()
     except SystemExit:
         raise
     except:
@@ -55,9 +76,12 @@ def main(args):
         sys.exit(1)
 
     try:
-        print(socket.getfqdn())
+        if name == "fqdn":
+            print_fqdn(args)
+    except SystemExit:
+        raise
     except:
-        stderr.write("error: could not determine the fully qualified host name\n")
+        stderr.write("error: unexpected error\n")
         sys.exit(1)
 
     sys.exit(0)

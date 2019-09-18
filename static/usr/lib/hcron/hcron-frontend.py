@@ -37,11 +37,10 @@ usage: hcron <subcommand> ...
 Subcommands:
 activate        Activate event.
 event           Create/edit event.
-info            Get hcron information.
+get             Get hcron information.
 list            List events.
 reload          Reload events.
 run             Simulate events.
-show-fqdn       Show hcron server hostname.
 show-log        Show log.
 unload          Unload events.""")
 
@@ -57,16 +56,14 @@ if __name__ == "__main__":
             from hcron_activate import main
         elif subcommand == "event":
             from hcron_event import main
-        elif subcommand == "info":
-            from hcron_info import main
+        elif subcommand == "get":
+            from hcron_get import main
         elif subcommand == "list":
             from hcron_list import main
         elif subcommand == "reload":
             from hcron_reload import main
         elif subcommand == "run":
             from hcron_run import main
-        elif subcommand == "show-fqdn":
-            from hcron_show_fqdn import main
         elif subcommand == "show-log":
             from hcron_show_log import main
         elif subcommand == "unload":
