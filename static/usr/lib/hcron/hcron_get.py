@@ -27,10 +27,28 @@ Simply print the fully qualified host name of the executing machine.
 
 from __future__ import print_function
 
+import os.path
 import socket
 import sys
 from sys import stderr
 import traceback
+
+from hcron.constants import *
+from hcron.library import whoami
+
+def print_allowed(args):
+    try:
+        username = whoami()
+        usereventlistspath = "%s/%s" % (HCRON_EVENT_LISTS_DUMP_DIR, username)
+
+        if os.path.exists(usereventlistspath):
+            print("yes")
+        else:
+            print("no")
+    except Exception:
+        stderr.write("error: could not determine allowed value\n")
+        sys.exit(1)
+    sys.exit(0)
 
 def print_fqdn(args):
     try:
@@ -48,6 +66,7 @@ usage: hcron get <name>
 Get and print hcron information.
 
 Where <name> is:
+allowed             Is allowed to use hcron: yes or no.
 fqdn                Fully qualified host name.""")
 
 def main(args):
@@ -59,10 +78,11 @@ def main(args):
             if arg in ["-h", "--help"]:
                 print_usage()
                 sys.exit(0)
+            elif arg == "allowed" and not args:
+                name = "allowed"
+                break
             elif arg == "fqdn" and not args:
                 name = "fqdn"
-                if args:
-                    raise Exception()
                 break
             else:
                 raise Exception()
@@ -76,7 +96,9 @@ def main(args):
         sys.exit(1)
 
     try:
-        if name == "fqdn":
+        if name == "allowed":
+            print_allowed(args)
+        elif name == "fqdn":
             print_fqdn(args)
     except SystemExit:
         raise
