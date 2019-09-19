@@ -29,6 +29,8 @@ import sys
 from sys import stderr
 import traceback
 
+from hcron.constants import VERSION
+
 def print_usage():
     print("""\
 usage: hcron <subcommand> ...
@@ -43,8 +45,9 @@ reload              Reload events.
 run                 Simulate events.
 show-log            Show log.
 unload              Unload events.
+version             Print version.
 
-Each subcommand supports -h and --help to get help.""")
+All subcommands except version support -h and --help to get help.""")
 
 if __name__ == "__main__":
     try:
@@ -70,6 +73,9 @@ if __name__ == "__main__":
             from hcron_show_log import main
         elif subcommand == "unload":
             from hcron_unload import main
+        elif subcommand == "version":
+            print(VERSION)
+            sys.exit(0)
         else:
             raise Exception()
     except SystemExit:

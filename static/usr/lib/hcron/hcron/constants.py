@@ -71,6 +71,7 @@ __all__ = [
     "PROG_NAME",
     "USER_ID",
     "USER_NAME",
+    "VERSION",
 ]
 
 # system imports
@@ -83,6 +84,7 @@ import sys
 
 # constants
 PROG_NAME = os.path.basename(sys.argv[0])
+VERSION = "1.0"
 
 HCRON_HOME = os.path.realpath(os.path.join(os.path.dirname(sys.argv[0]), "..", ".."))
 if HCRON_HOME.startswith("/usr"):
