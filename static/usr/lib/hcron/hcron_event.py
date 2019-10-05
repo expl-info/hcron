@@ -29,10 +29,17 @@ import subprocess
 import sys
 from sys import stderr
 import traceback
+try:
+    # python2
+    raw_input = raw_input
+except:
+    # python3
+    raw_input = input
 
 # app import
 from hcron.constants import *
 from hcron.event import signal_reload
+from hcron.server import setup
 
 # constants
 EDITOR = os.environ.get("EDITOR", "vi")
@@ -66,7 +73,6 @@ def main(args):
                 print_usage()
                 sys.exit(0)
             else:
-                args.insert(0, arg)
                 paths = [arg]+args
                 del args[:]
 
@@ -93,6 +99,8 @@ def main(args):
             sys.exit(1)
 
     try:
+        setup()
+
         if reloadevents or raw_input("Reload events (y/n)? ") == "y":
             signal_reload()
             now = datetime.datetime.now()
