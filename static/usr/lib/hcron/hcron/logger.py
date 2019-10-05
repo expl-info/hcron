@@ -137,7 +137,7 @@ def log_sleep(seconds):
     log("sleep", sleeptime=seconds)
 
 def log_start():
-    log("start")
+    log("start", version=VERSION)
 
 def log_trigger(triggername, triggerorigin):
     log("trigger", triggername=triggername, triggerorigin=triggerorigin)
