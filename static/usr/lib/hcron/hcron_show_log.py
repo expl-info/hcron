@@ -49,7 +49,16 @@ def parse_logline(line):
         log = HcronLog(t[0], t[1], t[2], values)
         return log
     except:
-        traceback.print_exc()
+        #traceback.print_exc()
+        pass
+
+    try:
+        # old format?
+        values = dict([(str(i), tt) for i, tt in enumerate(t[3:])])
+        log = HcronLog(t[0], t[1], t[2], values)
+        return log
+    except:
+        #traceback.print_exc()
         return None
 
 def load_logs(usernames, startdatetime, enddatetime):
