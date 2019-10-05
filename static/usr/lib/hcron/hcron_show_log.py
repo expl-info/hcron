@@ -22,6 +22,7 @@
 # GPL--end
 
 from collections import namedtuple
+import os.path
 import sys
 from sys import stderr
 import traceback
@@ -61,11 +62,11 @@ def parse_logline(line):
         #traceback.print_exc()
         return None
 
-def load_logs(usernames, startdatetime, enddatetime):
+def load_logs(path, usernames, startdatetime, enddatetime):
     starttimestamp = datetime2timestamp(startdatetime)
     endtimestamp = datetime2timestamp(enddatetime)
 
-    for line in open("/var/log/hcron/hcron.log"):
+    for line in open(path):
         line = line.strip()
         log = parse_logline(line)
 
@@ -133,6 +134,7 @@ Where:
 <startdatetime>     Filter out entries before this date and time.
 
 Options:
+-f <path>           Use alternate log file.
 --show-jobtree      Show job information as a tree grouped together by
                     job group.
 --show-types <type>[,...]
@@ -142,6 +144,7 @@ Options:
 def main(args):
     try:
         enddatetime = None
+        logfilepath = "/var/log/hcron/hcron.log"
         showjobtree = False
         showtypes = None
         startdatetime = None
@@ -149,12 +152,14 @@ def main(args):
 
         while args:
             arg = args.pop(0)
-            if arg == "-u" and args:
-                usernames = set(args.pop(0).split(","))
+            if arg == "-f" and args:
+                logfilepath = args.pop(0)
             elif arg == "--show-jobtree":
                 showjobtree = True
             elif arg == "--show-types" and args:
                 showtypes = set(args.pop(0).split(","))
+            elif arg == "-u" and args:
+                usernames = set(args.pop(0).split(","))
             elif arg in ["-h", "--help"]:
                 print_usage()
                 sys.exit(0)
@@ -174,8 +179,14 @@ def main(args):
         sys.exit(1)
 
     try:
-        load_logs(usernames, startdatetime, enddatetime)
+        if not os.path.isfile(logfilepath):
+            stderr.write("error: bad log file path (%s)" % (logfilepath,))
+            sys.exit(1)
+
+        load_logs(logfilepath, usernames, startdatetime, enddatetime)
         show_logs(showtypes, showjobtree)
+    except SystemExit:
+        raise
     except:
         #traceback.print_exc()
         stderr.write("error: failed to run\n")
