@@ -60,7 +60,7 @@ def main(args):
     try:
         setup()
 
-        signal_reload(unload)
+        signal_reload(unload=True)
         now = datetime.datetime.now()
         next_interval = (now+datetime.timedelta(seconds=60)).replace(second=0,microsecond=0)
         print("Unload signalled for machine (%s) at next interval (%s; in %ss)." % (HOST_NAME, next_interval, (next_interval-now).seconds))
