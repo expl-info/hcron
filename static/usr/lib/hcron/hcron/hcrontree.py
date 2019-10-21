@@ -112,7 +112,7 @@ class HcronTreeCache:
         link_cache = {}
 
         for m in f.getmembers():
-            if m.name.startswith("events/"):
+            if m.name.startswith("events/") or m.name == "events":
                 name = os.path.normpath(m.name)
                 basename = os.path.basename(name)
                 dirname = os.path.dirname(name)
@@ -121,7 +121,7 @@ class HcronTreeCache:
                     ignored[name] = None
                 else:
                     if m.issym():
-                        link_cache[m.name] = self.resolve_symlink(m.name, m.linkname)
+                        link_cache[m.name] = m.linkname
                     elif m.isfile():
                         cache[m.name] = tostr(f.extractfile(m).read())
                     else:
@@ -130,16 +130,13 @@ class HcronTreeCache:
         f.close()
 
         # resolve for symlinks
+        newcache = {}
         for name, linkname in link_cache.items():
-            for _ in range(10):
-                if linkname in cache:
-                    cache[name] = cache[linkname]
-                    break
-                elif linkname in link_cache:
-                    linkname = self.resolve_symlink(linkname, link_cache[linkname])
-                else:
-                    # not found; drop
-                    break
+            path = self.resolve_symlink(name, linkname, cache, link_cache)
+            if path in cache:
+                newcache[name] = cache[path]
+
+        cache.update(newcache)
 
         # discard non-files
         for name in list(cache.keys()):
@@ -149,11 +146,39 @@ class HcronTreeCache:
         self.cache = cache
         self.ignored = ignored
 
-    def resolve_symlink(self, name, linkname):
-        if linkname.startswith("/"):
+    def resolve_symlink(self, name, linkname, cache, link_cache):
+        """Resolve linkname for name.
+        """
+        def join_symlink(name, linkname):
+            if linkname.startswith("/"):
+                return None
+            return os.path.normpath(os.path.join(os.path.dirname(name), linkname))
+        
+        path = join_symlink(name, linkname)
+        if path == None or path.startswith("/"):
             return None
-        return os.path.normpath(os.path.dirname(name)+"/"+linkname)
 
+        for _ in range(10):
+            pathcomps = path.split("/")
+            comps = []
+            for i, comp in enumerate(pathcomps):
+                comps.append(comp)
+                xpath = "/".join(comps)
+                if xpath in cache:
+                    continue
+                elif xpath in link_cache:
+                    path = join_symlink(xpath, link_cache[xpath])
+                    if path == None:
+                        return None
+                    path = os.path.normpath(os.path.join(path, *(pathcomps[i+1:])))
+                    break
+                else:
+                    # not found
+                    return None
+            else:
+                # fully resolved
+                return path
+    
 def create_user_hcron_tree_file(username, hostname, dstpath=None, empty=False):
     """Create an hcron tree file at dstpath with select members from
     srcpath.
