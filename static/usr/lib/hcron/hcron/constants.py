@@ -37,6 +37,7 @@ __all__ = [
     "CONFIG_MAX_EVENTS_PER_USER",
     "CONFIG_MAX_HCRON_TREE_SNAPSHOT_SIZE",
     "CONFIG_MAX_NEXT_EVENTS",
+    "CONFIG_MAX_SYMLINKS",
     "CONFIG_REMOTE_SHELL_EXEC",
     "CONFIG_REMOTE_SHELL_TYPE",
     "CONFIG_TEST_NET_DELAY",
@@ -141,6 +142,7 @@ CONFIG_MAX_EMAIL_NOTIFICATIONS = 16         # max_email_notifications
 CONFIG_MAX_EVENT_FILE_SIZE = 5000           # max_event_file_size
 CONFIG_MAX_EVENTS_PER_USER = 25             # max_events_per_user
 CONFIG_MAX_NEXT_EVENTS = 8                  # max_next_events
+CONFIG_MAX_SYMLINKS = 8                     # max_symlinks
 CONFIG_REMOTE_SHELL_EXEC = "/usr/bin/ssh"   # remote_shell_exec
 CONFIG_REMOTE_SHELL_TYPE = "ssh"            # remote_shell_type
 CONFIG_USE_SYSLOG = False                   # use_syslog

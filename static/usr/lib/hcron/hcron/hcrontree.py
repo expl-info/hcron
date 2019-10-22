@@ -158,7 +158,9 @@ class HcronTreeCache:
         if path == None or path.startswith("/"):
             return None
 
-        for _ in range(10):
+        maxsymlinks = globs.configfile.get().get("max_symlinks", CONFIG_MAX_SYMLINKS)
+
+        for _ in range(maxsymlinks):
             pathcomps = path.split("/")
             comps = []
             for i, comp in enumerate(pathcomps):
