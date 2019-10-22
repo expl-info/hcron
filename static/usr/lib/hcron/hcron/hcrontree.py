@@ -51,6 +51,7 @@ class HcronTreeCache:
         self.username = username
         self.ignorematchfn = ignorematchfn or false_match
         self.cache = {}
+        self.dropped_cache = {}
         self.ignored = {}
         self.path = os.path.realpath(get_hcron_tree_filename(username, globs.fqdn))
         self.load()
@@ -84,6 +85,9 @@ class HcronTreeCache:
     def get_names(self):
         return list(self.cache.keys())
 
+    def is_dropped_event(self, name):
+        return os.path.normpath("event/"+name) in self.dropped_cache
+
     def is_ignored_event(self, name):
         return os.path.normpath("events/"+name) in self.ignored
 
@@ -91,6 +95,7 @@ class HcronTreeCache:
         """Load events from hcron tree file:
         - event files are loaded
         - symlinks are resolved
+        - dropped are tracked
         - ignored are tracked
         - non-file members are discarded
         """
@@ -108,6 +113,7 @@ class HcronTreeCache:
             f = tarfile.open(self.path)
 
         cache = {}
+        dropped_cache = {}
         ignored = {}
         link_cache = {}
 
@@ -135,6 +141,8 @@ class HcronTreeCache:
             path = self.resolve_symlink(name, linkname, cache, link_cache)
             if path in cache:
                 newcache[name] = cache[path]
+            else:
+                dropped_cache[name] = None
 
         cache.update(newcache)
 
@@ -144,6 +152,7 @@ class HcronTreeCache:
                 del cache[name]
 
         self.cache = cache
+        self.dropped_cache = dropped_cache
         self.ignored = ignored
 
     def resolve_symlink(self, name, linkname, cache, link_cache):
