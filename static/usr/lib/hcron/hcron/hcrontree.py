@@ -52,7 +52,7 @@ class HcronTreeCache:
         self.ignorematchfn = ignorematchfn or false_match
         self.cache = {}
         self.dropped_cache = {}
-        self.ignored = {}
+        self.ignored_cache = {}
         self.path = os.path.realpath(get_hcron_tree_filename(username, globs.fqdn))
         self.load()
 
@@ -89,7 +89,7 @@ class HcronTreeCache:
         return os.path.normpath("event/"+name) in self.dropped_cache
 
     def is_ignored_event(self, name):
-        return os.path.normpath("events/"+name) in self.ignored
+        return os.path.normpath("events/"+name) in self.ignored_cache
 
     def load(self):
         """Load events from hcron tree file:
@@ -114,7 +114,7 @@ class HcronTreeCache:
 
         cache = {}
         dropped_cache = {}
-        ignored = {}
+        ignored_cache = {}
         link_cache = {}
 
         for m in f.getmembers():
@@ -123,8 +123,8 @@ class HcronTreeCache:
                 basename = os.path.basename(name)
                 dirname = os.path.dirname(name)
 
-                if self.ignorematchfn(basename) or dirname in ignored:
-                    ignored[name] = None
+                if self.ignorematchfn(basename) or dirname in ignored_cache:
+                    ignored_cache[name] = None
                 else:
                     if m.issym():
                         link_cache[m.name] = m.linkname
@@ -153,7 +153,7 @@ class HcronTreeCache:
 
         self.cache = cache
         self.dropped_cache = dropped_cache
-        self.ignored = ignored
+        self.ignored_cache = ignored_cache
 
     def resolve_symlink(self, name, linkname, cache, link_cache):
         """Resolve linkname for name.
