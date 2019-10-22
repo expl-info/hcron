@@ -26,6 +26,7 @@
 
 # system imports
 import os
+import os.path
 
 # app imports
 from hcron.logger import *
@@ -36,12 +37,15 @@ class PidFile:
 
     def create(self):
         try:
-            pid = open(self.path, "r").read()
-            log_message("error", "cannot create pid file (%s)." % self.path)
-        except Exception:
+            if os.path.exists(self.path):
+                log_message("warning", "found pid file (%s)." % self.path)
+                self.remove()
+
             log_message("info", "creating pid file (%s)." % self.path)
             pid = os.getpid()
             open(self.path, "w").write("%s" % pid)
+        except:
+            log_message("error", "cannot create pid file (%s)." % self.path)
         return int(pid)
 
     def remove(self):
