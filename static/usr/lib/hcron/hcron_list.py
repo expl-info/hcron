@@ -29,6 +29,7 @@ from __future__ import print_function
 
 # system imports
 import fnmatch
+import json
 import re
 import sys
 from sys import stderr
@@ -64,19 +65,19 @@ def print_eventnames(pattern, showthings):
         username = whoami()
         usereventlistspath = "%s/%s" % (HCRON_EVENT_LISTS_DUMP_DIR, username)
 
-        eventinfo = {}
+        l = json.load(open(usereventlistspath, "r"))
 
-        for line in open(usereventlistspath, "r").readlines():
-            line = line.strip()
-            status, evtype, reason, eventname = line.split(":", 3)
+        eventinfo = {}
+        for d in l:
+            eventname = d["name"]
             if cre.match(eventname):
                 l = []
                 if "status" in showthings:
-                    l.append(status)
+                    l.append(d.get("status"))
                 if "type" in showthings:
-                    l.append(evtype)
+                    l.append(d.get("type"))
                 if "reason" in showthings:
-                    l.append(reason)
+                    l.append(d.get("reason"))
                 l.append(eventname)
                 line = ":".join(l)
                 eventinfo[eventname] = line

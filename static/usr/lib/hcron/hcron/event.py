@@ -26,6 +26,7 @@
 
 # system imports
 from datetime import datetime
+import json
 import os
 import os.path
 import stat
@@ -220,17 +221,20 @@ class EventList:
 
         try:
             f = None
+
+            l = []
+            for event in self.events.values():
+                d = {
+                    "name": event.name,
+                    "type": event.type,
+                    "reason": event.reason or "",
+                    "status": event.type == "normal" and "accepted" or "rejected",
+                }
+                l.append(d)
+
             f = open(path, "w+")
             os.chown(path, username2uid(self.username), 0)
-
-            for event in self.events.values():
-                if event.type == "normal":
-                    status = "accepted"
-                    reason = ""
-                else:
-                    status = "rejected"
-                    reason = event.reason
-                f.write("%s:%s:%s:%s\n" % (status, event.type, reason, event.name))
+            json.dump(l, f, indent=2, sort_keys=True)
         except Exception:
             pass
         finally:
