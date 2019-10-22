@@ -122,7 +122,7 @@ def log_load_events(username, nevents, naccepted, nrejected, ntemplates, elapsed
     log("load-events", username=username, nevents=nevents, naccepted=naccepted, nrejected=nrejected, ntemplates=ntemplates, elapsed="%f" % elapsed)
 
 def log_message(typ, msg, username=""):
-    log("message", username=username, message=msg)
+    log("message", username=username, type=typ, message=msg)
 
 def log_notify_email(username, addrs, eventName):
     log("notify-email", username=username, addrs=addrs, eventname=eventName)
