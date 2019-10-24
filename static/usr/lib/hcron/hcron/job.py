@@ -101,6 +101,7 @@ class JobQueue:
 
     def __init__(self):
         self.q = queue.Queue(globs.configfile.get().get("jobq_size", JOBQ_SIZE))
+        self.tp = ThreadPool(max(globs.configfile.get().get("max_activated_events", CONFIG_MAX_ACTIVATED_EVENTS), 1))
 
     def enqueue_ondemand_jobs(self):
         """Queue up on demand jobs.
@@ -224,16 +225,15 @@ class JobQueue:
                     nextjob.eventchainnames, nextjob.sched_datetime, nextjob.queue_datetime)
 
     def handle_jobs(self):
-        max_activated_events = max(globs.configfile.get().get("max_activated_events", CONFIG_MAX_ACTIVATED_EVENTS), 1)
-        tp = ThreadPool(max_activated_events)
-
+        """Process jobs found on the job queue.
+        """
         while True:
             try:
                 job = self.q.get(timeout=5)
                 if job:
-                    tp.add(None, self.handle_job, args=(job,))
-                while tp.has_done():
-                    res = tp.reap()
+                    self.tp.add(None, self.handle_job, args=(job,))
+                while self.tp.has_done():
+                    res = self.tp.reap()
             except queue.Empty:
                 pass
             except Exception as detail:
