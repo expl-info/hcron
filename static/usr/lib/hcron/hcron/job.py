@@ -230,6 +230,7 @@ class JobQueue:
     def handle_jobs(self):
         """Process jobs found on the job queue.
         """
+        lastntotal = 0
         while True:
             try:
                 job = self.q.get(timeout=5)
@@ -237,12 +238,23 @@ class JobQueue:
                     self.tp.add(None, self.handle_job, args=(job,))
                 while self.tp.has_done():
                     res = self.tp.reap()
+
             except queue.Empty:
                 pass
             except Exception as detail:
                 if self.q != None:
                     log_message("error", "unexpected exception (%s)." % str(detail))
                 return
+
+            try:                
+                nqueued = self.q.qsize()
+                nrunning = len(self.tp.runs)
+                ntotal = nqueued+nrunning
+                if ntotal or lastntotal:
+                    log_status(nqueued=nqueued, nrunning=nrunning, ntotal=ntotal)
+                lastntotal = ntotal
+            except Exception as detail:
+                log_message("error", "unexpected exception (%s)." % str(detail))
 
     def put(self, *args, **kwargs):
         return self.q.put(*args, **kwargs)

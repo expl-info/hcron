@@ -146,6 +146,9 @@ def log_sleep(seconds):
 def log_start():
     log("start", version=VERSION)
 
+def log_status(**kwargs):
+    log("status", **kwargs)
+
 def log_trigger(triggername, triggerorigin):
     log("trigger", triggername=triggername, triggerorigin=triggerorigin)
 
