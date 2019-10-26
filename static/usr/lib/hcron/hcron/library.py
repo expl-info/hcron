@@ -280,6 +280,10 @@ def time2seconds(s):
 def uid2username(uid):
     return getpwuid(uid).pw_name
 
+def username2ids(name):
+    pw = getpwnam(name)
+    return (pw.pw_uid, pw.pw_gid)
+
 def username2uid(name):
     return getpwnam(name).pw_uid
 
