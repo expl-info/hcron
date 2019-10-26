@@ -191,6 +191,9 @@ class JobQueue:
             log_message("error", "handle_job (%s)" % detail, user_name=event.username)
             nexteventnames, nexteventtype = [], None
 
+        log_done(job.username, job.jobid, job.jobgid, job.pjobid, job.eventname,
+            nexteventnames, nexteventtype)
+
         if nexteventnames:
             if len(eventChainNames) >= max_chain_events:
                 log_message("error", "event chain limit (%s) reached at (%s)." % (max_chain_events, ":".join(nexteventnames)), user_name=event.username)

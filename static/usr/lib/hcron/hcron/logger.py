@@ -97,6 +97,13 @@ def log_alarm(msg=""):
 def log_discard_events(username, count):
     log("discard-events", username=username, count=count)
 
+def log_done(username, jobid, jobgid, pjobid, eventname, nexteventnames, nexteventtype):
+    nexteventnames = nexteventnames or []
+    log("done", username=username, jobid=jobid, jobgid=jobgid, pjobid=pjobid,
+        eventname=eventname, nnextevents=len(nexteventnames),
+        nexteventnames=":".join(nexteventnames),
+        nexteventtype=nexteventtype)
+
 def log_end():
     log("end")
 
