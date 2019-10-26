@@ -32,7 +32,7 @@ import time
 # app imports
 from hcron import globs
 from hcron.constants import *
-from hcron.library import username2uid
+from hcron.library import username2ids
 from hcron.logger import *
 
 class RemoteExecuteException(Exception):
@@ -52,7 +52,7 @@ def remote_execute(job, eventname, localusername, remoteusername, remotehostname
     config = globs.configfile.get()
     allow_localhost = config.get("allow_localhost", CONFIG_ALLOW_LOCALHOST) 
     allow_root_events = config.get("allow_root_events", CONFIG_ALLOW_ROOT_EVENTS)
-    localuid = username2uid(localusername)
+    localuid, localgid = username2ids(localusername)
     remote_shell_type = config.get("remote_shell_type", CONFIG_REMOTE_SHELL_TYPE)
     remote_shell_exec = config.get("remote_shell_exec", CONFIG_REMOTE_SHELL_EXEC)
     timeout = timeout or config.get("command_spawn_timeout", CONFIG_COMMAND_SPAWN_TIMEOUT)
@@ -84,6 +84,7 @@ def remote_execute(job, eventname, localusername, remoteusername, remotehostname
             if pid == 0:
                 ### child
                 try:
+                    os.setgid(localgid)
                     os.setuid(localuid)
                     os.setsid()
                     os.execv(args[0], args)
