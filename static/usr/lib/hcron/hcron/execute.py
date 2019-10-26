@@ -55,7 +55,8 @@ def remote_execute(job, eventname, localusername, remoteusername, remotehostname
     localuid, localgid = username2ids(localusername)
     remote_shell_type = config.get("remote_shell_type", CONFIG_REMOTE_SHELL_TYPE)
     remote_shell_exec = config.get("remote_shell_exec", CONFIG_REMOTE_SHELL_EXEC)
-    timeout = timeout or config.get("command_spawn_timeout", CONFIG_COMMAND_SPAWN_TIMEOUT)
+    spawn_timeout = timeout or config.get("command_spawn_timeout", CONFIG_COMMAND_SPAWN_TIMEOUT)
+    kill_timeout = 10
     command = command.strip()
     spawn_starttime = time.time()
 
@@ -76,7 +77,7 @@ def remote_execute(job, eventname, localusername, remoteusername, remotehostname
 
         # spawn
         pid = 0
-        rv = -1
+        rv = EXECUTE_FAILURE
         try:
             args = [remote_shell_exec, "-f", "-n", "-t", "-l", remoteusername, remotehostname, command]
             pid = os.fork()
@@ -89,27 +90,53 @@ def remote_execute(job, eventname, localusername, remoteusername, remotehostname
                     os.setsid()
                     os.execv(args[0], args)
                 except (OSError, Exception):
-                    rv = 256
+                    rv = EXECUTE_EXECFAIL
                 os._exit(rv)
 
                 # NEVER REACHES HERE
 
             ### parent
             # poll and wait
-            while timeout > 0:
+            elapsed = 0
+            interval = 0.01
+            while elapsed < spawn_timeout:
                 waitpid, waitst = os.waitpid(pid, os.WNOHANG)
                 if waitpid != 0:
                     break
 
-                time.sleep(0.01)
-                timeout -= 0.01
+                time.sleep(interval)
+                elapsed += interval
             else:
-                os.kill(pid, signal.SIGKILL)
+                log_alarm(localusername, job.jobid, job.jobgid, job.pjobid, eventname, pid, "execute timeout expired (%s)" % spawn_timeout)
 
-            if os.WIFSIGNALED(waitst):
-                rv = -2
-            elif os.WIFEXITED(waitst):
-                rv = (os.WEXITSTATUS(waitst) == 255) and -1 or 0
+            # kill if timed out
+            if waitpid == 0:
+                elapsed = 0
+                interval = 0.1
+                while elapsed < kill_timeout:
+                    os.kill(pid, signal.SIGKILL)
+                    waitpid, waitst = os.waitpid(pid, os.WNOHANG)
+                    if waitpid != 0:
+                        break
+                    time.sleep(interval)
+                    elapsed += interval
+                else:
+                    log_alarm(localusername, job.jobid, job.jobgid, job.pjobid, eventname, pid, "kill timeout expired (%s)" % kill_timeout)
+
+            # tailor rv
+            if waitpid == 0:
+                rv = EXECUTE_KILLFAIL
+            else:
+                if os.WIFSIGNALED(waitst):
+                    rv = EXECUTE_SIGNALED
+                elif os.WIFEXITED(waitst):
+                    ev = os.WEXITSTATUS(waitst)
+                    if ev == 0:
+                        rv = EXECUTE_SUCCESS
+                    elif ev == 255:
+                        rv = EXECUTE_SSHFAIL
+                    else:
+                        rv = EXECUTE_FAILURE
         except Exception as detail:
             log_message("error", "execute failed (%s)." % detail)
 

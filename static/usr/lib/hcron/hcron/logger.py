@@ -91,8 +91,9 @@ def log_activate(username, jobid, jobgid, pjobid, triggername, triggerorigin, ev
         triggername=triggername, triggerorigin=triggerorigin,
         eventname=eventname, eventchain=eventchainnames)
 
-def log_alarm(msg=""):
-    log("alarm", message=msg)
+def log_alarm(username, jobid, jobgid, pjobid, eventname, pid, message):
+    log("alarm", username=username, jobid=jobid, jobgid=jobgid, pjobid=pjobid,
+        eventname=eventname, pid=pid, message=message)
 
 def log_discard_events(username, count):
     log("discard-events", username=username, count=count)
