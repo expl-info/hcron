@@ -120,7 +120,7 @@ def show_logs(showtypes, showjobtree):
 
 def print_usage():
     print("""\
-usage: hcron show-log [<options>] <startdatetime> <enddatetime>
+usage: hcron show-log [<options>] <startdatetime> [<enddatetime>]
        hcron show-log -h|--help
 
 Show log entries between <startdatetime> and <enddatetime> (specified
@@ -162,9 +162,12 @@ def main(args):
             elif arg in ["-h", "--help"]:
                 print_usage()
                 sys.exit(0)
-            elif len(args) == 1:
+            elif len(args) in [0, 1]:
                 startdatetime = arg
-                enddatetime = args.pop(0)
+                if len(args) == 1:
+                    enddatetime = args.pop(0)
+                else:
+                    enddatetime = "30000101"
             else:
                 raise Exception()
 
