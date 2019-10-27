@@ -9,6 +9,7 @@
     "max_email_notifications": 16,
     "max_events_per_user": 25,
     "max_next_events": 8,
+    #"max_queued_jobs": 100000,
     # hidden files, emacs backup files
     "names_to_ignore_regexp": "(\..*)|(.*~$)",
     "smtp_server": "localhost",

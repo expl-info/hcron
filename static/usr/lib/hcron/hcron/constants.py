@@ -37,6 +37,7 @@ __all__ = [
     "CONFIG_MAX_EVENTS_PER_USER",
     "CONFIG_MAX_HCRON_TREE_SNAPSHOT_SIZE",
     "CONFIG_MAX_NEXT_EVENTS",
+    "CONFIG_MAX_QUEUED_JOBS",
     "CONFIG_MAX_SYMLINKS",
     "CONFIG_REMOTE_SHELL_EXEC",
     "CONFIG_REMOTE_SHELL_TYPE",
@@ -72,7 +73,6 @@ __all__ = [
     "HCRON_TREES_HOME",
     "HCRON_VAR_PATH",
     "HOST_NAME",
-    "JOBQ_SIZE",
     "MINUTE_DELTA",
     "MONTH_NAMES_MAP",
     "PROG_NAME",
@@ -148,6 +148,7 @@ CONFIG_MAX_EMAIL_NOTIFICATIONS = 16         # max_email_notifications
 CONFIG_MAX_EVENT_FILE_SIZE = 5000           # max_event_file_size
 CONFIG_MAX_EVENTS_PER_USER = 25             # max_events_per_user
 CONFIG_MAX_NEXT_EVENTS = 8                  # max_next_events
+CONFIG_MAX_QUEUED_JOBS = 100000             # max_queued_jobs
 CONFIG_MAX_SYMLINKS = 8                     # max_symlinks
 CONFIG_REMOTE_SHELL_EXEC = "/usr/bin/ssh"   # remote_shell_exec
 CONFIG_REMOTE_SHELL_TYPE = "ssh"            # remote_shell_type
@@ -205,5 +206,4 @@ HOST_NAME = socket.getfqdn()
 
 MINUTE_DELTA = datetime.timedelta(minutes=1)
 
-JOBQ_SIZE = 100000
 ENQUEUE_ONDEMAND_DELAY = 5

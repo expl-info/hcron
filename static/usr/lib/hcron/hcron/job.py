@@ -100,7 +100,7 @@ class Job:
 class JobQueue:
 
     def __init__(self):
-        self.q = queue.Queue(globs.configfile.get().get("jobq_size", JOBQ_SIZE))
+        self.q = queue.Queue(globs.configfile.get().get("max_queued_jobs", CONFIG_MAX_QUEUED_JOBS))
         self.tp = ThreadPool(max(globs.configfile.get().get("max_activated_events", CONFIG_MAX_ACTIVATED_EVENTS), 1))
 
     def enqueue_ondemand_jobs(self):
