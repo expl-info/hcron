@@ -248,7 +248,7 @@ class JobQueue:
 
             try:                
                 nqueued = self.q.qsize()
-                nrunning = len(self.tp.runs)
+                nrunning = self.tp.get_nrunning()
                 ntotal = nqueued+nrunning
                 if ntotal or lastntotal:
                     log_status(nqueued=nqueued, nrunning=nrunning, ntotal=ntotal)
