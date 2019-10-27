@@ -62,10 +62,7 @@ def parse_logline(line):
         #traceback.print_exc()
         return None
 
-def load_logs(path, usernames, startdatetime, enddatetime):
-    starttimestamp = datetime2timestamp(startdatetime)
-    endtimestamp = datetime2timestamp(enddatetime)
-
+def load_logs(path, usernames, starttimestamp, endtimestamp):
     for line in open(path):
         line = line.strip()
         log = parse_logline(line)
@@ -144,10 +141,12 @@ Options:
 def main(args):
     try:
         enddatetime = None
+        endtimestamp = None
         logfilepath = "/var/log/hcron/hcron.log"
         showjobtree = False
         showtypes = None
         startdatetime = None
+        starttimestamp = None
         usernames = None
 
         while args:
@@ -171,6 +170,9 @@ def main(args):
 
         if None in [enddatetime, startdatetime]:
             raise Exception()
+
+        starttimestamp = datetime2timestamp(startdatetime)
+        endtimestamp = datetime2timestamp(enddatetime)
     except SystemExit:
         raise
     except:
@@ -183,7 +185,7 @@ def main(args):
             stderr.write("error: bad log file path (%s)" % (logfilepath,))
             sys.exit(1)
 
-        load_logs(logfilepath, usernames, startdatetime, enddatetime)
+        load_logs(logfilepath, usernames, starttimestamp, endtimestamp)
         show_logs(showtypes, showjobtree)
     except SystemExit:
         raise
