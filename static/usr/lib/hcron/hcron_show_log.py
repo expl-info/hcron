@@ -31,7 +31,7 @@ jobs = {}
 logs = []
 
 HcronLog = namedtuple("HcronLog", "timestamp type username values")
-Job = namedtuple("Job", "jobid jobgid, pjobid values childs")
+Job = namedtuple("Job", "jobid jobgid, pjobid type2log childs")
 
 def datetime2timestamp(datetime):
     s = (datetime+"0000")[:12]
@@ -63,6 +63,8 @@ def parse_logline(line):
         return None
 
 def load_logs(path, usernames, starttimestamp, endtimestamp):
+    joblogtypes = set(["queue", "activate", "expire", "execute", "done"])
+
     for line in open(path):
         line = line.strip()
         log = parse_logline(line)
@@ -77,16 +79,22 @@ def load_logs(path, usernames, starttimestamp, endtimestamp):
 
         logs.append(log)
 
+        #if log.type in joblogtypes:
         if log.type == "queue":
             values = log.values
-            jobid = values.pop("jobid", None)
-            jobgid = values.pop("jobgid", None)
-            pjobid = values.pop("pjobid", None)
-            job = Job(jobid, jobgid, pjobid, values, [])
+            jobid = values.get("jobid", None)
+            jobgid = values.get("jobgid", None)
+            pjobid = values.get("pjobid", None)
+
             if jobid == None:
                 # something is wrong
                 continue
-            jobs[jobid] = job
+
+            job = jobs.get(jobid)
+            if not job:
+                job = jobs.setdefault(jobid, Job(jobid, jobgid, pjobid, {}, []))
+            job.type2log[log.type] = log
+
             if jobid != pjobid:
                 pjob = jobs.setdefault(pjobid, None)
                 if pjob:
@@ -95,8 +103,9 @@ def load_logs(path, usernames, starttimestamp, endtimestamp):
 def show_job(jobid, depth=1):
     job = jobs[jobid]
     indent = "    "*depth
+    log = job.type2log.get("queue")
     print("%sjobid: %s" % (indent, jobid))
-    print("%svalues: %s" % (indent, job.values))
+    print("%svalues: %s" % (indent, log.values))
 
 def show_jobtree(jobid, depth=1):
     job = jobs[jobid]
