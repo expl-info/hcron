@@ -88,7 +88,7 @@ def datetime2timestamp(datetime):
     day = s[6:8]
     hour = s[8:10]
     minute = s[10:12]
-    return "%s-%s-%s %s:%s" % (year, month, day, hour, minute)
+    return "%s-%s-%sT%s:%s" % (year, month, day, hour, minute)
 
 def parse_logline(line):
     #print(line)
