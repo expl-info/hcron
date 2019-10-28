@@ -22,16 +22,63 @@
 # GPL--end
 
 from collections import namedtuple
+from datetime import datetime
 import os.path
 import sys
 from sys import stderr
 import traceback
+
+SHOWLOG_FMT = "%s %s %s %s"
+STRPTIME_DATETIME = "%Y-%m-%d %H:%M:%S"
+STRPTIME_DATETIMEDEC = "%Y-%m-%d %H:%M:%S.%f"
 
 jobs = {}
 logs = []
 
 HcronLog = namedtuple("HcronLog", "timestamp type username values")
 Job = namedtuple("Job", "jobid jobgid, pjobid type2log childs")
+
+def add_stats(jobid):
+    """Add "stats" pseudo log entry.
+    """
+    job = jobs[jobid]
+
+    queuelog = job.type2log.get("queue")
+    activatelog = job.type2log.get("activate")
+    expirelog = job.type2log.get("expire")
+    executelog = job.type2log.get("execute")
+    donelog = job.type2log.get("done")
+
+    queuedatetime = queuelog and timestamp2datetime(queuelog.timestamp)
+    activatedatetime = activatelog and timestamp2datetime(activatelog.timestamp)
+    expiredatetime = expirelog and timestamp2datetime(expirelog.timestamp)
+    executedatetime = executelog and timestamp2datetime(executelog.timestamp)
+    donedatetime = donelog and timestamp2datetime(donelog.timestamp)
+
+    values = {
+        "jobid": jobid,
+        "jobgid": job.jobgid,
+        "pjobid": job.pjobid,
+        "eventname": donelog.values.get("eventname"),
+        "elapsed": None,
+        "executetime": None,
+        "spawntime": None,
+        "waittime": None,
+    }
+
+    if queuedatetime:
+        if donedatetime:
+            values["elapsed"] = (donedatetime-queuedatetime).total_seconds()
+        if activatedatetime:
+            values["waittime"] = (activatedatetime-queuedatetime).total_seconds()
+    if executedatetime:
+        if donedatetime:
+            values["executetime"] = (donedatetime-executedatetime).total_seconds()
+        if activatedatetime:
+            values["spawntime"] = (executedatetime-activatedatetime).total_seconds()
+
+    log = HcronLog(donelog.timestamp.replace("T", " "), "stats", donelog.username, values)
+    logs.append(log)
 
 def datetime2timestamp(datetime):
     s = (datetime+"0000")[:12]
@@ -40,14 +87,14 @@ def datetime2timestamp(datetime):
     day = s[6:8]
     hour = s[8:10]
     minute = s[10:12]
-    return "%s-%s-%sT%s:%s" % (year, month, day, hour, minute)
+    return "%s-%s-%s %s:%s" % (year, month, day, hour, minute)
 
 def parse_logline(line):
     #print(line)
     try:
         t = line.split("|")
         values = dict([tt.split("=", 1) for tt in t[3:]])
-        log = HcronLog(t[0], t[1], t[2], values)
+        log = HcronLog(t[0].replace("T", " "), t[1], t[2], values)
         return log
     except:
         #traceback.print_exc()
@@ -56,7 +103,7 @@ def parse_logline(line):
     try:
         # old format?
         values = dict([(str(i), tt) for i, tt in enumerate(t[3:])])
-        log = HcronLog(t[0], t[1], t[2], values)
+        log = HcronLog(t[0].replace("T", " "), t[1], t[2], values)
         return log
     except:
         #traceback.print_exc()
@@ -79,8 +126,7 @@ def load_logs(path, usernames, starttimestamp, endtimestamp):
 
         logs.append(log)
 
-        #if log.type in joblogtypes:
-        if log.type == "queue":
+        if log.type in joblogtypes:
             values = log.values
             jobid = values.get("jobid", None)
             jobgid = values.get("jobgid", None)
@@ -100,6 +146,9 @@ def load_logs(path, usernames, starttimestamp, endtimestamp):
                 if pjob:
                     pjob.childs.append(jobid)
 
+            if log.type == "done":
+                add_stats(jobid)
+
 def show_job(jobid, depth=1):
     job = jobs[jobid]
     indent = "    "*depth
@@ -117,7 +166,7 @@ def show_logs(showtypes, showjobtree):
     for log in logs:
         if showtypes and log.type not in showtypes:
             continue
-        print("%s %s %s %s" % (log.timestamp, log.type, log.username, log.values))
+        print(SHOWLOG_FMT % (log.timestamp, log.type, log.username, log.values))
         if log.type == "activate":
             jobid = log.values.get("jobid")
             if showjobtree:
@@ -126,6 +175,14 @@ def show_logs(showtypes, showjobtree):
                     show_jobtree(jobid)
             else:
                 show_job(jobid)
+
+def timestamp2datetime(s):
+    if s == None:
+        return None
+    elif "." in s:
+        return datetime.strptime(s, STRPTIME_DATETIMEDEC)
+    else:
+        return datetime.strptime(s, STRPTIME_DATETIME)
 
 def print_usage():
     print("""\
