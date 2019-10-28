@@ -27,6 +27,7 @@
 # system imports
 import ast
 import os
+import pprint
 import re
 import stat
 import sys
@@ -57,6 +58,16 @@ class TrackableFile:
         return self.contents
 
 class ConfigFile(TrackableFile):
+
+    def dump(self, path):
+        try:
+            f = None
+            f = open(path, "w+")
+            pprint.pprint(self.get(), stream=f, indent=4)
+        finally:
+            if f:
+                f.close()
+
     def load(self):
         d = {}
 
@@ -80,6 +91,16 @@ class ConfigFile(TrackableFile):
         self.mtime = mtime
 
 class AllowFile(TrackableFile):
+
+    def dump(self, path):
+        try:
+            f = None
+            f = open(path, "w+")
+            f.write("\n".join(self.get()))
+        finally:
+            if f:
+                f.close()
+
     def load(self):
         allowedusers = []
         try:

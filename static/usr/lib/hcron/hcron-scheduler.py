@@ -36,7 +36,6 @@ del firstPath
 
 # system imports
 import os.path
-import pprint
 import signal
 from sys import stderr
 import tempfile
@@ -55,7 +54,6 @@ from hcron.trackablefile import AllowFile, ConfigFile, SignalDir
 def dump_signal_handler(num, frame):
     log_message("info", "received signal to dump.")
     signal.signal(num, dump_signal_handler)
-    pp = pprint.PrettyPrinter(indent=4)
 
     try:
         library.makedirs(HCRON_DUMPDIR_BASE, 0o700)
@@ -68,23 +66,15 @@ def dump_signal_handler(num, frame):
 
     # config
     try:
-        config = globs.configfile.get()
-        f = open(os.path.join(dumpdir, "hcron.conf"), "w+")
-        f.write(pp.pformat(config))
-        f.close()
+        globs.configfile.dump(os.path.join(dumpdir, "hcron.conf"))
     except Exception:
-        if f != None:
-            f.close()
+        pass
 
     # allowed users
     try:
-        allowedUsers = globs.allowfile.get()
-        f = open(os.path.join(dumpdir, "hcron.allow"), "w+")
-        f.write("\n".join(allowedUsers))
-        f.close()
+        globs.allowfile.dump(os.path.join(dumpdir, "hcron.allow"))
     except Exception:
-        if f != None:
-            f.close()
+        pass
 
     # event list
     try:
