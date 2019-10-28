@@ -24,6 +24,7 @@
 from collections import namedtuple
 from datetime import datetime
 import os.path
+import re
 import sys
 from sys import stderr
 import traceback
@@ -109,7 +110,7 @@ def parse_logline(line):
         #traceback.print_exc()
         return None
 
-def load_logs(path, usernames, starttimestamp, endtimestamp):
+def load_logs(path, eventnamecre, usernames, starttimestamp, endtimestamp):
     joblogtypes = set(["queue", "activate", "expire", "execute", "done"])
 
     for line in open(path):
@@ -118,16 +119,22 @@ def load_logs(path, usernames, starttimestamp, endtimestamp):
 
         if not log:
             continue
+
+        values = log.values
+        eventname = values.get("eventname")
+
         if log.timestamp < starttimestamp or log.timestamp > endtimestamp:
             continue
         if usernames:
             if log.username != "" and log.username not in usernames:
                 continue
+        if eventname:
+            if eventnamecre and not eventnamecre.match(eventname):
+                continue
 
         logs.append(log)
 
         if log.type in joblogtypes:
-            values = log.values
             jobid = values.get("jobid", None)
             jobgid = values.get("jobgid", None)
             pjobid = values.get("pjobid", None)
@@ -197,6 +204,7 @@ Where:
 <startdatetime>     Filter out entries before this date and time.
 
 Options:
+-e <pattern>        Filter by event name regexp pattern.
 -f <path>           Use alternate log file.
 --show-jobtree      Show job information as a tree grouped together by
                     job group.
@@ -208,6 +216,7 @@ def main(args):
     try:
         enddatetime = None
         endtimestamp = None
+        eventnamepatt = None
         logfilepath = "/var/log/hcron/hcron.log"
         showjobtree = False
         showtypes = None
@@ -217,7 +226,9 @@ def main(args):
 
         while args:
             arg = args.pop(0)
-            if arg == "-f" and args:
+            if arg == "-e" and args:
+                eventnamepatt = args.pop(0)
+            elif arg == "-f" and args:
                 logfilepath = args.pop(0)
             elif arg == "--show-jobtree":
                 showjobtree = True
@@ -254,7 +265,16 @@ def main(args):
             stderr.write("error: bad log file path (%s)" % (logfilepath,))
             sys.exit(1)
 
-        load_logs(logfilepath, usernames, starttimestamp, endtimestamp)
+        try:
+            if eventnamepatt:
+                eventnamecre = re.compile(eventnamepatt)
+            else:
+                eventnamecre = None
+        except:
+            stderr.write("error: bad eventname pattern (%s)\n" % (eventnamepatt,))
+            sys.exit(1)
+
+        load_logs(logfilepath, eventnamecre, usernames, starttimestamp, endtimestamp)
         show_logs(showtypes, showjobtree)
     except SystemExit:
         raise
