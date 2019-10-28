@@ -204,11 +204,14 @@ class EventList:
         self.events = None
         self.load()
 
-    def dump(self):
+    def dump(self, dumpdir=None):
         """Dump event list to a file.
         """
-        path = "%s/%s" % (HCRON_EVENT_LISTS_DUMP_DIR, self.username)
-        if not path.startswith(HCRON_EVENT_LISTS_DUMP_DIR):
+        if dumpdir == None:
+            dumpdir = HCRON_EVENT_LISTS_DUMP_DIR
+
+        path = "%s/%s" % (dumpdir, self.username)
+        if not path.startswith(dumpdir):
             # paranoia?
             return
 

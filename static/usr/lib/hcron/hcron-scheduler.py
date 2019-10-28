@@ -39,6 +39,8 @@ import os.path
 import pprint
 import signal
 from sys import stderr
+import tempfile
+import traceback
 
 # app imports
 from hcron import globs
@@ -55,10 +57,19 @@ def dump_signal_handler(num, frame):
     signal.signal(num, dump_signal_handler)
     pp = pprint.PrettyPrinter(indent=4)
 
+    try:
+        library.makedirs(HCRON_DUMPDIR_BASE, 0o700)
+        dumpdir = tempfile.mkdtemp(dir=HCRON_DUMPDIR_BASE)
+        elsdumpdir = os.path.join(dumpdir, "event_lists")
+        library.makedirs(elsdumpdir, 0o700)
+    except:
+        # something went wrong!
+        return
+
     # config
     try:
         config = globs.configfile.get()
-        f = open(HCRON_CONFIG_DUMP_PATH, "w+")
+        f = open(os.path.join(dumpdir, "hcron.conf"), "w+")
         f.write(pp.pformat(config))
         f.close()
     except Exception:
@@ -68,7 +79,7 @@ def dump_signal_handler(num, frame):
     # allowed users
     try:
         allowedUsers = globs.allowfile.get()
-        f = open(HCRON_ALLOWED_USERS_DUMP_PATH, "w+")
+        f = open(os.path.join(dumpdir, "hcron.allow"), "w+")
         f.write("\n".join(allowedUsers))
         f.close()
     except Exception:
@@ -76,11 +87,14 @@ def dump_signal_handler(num, frame):
             f.close()
 
     # event list
-    ell = globs.eventlistlist
-    for username in globs.allowfile.get():
-        el = ell.eventlists.get(username)
-        if el:
-            el.dump()
+    try:
+        ell = globs.eventlistlist
+        for username in globs.allowfile.get():
+            el = ell.eventlists.get(username)
+            if el:
+                el.dump(elsdumpdir)
+    except:
+        pass
 
 def reload_signal_handler(num, frame):
     log_message("info", "received signal to reload.")
@@ -143,7 +157,7 @@ if __name__ == "__main__":
         globs.eventlistlist = EventListList(globs.allowfile.get())
 
         signal.signal(signal.SIGHUP, reload_signal_handler)
-        #signal.signal(signal.SIGUSR1, dump_signal_handler)
+        signal.signal(signal.SIGUSR1, dump_signal_handler)
         signal.signal(signal.SIGTERM, quit_signal_handler)
         signal.signal(signal.SIGQUIT, quit_signal_handler)
         ###signal.signal(signal.SIGCHLD, signal.SIG_IGN)   # we don't care about children/zombies
