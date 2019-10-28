@@ -235,7 +235,8 @@ class JobQueue:
             try:
                 job = self.q.get(timeout=5)
                 if job:
-                    self.tp.add(None, self.handle_job, args=(job,))
+                    key = "%s--%s--%s" % (job.username, job.jobid, job.eventname)
+                    self.tp.add(key, self.handle_job, args=(job,))
                 while self.tp.has_done():
                     res = self.tp.reap()
 
