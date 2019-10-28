@@ -236,6 +236,20 @@ def get_utcoffset():
             break
     return utcnow.replace(second=0, microsecond=0)-now.replace(second=0, microsecond=0)
 
+def makedirs(path, mode=None):
+    """Make dirs upto and including path. Do not complain if
+    directories exist.
+    """
+    try:
+        if os.path.exists(path):
+            return
+        if mode == None:
+            os.makedirs(path)
+        else:
+            os.makedirs(path, mode)
+    except:
+        pass
+
 def serverize():
     if os.fork() != 0:
         # exit original/parent process
