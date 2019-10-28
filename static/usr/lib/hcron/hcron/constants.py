@@ -91,7 +91,7 @@ import sys
 
 # constants
 PROG_NAME = os.path.basename(sys.argv[0])
-VERSION = "1.1"
+VERSION = "1.2"
 
 HCRON_HOME = os.path.realpath(os.path.join(os.path.dirname(sys.argv[0]), "..", ".."))
 if HCRON_HOME.startswith("/usr"):
