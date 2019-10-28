@@ -86,6 +86,14 @@ def dump_signal_handler(num, frame):
     except:
         pass
 
+    # threadpool information
+    try:
+        tp = globs.server.jobq.tp
+        l = ["%s" % x for x in tp.runs]
+        open(os.path.join(dumpdir, "tp"), "w+").write("\n".join(l))
+    except:
+        pass
+
 def reload_signal_handler(num, frame):
     log_message("info", "received signal to reload.")
     signal.signal(num, reload_signal_handler)
