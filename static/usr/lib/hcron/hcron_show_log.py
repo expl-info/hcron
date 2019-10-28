@@ -50,11 +50,11 @@ def add_stats(jobid):
     executelog = job.type2log.get("execute")
     donelog = job.type2log.get("done")
 
-    queuedatetime = queuelog and timestamp2datetime(queuelog.timestamp)
-    activatedatetime = activatelog and timestamp2datetime(activatelog.timestamp)
-    expiredatetime = expirelog and timestamp2datetime(expirelog.timestamp)
-    executedatetime = executelog and timestamp2datetime(executelog.timestamp)
-    donedatetime = donelog and timestamp2datetime(donelog.timestamp)
+    queuedatetime = queuelog and timestamp2datetime(queuelog.timestamp.replace("T", " "))
+    activatedatetime = activatelog and timestamp2datetime(activatelog.timestamp.replace("T", " "))
+    expiredatetime = expirelog and timestamp2datetime(expirelog.timestamp.replace("T", " "))
+    executedatetime = executelog and timestamp2datetime(executelog.timestamp.replace("T", " "))
+    donedatetime = donelog and timestamp2datetime(donelog.timestamp.replace("T", " "))
 
     values = {
         "jobid": jobid,
@@ -78,7 +78,7 @@ def add_stats(jobid):
         if activatedatetime:
             values["spawntime"] = (executedatetime-activatedatetime).total_seconds()
 
-    log = HcronLog(donelog.timestamp.replace("T", " "), "stats", donelog.username, values)
+    log = HcronLog(donelog.timestamp, "stats", donelog.username, values)
     logs.append(log)
 
 def datetime2timestamp(datetime):
@@ -95,7 +95,7 @@ def parse_logline(line):
     try:
         t = line.split("|")
         values = dict([tt.split("=", 1) for tt in t[3:]])
-        log = HcronLog(t[0].replace("T", " "), t[1], t[2], values)
+        log = HcronLog(t[0], t[1], t[2], values)
         return log
     except:
         #traceback.print_exc()
@@ -104,7 +104,7 @@ def parse_logline(line):
     try:
         # old format?
         values = dict([(str(i), tt) for i, tt in enumerate(t[3:])])
-        log = HcronLog(t[0].replace("T", " "), t[1], t[2], values)
+        log = HcronLog(t[0], t[1], t[2], values)
         return log
     except:
         #traceback.print_exc()
