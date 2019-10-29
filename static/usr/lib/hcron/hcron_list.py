@@ -73,12 +73,12 @@ def print_eventnames(pattern, showthings):
             if cre.match(eventname):
                 l = []
                 if "status" in showthings:
-                    l.append(d.get("status"))
+                    l.append(d.get("status", ""))
                 if "type" in showthings:
-                    l.append(d.get("type"))
+                    l.append(d.get("type", ""))
                 if "reason" in showthings:
-                    l.append(d.get("reason"))
-                l.append(eventname)
+                    l.append(d.get("reason", ""))
+                l.append(eventname or "")
                 line = ":".join(l)
                 eventinfo[eventname] = line
         for eventname, line in sorted(eventinfo.items()):

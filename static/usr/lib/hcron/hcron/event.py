@@ -565,9 +565,14 @@ class Event:
                     varinfo.get("when_minute"),
                     varinfo.get("when_dow"))
             self.type = "normal"
+            self.reason = "passed"
         except:
+            pass
+        finally:
+            if self.type == None:
+                self.type = "unknown"
             if self.reason == None:
-                self.reason = "unknown problem"
+                self.reason = "unknown"
 
     def process_includes(self, callername, lines, depth=1):
         if depth > 3:
