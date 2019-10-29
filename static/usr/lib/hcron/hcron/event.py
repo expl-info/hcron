@@ -611,7 +611,7 @@ class Event:
         return l
         
     def test(self, datemasks):
-        if self.reason != None:
+        if self.type != "normal":
             return 0
 
         masks = self.masks
