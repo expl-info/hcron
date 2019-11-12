@@ -89,8 +89,14 @@ def dump_signal_handler(num, frame):
     # threadpool information
     try:
         tp = globs.server.jobq.tp
-        l = ["%s" % x for x in tp.runs]
-        open(os.path.join(dumpdir, "tp"), "w+").write("\n".join(l))
+        l = []
+        l.append("ndone (%s)" % tp.get_ndone())
+        l.append("nrunning (%s)" % tp.get_nrunning())
+        l.append("nwaiting (%s)" % tp.get_nwaiting())
+        l.append("nworkers (%s)" % tp.get_nworkers())
+        l.append("\nrunning:")
+        l.append("\n".join(["%s" % x for x in tp.runs]))
+        open(os.path.join(dumpdir, "threadpool"), "w+").write("\n".join(l))
     except:
         pass
 
