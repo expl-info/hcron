@@ -100,7 +100,7 @@ class Job:
 class JobQueue:
 
     def __init__(self):
-        self.q = queue.Queue(globs.configfile.get().get("max_queued_jobs", CONFIG_MAX_QUEUED_JOBS))
+        #self.q = queue.Queue(globs.configfile.get().get("max_queued_jobs", CONFIG_MAX_QUEUED_JOBS))
         self.tp = ThreadPool(max(globs.configfile.get().get("max_activated_events", CONFIG_MAX_ACTIVATED_EVENTS), 1))
 
     def enqueue_ondemand_jobs(self):
@@ -150,7 +150,7 @@ class JobQueue:
                     job.queue_datetime = datetime.now()
                     job.sched_datetime = clock.now()
                     job.username = username
-                    self.q.put(job)
+                    self.put(job)
                     log_queue(job.username, job.jobid, job.jobgid, job.pjobid,
                         job.triggername, job.triggerorigin, job.eventname,
                         job.eventchainnames, job.sched_datetime, job.queue_datetime)
@@ -160,9 +160,6 @@ class JobQueue:
                     if path:
                         os.remove(path)
             time.sleep(ENQUEUE_ONDEMAND_DELAY)
-
-    def get(self, *args, **kwargs):
-        return self.q.get(*args, **kwargs)
 
     def handle_job(self, job):
         """Handle a single job and queue related/followon chain jobs
@@ -222,7 +219,7 @@ class JobQueue:
                 nextjob.queue_datetime = datetime.now()
                 nextjob.sched_datetime = globs.clock.now()
                 nextjob.username = job.username
-                self.q.put(nextjob)
+                self.put(nextjob)
                 log_queue(nextjob.username, nextjob.jobid, nextjob.jobgid, nextjob.pjobid,
                     nextjob.triggername, nextjob.triggerorigin, nextjob.eventname,
                     nextjob.eventchainnames, nextjob.sched_datetime, nextjob.queue_datetime)
@@ -233,22 +230,14 @@ class JobQueue:
         lastntotal = 0
         while True:
             try:
-                job = self.q.get(timeout=5)
-                if job:
-                    key = "%s--%s--%s" % (job.username, job.jobid, job.eventname)
-                    self.tp.add(key, self.handle_job, args=(job,))
-                while self.tp.has_done():
-                    res = self.tp.reap()
-
-            except queue.Empty:
-                pass
-            except Exception as detail:
-                if self.q != None:
-                    log_message("error", "unexpected exception (%s)." % str(detail))
-                return
-
-            try:                
-                nqueued = self.q.qsize()
+                try:
+                    while self.tp.has_done():
+                        res = self.tp.read(timeout=1)
+                    else:
+                        res = self.tp.reap(timeout=2)
+                except:
+                    pass
+                nqueued = self.tp.get_nwaiting()
                 nrunning = self.tp.get_nrunning()
                 ntotal = nqueued+nrunning
                 if ntotal or lastntotal:
@@ -257,5 +246,13 @@ class JobQueue:
             except Exception as detail:
                 log_message("error", "unexpected exception (%s)." % str(detail))
 
-    def put(self, *args, **kwargs):
-        return self.q.put(*args, **kwargs)
+    def put(self, job):
+        """Enqueue the job.
+        """
+        try:
+            if not isinstance(job, Job):
+                raise Exception("not a job object")
+            key = "%s--%s--%s" % (job.username, job.jobid, job.eventname)
+            self.tp.add(key, self.handle_job, args=(job,))
+        except:
+            raise
