@@ -38,6 +38,7 @@ usage: hcron <subcommand> ...
 
 Subcommands:
 activate            Activate event.
+conv                Convert between hcron and crontab.
 event               Create/edit event.
 get                 Get hcron information.
 list                List events.
@@ -59,6 +60,8 @@ if __name__ == "__main__":
 
         if subcommand == "activate":
             from hcron_activate import main
+        elif subcommand == "conv":
+            from hcron_conv import main
         elif subcommand == "event":
             from hcron_event import main
         elif subcommand == "get":
