@@ -232,7 +232,7 @@ class JobQueue:
             try:
                 try:
                     while self.tp.has_done():
-                        res = self.tp.read(timeout=1)
+                        res = self.tp.reap(timeout=1)
                     else:
                         res = self.tp.reap(timeout=2)
                 except:
