@@ -237,11 +237,13 @@ class JobQueue:
                         res = self.tp.reap(timeout=2)
                 except:
                     pass
+                ndone = self.tp.get_ndone()
                 nqueued = self.tp.get_nwaiting()
                 nrunning = self.tp.get_nrunning()
+                nworkers = self.tp.get_nworkers()
                 ntotal = nqueued+nrunning
                 if ntotal or lastntotal:
-                    log_status(nqueued=nqueued, nrunning=nrunning, ntotal=ntotal)
+                    log_status(nqueued=nqueued, nrunning=nrunning, ntotal=ntotal, ndone=ndone, nworkers=nworkers)
                 lastntotal = ntotal
             except Exception as detail:
                 log_message("error", "unexpected exception (%s)." % str(detail))
