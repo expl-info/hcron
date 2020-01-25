@@ -258,11 +258,11 @@ def serverize():
     try:
         # close streams - the Python way
         if sys.stdin:
-            sys.stdin.close(); os.close(0); os.open("/dev/null", os.O_RDONLY)
+            sys.stdin.close(); os.close(0); sys.stdin = open("/dev/null", "r")
         if sys.stdout:
-            sys.stdout.close(); os.close(1); os.open("/dev/null", os.O_RDWR)
+            sys.stdout.close(); os.close(1); sys.stdout = open("/dev/null", "w")
         if sys.stderr:
-            sys.stderr.close(); os.close(2); os.open("/dev/null", os.O_RDWR)
+            sys.stderr.close(); os.close(2); sys.stderr = os.fdopen(1, "wt")
 
         # detach from controlling terminal
         os.setsid()
