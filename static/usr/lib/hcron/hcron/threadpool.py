@@ -69,9 +69,20 @@ class ThreadPool:
         import threading
 
         def _worker(key, fn, args, kwargs):
-            rv = fn(*args, **kwargs)
-            self.doneq.put((key, rv))
-            self.runs.discard(threading.current_thread())
+            try:
+                rv = fn(*args, **kwargs)
+            except:
+                rv = None
+
+            try:
+                self.doneq.put((key, rv))
+            except:
+                pass
+            try:
+                self.runs.discard(threading.current_thread())
+            except:
+                pass
+
             self._schedule()
 
         try:
