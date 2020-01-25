@@ -211,18 +211,19 @@ class JobQueue:
                     log_message("error", "chained event (%s) was rejected (%s)." % (nexteventname, nextevent.reason), username=event.username)
                     nextevent = None
 
-                nextjob = Job(job.jobgid, job.jobid)
-                nextjob.triggername = nexteventtype
-                nextjob.triggerorigin = nextevent.name
-                nextjob.eventname = nextevent.name
-                nextjob.eventchainnames = "%s:%s" % (job.eventchainnames, nextjob.eventname)
-                nextjob.queue_datetime = datetime.now()
-                nextjob.sched_datetime = globs.clock.now()
-                nextjob.username = job.username
-                self.put(nextjob)
-                log_queue(nextjob.username, nextjob.jobid, nextjob.jobgid, nextjob.pjobid,
-                    nextjob.triggername, nextjob.triggerorigin, nextjob.eventname,
-                    nextjob.eventchainnames, nextjob.sched_datetime, nextjob.queue_datetime)
+                if nextevent:
+                    nextjob = Job(job.jobgid, job.jobid)
+                    nextjob.triggername = nexteventtype
+                    nextjob.triggerorigin = nextevent.name
+                    nextjob.eventname = nextevent.name
+                    nextjob.eventchainnames = "%s:%s" % (job.eventchainnames, nextjob.eventname)
+                    nextjob.queue_datetime = datetime.now()
+                    nextjob.sched_datetime = globs.clock.now()
+                    nextjob.username = job.username
+                    self.put(nextjob)
+                    log_queue(nextjob.username, nextjob.jobid, nextjob.jobgid, nextjob.pjobid,
+                        nextjob.triggername, nextjob.triggerorigin, nextjob.eventname,
+                        nextjob.eventchainnames, nextjob.sched_datetime, nextjob.queue_datetime)
 
     def handle_jobs(self):
         """Process jobs found on the job queue.
