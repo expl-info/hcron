@@ -53,7 +53,7 @@ class HcronTreeCache:
         self.cache = {}
         self.dropped_cache = {}
         self.ignored_cache = {}
-        self.path = os.path.realpath(get_hcron_tree_filename(username, globs.fqdn))
+        self.path = os.path.realpath(get_hcron_tree_filename(username, globs.servername))
         self.load()
 
     def get_contents(self, tree_path):

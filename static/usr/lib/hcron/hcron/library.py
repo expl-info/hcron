@@ -193,9 +193,9 @@ def get_events_home(username):
     events_base_path = (globs.config.get("events_base_path") or "").strip()
 
     if events_base_path == "":
-        path = os.path.expanduser("~%s/.hcron/%s/events" % (username, globs.fqdn))
+        path = os.path.expanduser("~%s/.hcron/%s/events" % (username, globs.servername))
     else:
-        path = os.path.join(events_base_path, username, ".hcron/%s/events" % globs.fqdn)
+        path = os.path.join(events_base_path, username, ".hcron/%s/events" % globs.servername)
 
     if path.startswith("~"):
         return None
@@ -208,9 +208,9 @@ def get_includes_home(username):
     events_base_path = (globs.config.get("events_base_path") or "").strip()
 
     if events_base_path == "":
-        path = os.path.expanduser("~%s/.hcron/%s/includes" % (username, globs.fqdn))
+        path = os.path.expanduser("~%s/.hcron/%s/includes" % (username, globs.servername))
     else:
-        path = os.path.join(events_base_path, username, ".hcron/%s/includes" % globs.fqdn)
+        path = os.path.join(events_base_path, username, ".hcron/%s/includes" % globs.servername)
 
     if path.startswith("~"):
         return None

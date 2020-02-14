@@ -162,4 +162,5 @@ def setup(configpath=None):
 
     globs.clock = Clock()
     globs.fqdn = socket.getfqdn()
+    globs.servername = globs.configfile.get().get("server_name", globs.fqdn)
     globs.localhostname = [globs.fqdn, socket.gethostname(), "localhost"]

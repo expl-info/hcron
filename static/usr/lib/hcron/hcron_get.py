@@ -58,6 +58,14 @@ def print_fqdn(args):
         sys.exit(1)
     sys.exit(0)
 
+def print_servername(args):
+    try:
+        print(globs.servername)
+    except:
+        stderr.write("error: could not determine servername\n")
+        sys.exit(1)
+    sys.exit(0)
+
 def print_usage():
     print("""\
 usage: hcron get <name>
@@ -67,7 +75,8 @@ Get and print hcron information.
 
 Where <name> is:
 allowed             Is allowed to use hcron: yes or no.
-fqdn                Fully qualified host name.""")
+fqdn                Fully qualified host name.
+servername          Name of server for which events are scheduled.""")
 
 def main(args):
     try:
@@ -83,6 +92,9 @@ def main(args):
                 break
             elif arg == "fqdn" and not args:
                 name = "fqdn"
+                break
+            elif arg == "servername" and not args:
+                name = "servername"
                 break
             else:
                 raise Exception()
@@ -100,6 +112,8 @@ def main(args):
             print_allowed(args)
         elif name == "fqdn":
             print_fqdn(args)
+        elif name == "servername":
+            print_servername(args)
     except SystemExit:
         raise
     except:

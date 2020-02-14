@@ -36,6 +36,7 @@ localhostnames = []
 pidfile = None
 remote_execute_enabled = False
 server = None
+servername = None
 signaldir = None
 simulate = False
 simulate_fail_events = []

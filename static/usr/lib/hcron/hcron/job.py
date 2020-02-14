@@ -119,7 +119,7 @@ class JobQueue:
                     st = os.stat(path)
                     uid = st[stat.ST_UID]
                     username = uid2username(uid)
-                    triggerorigin = "%s@%s" % (username, globs.fqdn)
+                    triggerorigin = "%s@%s" % (username, globs.servername)
                     log_trigger("ondemand", triggerorigin)
                     log_message("debug", "filename (%s) user (%s) path (%s)" % (filename, username, path))
 

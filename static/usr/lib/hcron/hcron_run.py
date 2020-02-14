@@ -143,7 +143,8 @@ def main(args):
         globs.clock.set(now)
         globs.simulate = True
 
-        globs.fqdn = eventsdir.split("/")[-2]
+        # override from eventsdir
+        globs.servername = eventsdir.split("/")[-2]
 
         globs.config["log_path"] = None
         setup_logger()

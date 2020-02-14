@@ -30,7 +30,7 @@ import sys
 from sys import stderr
 import traceback
 
-from hcron.constants import *
+from hcron import globs
 from hcron.event import signal_reload
 from hcron.server import setup
 
@@ -63,7 +63,7 @@ def main(args):
         signal_reload(unload=True)
         now = datetime.datetime.now()
         next_interval = (now+datetime.timedelta(seconds=60)).replace(second=0,microsecond=0)
-        print("Unload signalled for machine (%s) at next interval (%s; in %ss)." % (HOST_NAME, next_interval, (next_interval-now).seconds))
+        print("Unload signalled for servername (%s) on host/fqdn (%s) at next interval (%s; in %ss)." % (globs.servername, globs.fqdn, next_interval, (next_interval-now).seconds))
     except Exception:
         #traceback.print_exc()
         stderr.write("error: failed to signal to unload events\n")

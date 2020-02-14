@@ -74,7 +74,7 @@ def reload_events(signalHomeMtime):
 
             if username not in usernames:
                 try:
-                    install_hcron_tree_file(username, globs.fqdn)
+                    install_hcron_tree_file(username, globs.servername)
                     globs.eventlistlist.reload(username)
                     usernames[username] = None
                 except Exception:
@@ -101,7 +101,7 @@ def signal_reload(unload=False):
         raise Exception("you are not an allowed hcron user.")
 
     try:
-        create_user_hcron_tree_file(username, globs.fqdn, empty=unload)
+        create_user_hcron_tree_file(username, globs.servername, empty=unload)
     except Exception as detail:
         raise Exception("could not create hcron snapshot file (%s)." % detail)
 
@@ -396,7 +396,7 @@ class Event:
                     toaddrs = toaddrs[:max_email_notifications]
 
                 if event_notify_subject == "":
-                    subject = """hcron (%s): "%s" executed at %s@%s""" % (globs.fqdn, self.name, event_as_user, event_host)
+                    subject = """hcron (%s): "%s" executed at %s@%s""" % (globs.servername, self.name, event_as_user, event_host)
                 else:
                     subject = event_notify_subject
                 subject = subject[:1024]
@@ -437,6 +437,7 @@ class Event:
             "HCRON_EVENT_CHAIN": "",
             "HCRON_EVENT_NAME": self.name,
             "HCRON_HOST_NAME": globs.fqdn,
+            "HCRON_SERVER_NAME": globs.servername,
             "HCRON_SELF_CHAIN": "",
         }
         
