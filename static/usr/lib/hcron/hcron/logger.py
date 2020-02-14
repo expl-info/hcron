@@ -144,7 +144,7 @@ def log_sleep(seconds):
     log("sleep", sleeptime=seconds)
 
 def log_start():
-    log("start", version=VERSION)
+    log("start", version=VERSION, servername=globs.servername, fqdn=globs.fqdn)
 
 def log_status(**kwargs):
     log("status", **kwargs)
