@@ -87,15 +87,17 @@ def reload_events(signalHomeMtime):
 
 def signal_reload(unload=False):
     """Signal to reload.
+
+    This should be called by client only, not server.
     """
     import tempfile
     from hcron.trackablefile import AllowFile
 
-    globs.allowfile = AllowFile(HCRON_ALLOW_PATH)
+    allowfile = AllowFile(HCRON_ALLOW_PATH)
     signalHome = globs.config.get("signalHome") or HCRON_SIGNAL_DIR
     username = uid2username(os.getuid())
 
-    if username not in globs.allowfile.get():
+    if username not in allowfile.get():
         raise Exception("you are not an allowed hcron user.")
 
     try:
