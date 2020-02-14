@@ -49,7 +49,7 @@ from hcron.event import EventListList
 from hcron.file import PidFile
 from hcron.logger import *
 from hcron.server import Server, setup
-from hcron.trackablefile import AllowFile, ConfigFile, SignalDir
+from hcron.trackablefile import AllowFile, SignalDir
 
 def dump_signal_handler(num, frame):
     log_message("info", "received signal to dump.")
@@ -154,8 +154,8 @@ if __name__ == "__main__":
         globs.remote_execute_enabled = True
         globs.email_notify_enabled = True
 
-        globs.configfile = ConfigFile(HCRON_CONFIG_PATH)
         setup_logger()
+
         globs.allowfile = AllowFile(HCRON_ALLOW_PATH)
         globs.signaldir = SignalDir(HCRON_SIGNAL_DIR)
         globs.eventlistlist = EventListList(globs.allowfile.get())

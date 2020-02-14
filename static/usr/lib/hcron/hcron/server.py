@@ -38,6 +38,7 @@ from hcron.event import EventListList, reload_events
 from hcron.job import Job, JobQueue
 from hcron.library import date_to_bitmasks
 from hcron.logger import *
+from hcron.trackablefile import ConfigFile
 
 class Server:
 
@@ -147,13 +148,17 @@ class Server:
                 self.jobq.put(job)
         log_work(len(events), (time()-t0))
 
-def setup():
+def setup(configpath=None):
     """Do general/common setup.
 
     Must be called by hcron-run and hcron-scheduler.
     """
     import socket
     from hcron.clock import Clock
+
+    configpath = configpath or HCRON_CONFIG_PATH
+    globs.configfile = ConfigFile(configpath)
+    globs.config = globs.configfile.get()
 
     globs.clock = Clock()
     globs.fqdn = socket.getfqdn()

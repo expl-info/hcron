@@ -76,7 +76,7 @@ def main(args):
     try:
         global eventsdir
 
-        confpath = None
+        configpath = None
         delay = 0
         enddatetime = None
         eventsdir = None
@@ -85,7 +85,7 @@ def main(args):
         while args:
             arg = args.pop(0)
             if arg == "-c" and args:
-                confpath = args.pop(0)
+                configpath = args.pop(0)
             elif arg == "-d" and args:
                 delay = max(0, float(args.pop(0)))
             elif arg == "--fail-events" and args:
@@ -125,7 +125,13 @@ def main(args):
         sys.exit(1)
 
     try:
-        setup()
+        if configpath:
+            configpath = os.path.realpath(configpath)
+        else:
+            etcdir = os.path.realpath("%s/../../etc" % os.path.dirname(sys.argv[0]))
+            configpath = os.path.join(etcdir, "hcron/hcron-run.conf")
+
+        setup(configpath)
 
         globs.remote_execute_enabled = False
         globs.email_notify_enabled = False
@@ -137,14 +143,8 @@ def main(args):
         globs.clock.set(now)
         globs.simulate = True
 
-        if confpath:
-            constants.HCRON_CONFIG_PATH = os.path.realpath(confpath)
-        else:
-            etcdir = os.path.realpath("%s/../../etc" % os.path.dirname(sys.argv[0]))
-            constants.HCRON_CONFIG_PATH = os.path.join(etcdir, "hcron/hcron-run.conf")
         globs.fqdn = eventsdir.split("/")[-2]
 
-        globs.configfile = ConfigFile(constants.HCRON_CONFIG_PATH)
         globs.configfile.get()["log_path"] = None
         setup_logger()
 

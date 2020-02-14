@@ -89,12 +89,10 @@ def signal_reload(unload=False):
     """Signal to reload.
     """
     import tempfile
-    from hcron.trackablefile import AllowFile, ConfigFile
+    from hcron.trackablefile import AllowFile
 
-    globs.configfile = ConfigFile(HCRON_CONFIG_PATH)
     globs.allowfile = AllowFile(HCRON_ALLOW_PATH)
-    config = globs.configfile.get()
-    signalHome = config.get("signalHome") or HCRON_SIGNAL_DIR
+    signalHome = globs.config.get("signalHome") or HCRON_SIGNAL_DIR
     username = uid2username(os.getuid())
 
     if username not in globs.allowfile.get():
