@@ -145,7 +145,7 @@ def main(args):
 
         globs.fqdn = eventsdir.split("/")[-2]
 
-        globs.configfile.get()["log_path"] = None
+        globs.config["log_path"] = None
         setup_logger()
 
         globs.eventlistlist = EventListList(allowedUsers)

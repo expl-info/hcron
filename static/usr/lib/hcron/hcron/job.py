@@ -100,8 +100,8 @@ class Job:
 class JobQueue:
 
     def __init__(self):
-        #self.q = queue.Queue(globs.configfile.get().get("max_queued_jobs", CONFIG_MAX_QUEUED_JOBS))
-        self.tp = ThreadPool(max(globs.configfile.get().get("max_activated_events", CONFIG_MAX_ACTIVATED_EVENTS), 1))
+        #self.q = queue.Queue(globs.config.get("max_queued_jobs", CONFIG_MAX_QUEUED_JOBS))
+        self.tp = ThreadPool(max(globs.config.get("max_activated_events", CONFIG_MAX_ACTIVATED_EVENTS), 1))
 
     def enqueue_ondemand_jobs(self):
         """Queue up on demand jobs.
@@ -171,8 +171,8 @@ class JobQueue:
             log_message("error", "cannot get event (%s) for user (%s)" % (job.eventname, job.username))
             return
 
-        max_chain_events = max(globs.configfile.get().get("max_chain_events", CONFIG_MAX_CHAIN_EVENTS), 1)
-        max_next_events = max(globs.configfile.get().get("max_next_events", CONFIG_MAX_NEXT_EVENTS), 1)
+        max_chain_events = max(globs.config.get("max_chain_events", CONFIG_MAX_CHAIN_EVENTS), 1)
+        max_next_events = max(globs.config.get("max_next_events", CONFIG_MAX_NEXT_EVENTS), 1)
 
         if job.eventchainnames:
             eventChainNames = job.eventchainnames.split(":")

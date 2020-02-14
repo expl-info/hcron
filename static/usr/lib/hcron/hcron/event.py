@@ -251,8 +251,8 @@ class EventList:
         self.events = {}
 
         try:
-            max_events_per_user = globs.configfile.get().get("max_events_per_user", CONFIG_MAX_EVENTS_PER_USER)
-            names_to_ignore_cregexp = globs.configfile.get().get("names_to_ignore_cregexp")
+            max_events_per_user = globs.config.get("max_events_per_user", CONFIG_MAX_EVENTS_PER_USER)
+            names_to_ignore_cregexp = globs.config.get("names_to_ignore_cregexp")
             ignoreMatchFn = names_to_ignore_cregexp and names_to_ignore_cregexp.match
 
             # global cache assumes single-threaded load!
@@ -351,7 +351,7 @@ class Event:
             if event_command:
                 rv = remote_execute(job, self.name, self.username, event_as_user, event_host, event_command)
             else:
-                error_on_empty_command = globs.configfile.get().get("error_on_empty_command", CONFIG_ERROR_ON_EMPTY_COMMAND)
+                error_on_empty_command = globs.config.get("error_on_empty_command", CONFIG_ERROR_ON_EMPTY_COMMAND)
                 if error_on_empty_command:
                     rv = -1
                 else:
@@ -387,8 +387,7 @@ class Event:
         if rv == 0:
             # success; notify
             if event_notify_email:
-                config = globs.configfile.get()
-                max_email_notifications = config.get("max_email_notifications", CONFIG_MAX_EMAIL_NOTIFICATIONS)
+                max_email_notifications = globs.config.get("max_email_notifications", CONFIG_MAX_EMAIL_NOTIFICATIONS)
                 toaddrs = [toaddr.strip() for toaddr in event_notify_email.split(",")]
                 if len(toaddrs) > max_email_notifications:
                     log_message("error", "limited user (%s) event (%s) email notification recipients from (%s) to (%s)" % (self.username, self.name, len(toaddrs), max_email_notifications))

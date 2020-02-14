@@ -39,8 +39,7 @@ tw.subsequent_indent = "    "
 tw.width = 1024
 
 def send_email_notification(eventname, fromusername, toaddr, subject, content):
-    config = globs.configfile.get()
-    smtp_server = config.get("smtp_server", "localhost")
+    smtp_server = globs.config.get("smtp_server", "localhost")
 
     fromaddr = "%s@%s" % (fromusername, globs.fqdn)
     message = """From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\n%s""" % \

@@ -40,11 +40,10 @@ logger = None
 def setup_logger():
     global logger
 
-    config = globs.configfile.get()
-    if config.get("use_syslog", CONFIG_USE_SYSLOG):
+    if globs.config.get("use_syslog", CONFIG_USE_SYSLOG):
         handler = logging.SysLogHandler()
     else:
-        log_path = config.get("log_path", CONFIG_LOG_PATH)
+        log_path = globs.config.get("log_path", CONFIG_LOG_PATH)
         if log_path:
             if not log_path.startswith("/"):
                 log_path = os.path.join(HCRON_LOG_HOME, log_path)

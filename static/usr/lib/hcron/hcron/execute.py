@@ -49,13 +49,12 @@ def remote_execute(job, eventname, localusername, remoteusername, remotehostname
     -1  error/failure
     """
     # setup
-    config = globs.configfile.get()
-    allow_localhost = config.get("allow_localhost", CONFIG_ALLOW_LOCALHOST) 
-    allow_root_events = config.get("allow_root_events", CONFIG_ALLOW_ROOT_EVENTS)
+    allow_localhost = globs.config.get("allow_localhost", CONFIG_ALLOW_LOCALHOST) 
+    allow_root_events = globs.config.get("allow_root_events", CONFIG_ALLOW_ROOT_EVENTS)
     localuid, localgid = username2ids(localusername)
-    remote_shell_type = config.get("remote_shell_type", CONFIG_REMOTE_SHELL_TYPE)
-    remote_shell_exec = config.get("remote_shell_exec", CONFIG_REMOTE_SHELL_EXEC)
-    spawn_timeout = timeout or config.get("command_spawn_timeout", CONFIG_COMMAND_SPAWN_TIMEOUT)
+    remote_shell_type = globs.config.get("remote_shell_type", CONFIG_REMOTE_SHELL_TYPE)
+    remote_shell_exec = globs.config.get("remote_shell_exec", CONFIG_REMOTE_SHELL_EXEC)
+    spawn_timeout = timeout or globs.config.get("command_spawn_timeout", CONFIG_COMMAND_SPAWN_TIMEOUT)
     kill_timeout = 10
     command = command.strip()
     spawn_starttime = time.time()
