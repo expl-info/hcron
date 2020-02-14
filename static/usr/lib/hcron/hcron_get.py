@@ -87,14 +87,8 @@ def main(args):
             if arg in ["-h", "--help"]:
                 print_usage()
                 sys.exit(0)
-            elif arg == "allowed" and not args:
-                name = "allowed"
-                break
-            elif arg == "fqdn" and not args:
-                name = "fqdn"
-                break
-            elif arg == "servername" and not args:
-                name = "servername"
+            elif arg in ["allowed", "fqdn", "servername"] and not args:
+                name = arg
                 break
             else:
                 raise Exception()
