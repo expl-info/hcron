@@ -1,4 +1,4 @@
-.TH HCRON-SCHEDULER "8" "2019" "hcron 1.0" ""
+.TH HCRON-SCHEDULER "8" "2020" "hcron 1.x" ""
 .SH NAME
 hcron-scheduler \- Server which schedules and executes hcron events
 .SH SYNOPSIS
@@ -101,6 +101,11 @@ and names ending with ~ (commonly used to name backup or temporary
 files when editing).
 
 .TP
+.B server_name
+Name of the server for which events are being scheduled. Default is the
+fqdn, but may be overridden with this setting.
+
+.TP
 .B smtp_server
 Host name of an SMTP server willing to accept connections. If not
 specified, localhost is used.
@@ -199,7 +204,7 @@ hcron(1)
 Written by John Marshall.
 
 .SH COPYRIGHT
-Copyright \(co 2008-2019 Environment Canada.
+Copyright \(co 2008-2020 Environment Canada.
 .br
 This is free software.  You may redistribute copies of it under the terms of
 the GNU General Public License <http://www.gnu.org/licenses/gpl.html>.

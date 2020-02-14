@@ -1,4 +1,4 @@
-.TH HCRON "1" "2019" "hcron 1.0" ""
+.TH HCRON "1" "2020" "hcron 1.x" ""
 .SH NAME
 hcron \- Front-end tool to run subcommands
 
@@ -28,19 +28,23 @@ hcron is front-end tool used to run subcommands:
 .IP \[bu] 2
 activate - Activate event.
 .IP \[bu] 2
+conv - Convert between hcron and crontab.
+.IP \[bu] 2
 event - Create/edit event file.
 .IP \[bu] 2
-info - Get hcron information (deprecated).
+get - Get hcron information.
 .IP \[bu] 2
 list - List events.
 .IP \[bu] 2
-reload - Reload/unload events.
+reload - Reload events.
 .IP \[bu] 2
 run - Simulate events.
 .IP \[bu] 2
-show-fqdn - Show hcron server hostname.
-.IP \[bu] 2
 show-log - Show log.
+.IP \[bu] 2
+unload - Unload events.
+.IP \[bu] 2
+version - Print version.
 
 .PP
 Refer to the repository for more: https://bitbucket.org/hcron/hcron/ .
@@ -55,7 +59,7 @@ hcron-scheduler(8)
 Written by John Marshall.
 
 .SH COPYRIGHT
-Copyright \(co 2008-2019 Environment Canada.
+Copyright \(co 2008-2020 Environment Canada.
 .br
 This is free software.  You may redistribute copies of it under the terms of
 the GNU General Public License <http://www.gnu.org/licenses/gpl.html>.
