@@ -153,11 +153,12 @@ def main(args):
         globs.server = Server(False)
         log_start()
 
+        jobq = globs.server.jobq
         while now < enddatetime:
+            # queue up, then handle asynchronously in the threadpool
             globs.server.run_now("clock", "hcron-run", now)
-            while globs.server.jobq.q.qsize():
-                job = globs.server.jobq.get()
-                globs.server.jobq.handle_job(job)
+            while jobq.tp.get_nwaiting()+jobq.tp.get_nrunning():
+                time.sleep(0.00001)
             time.sleep(delay)
             now += minute
             globs.clock.set(now)
