@@ -44,7 +44,7 @@ class HcronTreeCache:
     """
 
     #def __init__(self, path, ignorematchfn=None):
-    def __init__(self, username, ignorematchfn=None):
+    def __init__(self, username, ignorematchfn=None, path=None):
         def false_match(*args):
             return False
 
@@ -53,7 +53,7 @@ class HcronTreeCache:
         self.cache = {}
         self.dropped_cache = {}
         self.ignored_cache = {}
-        self.path = os.path.realpath(get_hcron_tree_filename(username, globs.servername))
+        self.path = path or os.path.realpath(get_hcron_tree_filename(username, globs.servername))
         self.load()
 
     def get_contents(self, tree_path):
@@ -190,12 +190,11 @@ class HcronTreeCache:
                 # fully resolved
                 return path
     
-def create_user_hcron_tree_file(username, hostname, dstpath=None, empty=False):
+def create_user_hcron_tree_file(username, hostname, srcpath=None, dstpath=None, empty=False):
     """Create an hcron tree file at dstpath with select members from
     srcpath.
     """
-    if dstpath == None:
-        dstpath = get_user_hcron_tree_filename(username, hostname)
+    dstpath = dstpath or get_user_hcron_tree_filename(username, hostname)
 
     if empty:
         # truncate
@@ -208,11 +207,11 @@ def create_user_hcron_tree_file(username, hostname, dstpath=None, empty=False):
 
     try:
         # temp file
-        user_hcron_tree_home = get_user_hcron_tree_home(username, hostname)
-        _, tmppath = tempfile.mkstemp(prefix="snapshot-", dir=user_hcron_tree_home)
+        _, tmppath = tempfile.mkstemp(prefix="hcron-snapshot-", dir="/tmp")
 
         # create tar
-        os.chdir(user_hcron_tree_home)
+        srcpath = srcpath or get_user_hcron_tree_home(username, hostname)
+        os.chdir(srcpath)
         f = tarfile.open(tmppath, mode="w:gz")
         for name in names:
             try:

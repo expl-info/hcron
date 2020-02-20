@@ -57,6 +57,8 @@ __all__ = [
     "HCRON_ALLOWED_USERS_DUMP_PATH",
     "HCRON_CONFIG_DUMP_PATH",
     "HCRON_CONFIG_PATH",
+    "HCRON_DOC_EVENT_FIELD_NAMES",
+    "HCRON_DOC_INDEX_NAMES",
     "HCRON_DUMPDIR_BASE",
     "HCRON_ETC_PATH",
     "HCRON_EVENT_DEFINITION",
@@ -159,6 +161,38 @@ HCRON_EVENT_FIELD_NAMES_REQUIRED = [
 ]
 
 HCRON_EVENT_DEFINITION = "\n".join(["%s=" % name for name in HCRON_EVENT_FIELD_NAMES_ALL])
+
+HCRON_DOC_EVENT_FIELD_NAMES = [
+    "description",
+    "contact",
+    "label",
+    "url",
+    "as_user",
+    "host",
+    "command",
+    "notify_email",
+    "notify_message",
+    "when_year",
+    "when_month",
+    "when_day",
+    "when_hour",
+    "when_minute",
+    "when_dow",
+    "next_event",
+    "failover_event",
+    "template_name",
+]
+
+HCRON_DOC_INDEX_NAMES = [
+    "contact",
+    "failover_event",
+    "host",
+    "label",
+    "next_event",
+    "notify_email",
+    "template_name",
+    "url",
+]
 
 CONFIG_ALLOW_LOCALHOST = False              # allow_localhost
 CONFIG_ALLOW_ROOT_EVENTS = False            # allow_root_events

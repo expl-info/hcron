@@ -199,10 +199,11 @@ class EventList:
     ~/.hcron/<hostName>/events).
     """
 
-    def __init__(self, username):
+    def __init__(self, username, path=None, dumptofile=True):
         self.username = username
         self.events = None
-        self.load()
+        self.dumptofile = dumptofile
+        self.load(path)
 
     def dump(self, dumpdir=None):
         """Dump event list to a file.
@@ -249,7 +250,7 @@ class EventList:
     def get(self, name):
         return self.events.get(name)
 
-    def load(self):
+    def load(self, path=None):
         self.events = {}
 
         try:
@@ -258,7 +259,7 @@ class EventList:
             ignoreMatchFn = names_to_ignore_cregexp and names_to_ignore_cregexp.match
 
             # global cache assumes single-threaded load!
-            hcron_tree_cache = globs.hcron_tree_cache = HcronTreeCache(self.username, ignoreMatchFn)
+            hcron_tree_cache = globs.hcron_tree_cache = HcronTreeCache(self.username, ignoreMatchFn, path)
             for name in hcron_tree_cache.get_event_names():
                 try:
                     if hcron_tree_cache.is_ignored_event(name):
@@ -283,7 +284,8 @@ class EventList:
         # without an prior exception!
         hcron_tree_cache = globs.hcron_tree_cache = None
 
-        self.dump()
+        if self.dumptofile:
+            self.dump()
 
     def print_events(self):
         for name, event in self.events.items():
@@ -302,6 +304,8 @@ class Event:
         self.username = username
         self.assignments = None
         self.deleted = False
+        self.lines_raw = None
+        self.lines_included = None
         self.masks = None
         self.reason = None
         self.type = None
@@ -500,13 +504,15 @@ class Event:
                     lines = open(path).read().split("\n")
                 else:
                     lines = globs.hcron_tree_cache.get_event_contents(self.name).split("\n")
+                self.lines_raw = lines[:]
                 lines = self.process_lines(lines)
-            except Exception:
+            except:
                 self.reason = "cannot load file"
                 raise CannotLoadFileException("Ignored event file (%s)." % self.name)
 
             try:
                 lines = self.process_includes(self.name, lines)
+                self.lines_included = lines[:]
             except Exception:
                 self.reason = "cannot process include(s)"
                 raise CannotLoadFileException("Ignored event file (%s)." % self.name)
