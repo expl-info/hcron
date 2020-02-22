@@ -123,6 +123,10 @@ HCRON_PID_FILE_PATH = os.path.join(HCRON_VAR_PATH, "run/hcron.pid")
 HCRON_TREES_HOME = os.path.join(HCRON_LIB_HOME, "trees")
 
 HCRON_EVENT_DEFINITION_NAMES = [
+    "description",
+    "contact",
+    "url",
+    "label",
     "as_user",
     "host",
     "command",
