@@ -113,7 +113,7 @@ def convert_to_events(hostname, crontabpath, dirpath, mailaddr=""):
                 # error in spec
                 continue
 
-            d = HCRON_EVENT_DEFINITION_MAP.copy()
+            d = dict([(name, "") for name in HCRON_EVENT_FIELD_NAMES_ALL])
             d["host"] = hostname
             d["command"] = cmd
             d["notify_email"] = mailaddr
@@ -123,7 +123,7 @@ def convert_to_events(hostname, crontabpath, dirpath, mailaddr=""):
             d["when_minute"] = minute
             d["when_dow"] = dow
 
-            st = "\n".join([ "%s=%s" % (name, d[name]) for name in HCRON_EVENT_DEFINITION_NAMES ])
+            st = "\n".join([ "%s=%s" % (name, d[name]) for name in HCRON_EVENT_FIELD_NAMES_ALL])
 
             l.append(st)
             events.append("\n".join(l))

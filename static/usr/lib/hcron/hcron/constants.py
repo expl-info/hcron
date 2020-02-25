@@ -60,8 +60,8 @@ __all__ = [
     "HCRON_DUMPDIR_BASE",
     "HCRON_ETC_PATH",
     "HCRON_EVENT_DEFINITION",
-    "HCRON_EVENT_DEFINITION_MAP",
-    "HCRON_EVENT_DEFINITION_NAMES",
+    "HCRON_EVENT_FIELD_NAMES_ALL",
+    "HCRON_EVENT_FIELD_NAMES_REQUIRED",
     "HCRON_EVENT_LISTS_DUMP_DIR",
     "HCRON_EVENTS_SNAPSHOT_HOME",
     "HCRON_HOME",
@@ -122,11 +122,30 @@ HCRON_PID_FILE_PATH = os.path.join(HCRON_VAR_PATH, "run/hcron.pid")
 
 HCRON_TREES_HOME = os.path.join(HCRON_LIB_HOME, "trees")
 
-HCRON_EVENT_DEFINITION_NAMES = [
+HCRON_EVENT_FIELD_NAMES_ALL = [
     "description",
     "contact",
     "url",
     "label",
+    "as_user",
+    "host",
+    "command",
+    "notify_email",
+    "notify_subject",
+    "notify_message",
+    #"when_years",
+    "when_month",
+    "when_day",
+    "when_hour",
+    "when_minute",
+    "when_dow",
+    #"when_expire",
+    "next_event",
+    "failover_event",
+    "template_name",
+]
+
+HCRON_EVENT_FIELD_NAMES_REQUIRED = [
     "as_user",
     "host",
     "command",
@@ -137,11 +156,9 @@ HCRON_EVENT_DEFINITION_NAMES = [
     "when_hour",
     "when_minute",
     "when_dow",
-    "template_name",
 ]
 
-HCRON_EVENT_DEFINITION = "\n".join([ "%s=" % name for name in HCRON_EVENT_DEFINITION_NAMES ])
-HCRON_EVENT_DEFINITION_MAP = dict([ (name, "") for name in HCRON_EVENT_DEFINITION_NAMES ])
+HCRON_EVENT_DEFINITION = "\n".join(["%s=" % name for name in HCRON_EVENT_FIELD_NAMES_ALL])
 
 CONFIG_ALLOW_LOCALHOST = False              # allow_localhost
 CONFIG_ALLOW_ROOT_EVENTS = False            # allow_root_events

@@ -550,7 +550,7 @@ class Event:
             self.masks = masks
 
             # full specification check
-            for name in HCRON_EVENT_DEFINITION_NAMES:
+            for name in HCRON_EVENT_FIELD_NAMES_REQUIRED:
                 if name not in varinfo:
                     self.type = "partial"
                     self.reason = "not fully specified, missing field (%s)" % name
