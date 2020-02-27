@@ -40,7 +40,7 @@ chmod a+rx /var/lib/hcron/event_lists
 if [ ! -d /var/lib/hcron/trees ]; then
 	mkdir -p /var/lib/hcron/trees
 fi
-chmod go-rwx /var/lib/hcron/trees
+chmod 0711 /var/lib/hcron/trees
 
 # other
 if [ -x /etc/init.d/hcron ]; then

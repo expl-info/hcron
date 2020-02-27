@@ -284,3 +284,18 @@ def install_hcron_tree_file(username, hostname):
     if srcsize > 0:
         max_hcron_tree_snapshot_size = globs.config.get("max_hcron_tree_snapshot_size", CONFIG_MAX_HCRON_TREE_SNAPSHOT_SIZE)
         copyfile(src, dstpath, max_hcron_tree_snapshot_size)
+        os.chmod(dstpath, 0o440)
+        os.chown(dstpath, uid, 0)
+
+def set_hcron_tree_files():
+    """Set hcron tree files (ownership and perms).
+    """
+    try:
+        for name in os.listdir(HCRON_TREES_HOME):
+            path = os.path.join(HCRON_TREES_HOME, name)
+            if path.startswith(HCRON_TREES_HOME) and os.path.isfile(path):
+                uid = username2uid(name)
+                os.chmod(path, 0o440)
+                os.chown(path, uid, 0)
+    except:
+        raise

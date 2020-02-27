@@ -47,6 +47,7 @@ from hcron import library
 from hcron.constants import *
 from hcron.event import EventListList
 from hcron.file import PidFile
+from hcron.hcrontree import set_hcron_tree_files
 from hcron.logger import *
 from hcron.server import Server, setup
 from hcron.trackablefile import AllowFile, SignalDir
@@ -171,6 +172,9 @@ if __name__ == "__main__":
         globs.server = Server()
         globs.pidfile = PidFile(HCRON_PID_FILE_PATH)
         globs.pidfile.create()
+
+        # set trees/ files ownership and perms! (temporary)
+        set_hcron_tree_files()
 
         log_start()
         globs.server.run(immediate=immediate)
