@@ -149,10 +149,14 @@ def main(args):
         # override from eventsdir
         globs.servername = eventsdir.split("/")[-2]
 
+        globs.eventlistlist = EventListList(allowedUsers)
+        el = globs.eventlistlist.get(whoami())
+        if not el.events:
+            sys.stderr.write("error: no events found/loaded\n")
+            sys.exit(1)
+
         globs.config["log_path"] = None
         setup_logger()
-
-        globs.eventlistlist = EventListList(allowedUsers)
 
         globs.server = Server(False)
         log_start()
@@ -166,6 +170,8 @@ def main(args):
             time.sleep(delay)
             now += minute
             globs.clock.set(now)
+    except SystemExit:
+        raise
     except:
         if globs.debug:
             traceback.print_exc()
