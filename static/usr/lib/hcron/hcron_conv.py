@@ -34,6 +34,7 @@ import traceback
 
 # app import
 from hcron.constants import *
+from hcron import globs
 from hcron.event import Event
 
 def convert_to_events_main(args):
@@ -47,7 +48,9 @@ def convert_to_events_main(args):
 
         while args:
             arg = args.pop(0)
-            if arg in [ "--mail" ]:
+            if arg == "--debug":
+                globs.debug = True
+            elif arg in [ "--mail" ]:
                 mailaddr = args.pop(0)
             elif len(args) == 2:
                 hostname, crontabpath, dirpath = [arg]+args
@@ -161,7 +164,9 @@ def convert_to_crontab_main(args):
 
         while args:
             arg = args.pop(0)
-            if arg in ["--remoteshell", "--remoteshell"]:
+            if arg == "--debug":
+                globs.debug = True
+            elif arg in ["--remoteshell", "--remoteshell"]:
                 remoteshell = args.pop(0)
             elif len(args) == 1:
                 crontabpath, dirpath = [arg]+args
@@ -245,19 +250,22 @@ Options for --to-crontab:
 def main(args):
     try:
         arg = args.pop(0)
-        if arg == "--to-events":
-            convert_to_events_main(args)
-        elif arg == "--to-crontab":
-            convert_to_crontab_main(args)
+        if arg == "--debug":
+            globs.debug = True
         elif arg in ["-h", "--help"]:
             print_usage()
             sys.exit(0)
+        elif arg == "--to-events":
+            convert_to_events_main(args)
+        elif arg == "--to-crontab":
+            convert_to_crontab_main(args)
         else:
             raise Exception()
     except SystemExit:
         raise
     except Exception:
-        #traceback.print_exc()
+        if globs.debug:
+            traceback.print_exc()
         stderr.write("error: bad/missing argument\n")
         sys.exit(1)
 

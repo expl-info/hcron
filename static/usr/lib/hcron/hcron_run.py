@@ -88,8 +88,13 @@ def main(args):
                 configpath = args.pop(0)
             elif arg == "-d" and args:
                 delay = max(0, float(args.pop(0)))
+            elif arg == "--debug":
+                globs.debug = True
             elif arg == "--fail-events" and args:
                 globs.simulate_fail_events = args.pop(0).split(":")
+            elif arg in ["-h", "--help"]:
+                print_usage()
+                sys.exit(1)
             elif arg == "--show-all":
                 globs.simulate_show_email = True
                 globs.simulate_show_event = True
@@ -101,9 +106,6 @@ def main(args):
                 eventsdir = os.path.realpath(arg)
                 startdatetime = datetime.strptime((args.pop(0)+"0000")[:12], "%Y%m%d%H%M")
                 enddatetime = datetime.strptime((args.pop(0)+"0000")[:12], "%Y%m%d%H%M")
-            elif arg in ["-h", "--help"]:
-                print_usage()
-                sys.exit(1)
             else:
                 raise Exception()
 
@@ -120,7 +122,8 @@ def main(args):
     except SystemExit:
         raise
     except:
-        #traceback.print_exc()
+        if globs.debug:
+            traceback.print_exc()
         stderr.write("error: bad/missing argument\n")
         sys.exit(1)
 
@@ -164,6 +167,8 @@ def main(args):
             now += minute
             globs.clock.set(now)
     except:
+        if globs.debug:
+            traceback.print_exc()
         stderr.write("error: unexpected error\n")
         sys.exit(1)
 

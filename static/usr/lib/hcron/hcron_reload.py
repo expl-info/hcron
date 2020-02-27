@@ -46,7 +46,9 @@ def main(args):
     try:
         while args:
             arg = args.pop(0)
-            if arg in ["-h", "--help"]:
+            if arg == "--debug":
+                globs.debug = True
+            elif arg in ["-h", "--help"]:
                 print_usage()
                 sys.exit(0)
             else:
@@ -54,6 +56,8 @@ def main(args):
     except SystemExit:
         raise
     except:
+        if globs.debug:
+            traceback.print_exc()
         stderr.write("error: bad/missing argument\n")
         sys.exit(1)
 
@@ -65,7 +69,8 @@ def main(args):
         next_interval = (now+datetime.timedelta(seconds=60)).replace(second=0,microsecond=0)
         print("Reload signalled for servername (%s) on host/fqdn (%s) at next interval (%s; in %ss)." % (globs.servername, globs.fqdn, next_interval, (next_interval-now).seconds))
     except Exception:
-        #traceback.print_exc()
+        if globs.debug:
+            traceback.print_exc()
         stderr.write("error: failed to signal to reload events\n")
         sys.exit(1)
 

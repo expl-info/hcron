@@ -33,6 +33,7 @@ import traceback
 
 # app imports
 from hcron.constants import *
+from hcron import globs
 
 def print_usage():
     print("""\
@@ -47,7 +48,9 @@ def main(args):
 
         while args:
             arg = args.pop(0)
-            if arg in [ "-h", "--help" ]:
+            if arg == "--debug":
+                globs.debug = True
+            elif arg in [ "-h", "--help" ]:
                 print_usage()
                 sys.exit(0)
             elif not args:
@@ -60,6 +63,8 @@ def main(args):
     except SystemExit:
         raise
     except:
+        if globs.debug:
+            traceback.print_exc()
         stderr.write("error: bad/missing argument\n")
         sys.exit(1)
 
@@ -68,7 +73,8 @@ def main(args):
         os.write(fd, str.encode("%s\n" % eventname))
         os.close(fd)
     except Exception:
-        #traceback.print_exc()
+        if globs.debug:
+            traceback.print_exc()
         stderr.write("error: unexpected error\n")
         sys.exit(1)
 

@@ -38,6 +38,7 @@ except:
 
 # app import
 from hcron.constants import *
+from hcron import globs
 from hcron.event import signal_reload
 from hcron.server import setup
 
@@ -64,14 +65,15 @@ def main(args):
 
         while args:
             arg = args.pop(0)
-
             if arg == "-c":
                 createonly = True
-            elif arg == "-y":
-                reloadevents = True
+            elif arg == "--debug":
+                globs.debug = True
             elif arg in ["-h", "--help"]:
                 print_usage()
                 sys.exit(0)
+            elif arg == "-y":
+                reloadevents = True
             else:
                 paths = [arg]+args
                 del args[:]
@@ -81,6 +83,8 @@ def main(args):
     except SystemExit:
         raise
     except:
+        if globs.debug:
+            traceback.print_exc()
         stderr.write("error: bad/missing argument\n")
         sys.exit(1)
 
@@ -109,7 +113,8 @@ def main(args):
         else:
             print("Reload deferred.")
     except Exception:
-        #traceback.print_exc()
+        if globs.debug:
+            traceback.print_exc()
         stderr.write("error: could not reload\n")
         sys.exit(1)
 

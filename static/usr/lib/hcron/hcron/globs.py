@@ -28,6 +28,7 @@ allowfile = None
 clock = None
 config = None
 configfile = None
+debug = False
 email_notify_enabled = False
 eventlistlist = None
 fqdn = None

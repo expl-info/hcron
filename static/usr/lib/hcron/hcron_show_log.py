@@ -29,6 +29,8 @@ import sys
 from sys import stderr
 import traceback
 
+from hcron import globs
+
 SHOWLOG_FMT = "%s %s %s %s"
 STRPTIME_DATETIME = "%Y-%m-%d %H:%M:%S"
 STRPTIME_DATETIMEDEC = "%Y-%m-%d %H:%M:%S.%f"
@@ -226,7 +228,9 @@ def main(args):
 
         while args:
             arg = args.pop(0)
-            if arg == "-e" and args:
+            if arg == "--debug":
+                globs.debug = True
+            elif arg == "-e" and args:
                 eventnamepatt = args.pop(0)
             elif arg == "-f" and args:
                 logfilepath = args.pop(0)
@@ -256,7 +260,8 @@ def main(args):
     except SystemExit:
         raise
     except:
-        #traceback.print_exc()
+        if globs.debug:
+            traceback.print_exc()
         stderr.write("error: bad/missing argument\n")
         sys.exit(1)
 
@@ -279,6 +284,7 @@ def main(args):
     except SystemExit:
         raise
     except:
-        #traceback.print_exc()
+        if globs.debug:
+            traceback.print_exc()
         stderr.write("error: failed to run\n")
         sys.exit(1)

@@ -250,6 +250,8 @@ def main(args):
             arg = args.pop(0)
             if arg == "-c" and args:
                 configpath = args.pop(0)
+            elif arg == "--debug":
+                globs.debug = True
             elif arg in ["-h", "--help"]:
                 print_usage()
                 sys.exit(0)
@@ -276,7 +278,8 @@ def main(args):
     except SystemExit:
         raise
     except:
-        #traceback.print_exc()
+        if globs.debug:
+            traceback.print_exc()
         stderr.write("error: bad/missing argument\n")
         sys.exit(1)
 
@@ -317,10 +320,10 @@ def main(args):
             html = generate_doc(info, styling)
             print(html)
     except SystemExit:
-        traceback.print_exc()
         raise
     except:
-        traceback.print_exc()
+        if globs.debug:
+            traceback.print_exc()
         stderr.write("error: failed to run\n")
         sys.exit(1)
     finally:
