@@ -76,7 +76,7 @@ def collect_info(events):
             elif k in ["host"]:
                 if "$" not in v:
                     l = [v]
-            elif k in ["label"]:
+            elif k in ["label", "url"]:
                 l = [v for v in v.split(",") if "$" not in v]
             elif k in ["contact", "notify_email"]:
                 l = [v for v in v.split(",") if "$" not in v and "@" in v]
@@ -125,8 +125,8 @@ def generate_doc(info, styling):
         table.add(tb.tr(
             tb.td(linkify_eventname(tb, "", name, hreffmt)),
             tb.td(fieldsd.get("description", "")),
-            tb.td(linkify_email(tb, fieldsd.get("contact", ""))),
-            tb.td(fieldsd.get("URL", "")),
+            tb.td(linkify_emails(tb, fieldsd.get("contact", ""))),
+            tb.td(linkify_urls(tb, fieldsd.get("url", ""))),
             tb.td(fieldsd.get("label", "")),
         ))
 
@@ -143,12 +143,14 @@ def generate_doc(info, styling):
             v = fieldsd.get(k, "")
             if showemptyfields == False and not v:
                 continue
-            if k in ["notify_email"]:
+            if k in ["contact", "notify_email"]:
                 tab.add(tb.tr(tb.th(k), tb.td(linkify_emails(tb, v))))
             elif k in ["template_name"]:
                 tab.add(tb.tr(tb.th(k), tb.td(linkify_eventname(tb, dirname, v, hreffmt))))
             elif k in ["failover_event", "next_event"]:
                 tab.add(tb.tr(tb.th(k), tb.td(linkify_eventnames(tb, dirname, v, hreffmt, ":"))))
+            elif k in ["url"]:
+                tab.add(tb.tr(tb.th(k), tb.td(linkify_urls(tb, v))))
             else:
                 if k in ["command", "notify_message"]:
                     v = v and tb.pre(v)
@@ -168,8 +170,10 @@ def generate_doc(info, styling):
             l = interleave_with_separator([linkify_eventname(tb, "", x, hreffmt) for x in names], " ")
             if indexname in ["failover_event", "next_event", "template_name"]:
                 k = linkify_eventname(tb, "", k, hreffmt)
-            if indexname == "notify_email":
+            elif indexname in ["contact", "notify_email"]:
                 k = linkify_email(tb, k)
+            elif indexname in ["url"]:
+                k = linkify_url(tb, k)
             table.add(tb.tr(tb.td(k), tb.td(l)))
 
     return doc.render()
@@ -212,6 +216,20 @@ def linkify_eventnames(tb, dirname, s, hreffmt, sep=None):
     l = [linkify_eventname(tb, dirname, x, hreffmt) for x in l]
     if sep:
         l = interleave_with_separator(l, sep)
+    return l
+
+def linkify_url(tb, s):
+    """Return link for url.
+    """
+    if "://" in s:
+        return tb.a(s, _href="%s" % s)
+    return s
+
+def linkify_urls(tb, s):
+    """Return links for URLs.
+    """
+    l = [linkify_url(tb, x) for x in s.split(",")]
+    l = interleave_with_separator(l, ",")
     return l
 
 def print_usage():
